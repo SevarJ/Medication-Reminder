@@ -12,6 +12,7 @@
 		E7A80B46301DDE4100E0BF9C /* NotificationsKit in Frameworks */ = {isa = PBXBuildFile; productRef = E7A80B45301DDE4100E0BF9C /* NotificationsKit */; };
 		E7A80B49301DDE4B00E0BF9C /* Persistence in Frameworks */ = {isa = PBXBuildFile; productRef = E7A80B48301DDE4B00E0BF9C /* Persistence */; };
 		E7A80B4C301DDE5300E0BF9C /* Domain in Frameworks */ = {isa = PBXBuildFile; productRef = E7A80B4B301DDE5300E0BF9C /* Domain */; };
+		E7A80B55301E0B3700E0BF9C /* DIContainer in Frameworks */ = {isa = PBXBuildFile; productRef = E7A80B54301E0B3700E0BF9C /* DIContainer */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E7A80B4C301DDE5300E0BF9C /* Domain in Frameworks */,
+				E7A80B55301E0B3700E0BF9C /* DIContainer in Frameworks */,
 				E7A80B49301DDE4B00E0BF9C /* Persistence in Frameworks */,
 				E7A80B40301DDE2900E0BF9C /* MedicationFeature in Frameworks */,
 				E7A80B43301DDE3900E0BF9C /* DesignSystem in Frameworks */,
@@ -83,6 +85,7 @@
 				E7A80B45301DDE4100E0BF9C /* NotificationsKit */,
 				E7A80B48301DDE4B00E0BF9C /* Persistence */,
 				E7A80B4B301DDE5300E0BF9C /* Domain */,
+				E7A80B54301E0B3700E0BF9C /* DIContainer */,
 			);
 			productName = MedReminder;
 			productReference = E7A80B2A301DD76B00E0BF9C /* MedReminder.app */;
@@ -118,6 +121,7 @@
 				E7A80B44301DDE4100E0BF9C /* XCLocalSwiftPackageReference "Packages/NotificationsKit" */,
 				E7A80B47301DDE4B00E0BF9C /* XCLocalSwiftPackageReference "Packages/Persistence" */,
 				E7A80B4A301DDE5300E0BF9C /* XCLocalSwiftPackageReference "Packages/Domain" */,
+				E7A80B53301E0B3700E0BF9C /* XCLocalSwiftPackageReference "Packages/DIContainer" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E7A80B2B301DD76B00E0BF9C /* Products */;
@@ -385,6 +389,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/Domain;
 		};
+		E7A80B53301E0B3700E0BF9C /* XCLocalSwiftPackageReference "Packages/DIContainer" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/DIContainer;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -407,6 +415,10 @@
 		E7A80B4B301DDE5300E0BF9C /* Domain */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Domain;
+		};
+		E7A80B54301E0B3700E0BF9C /* DIContainer */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DIContainer;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
