@@ -6,6 +6,14 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		E7A80B40301DDE2900E0BF9C /* MedicationFeature in Frameworks */ = {isa = PBXBuildFile; productRef = E7A80B3F301DDE2900E0BF9C /* MedicationFeature */; };
+		E7A80B43301DDE3900E0BF9C /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = E7A80B42301DDE3900E0BF9C /* DesignSystem */; };
+		E7A80B46301DDE4100E0BF9C /* NotificationsKit in Frameworks */ = {isa = PBXBuildFile; productRef = E7A80B45301DDE4100E0BF9C /* NotificationsKit */; };
+		E7A80B49301DDE4B00E0BF9C /* Persistence in Frameworks */ = {isa = PBXBuildFile; productRef = E7A80B48301DDE4B00E0BF9C /* Persistence */; };
+		E7A80B4C301DDE5300E0BF9C /* Domain in Frameworks */ = {isa = PBXBuildFile; productRef = E7A80B4B301DDE5300E0BF9C /* Domain */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		E7A80B2A301DD76B00E0BF9C /* MedReminder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MedReminder.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +31,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E7A80B4C301DDE5300E0BF9C /* Domain in Frameworks */,
+				E7A80B49301DDE4B00E0BF9C /* Persistence in Frameworks */,
+				E7A80B40301DDE2900E0BF9C /* MedicationFeature in Frameworks */,
+				E7A80B43301DDE3900E0BF9C /* DesignSystem in Frameworks */,
+				E7A80B46301DDE4100E0BF9C /* NotificationsKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +78,11 @@
 			);
 			name = MedReminder;
 			packageProductDependencies = (
+				E7A80B3F301DDE2900E0BF9C /* MedicationFeature */,
+				E7A80B42301DDE3900E0BF9C /* DesignSystem */,
+				E7A80B45301DDE4100E0BF9C /* NotificationsKit */,
+				E7A80B48301DDE4B00E0BF9C /* Persistence */,
+				E7A80B4B301DDE5300E0BF9C /* Domain */,
 			);
 			productName = MedReminder;
 			productReference = E7A80B2A301DD76B00E0BF9C /* MedReminder.app */;
@@ -94,6 +112,13 @@
 			);
 			mainGroup = E7A80B21301DD76B00E0BF9C;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				E7A80B3E301DDE2900E0BF9C /* XCLocalSwiftPackageReference "Packages/MedicationFeature" */,
+				E7A80B41301DDE3900E0BF9C /* XCLocalSwiftPackageReference "Packages/DesignSystem" */,
+				E7A80B44301DDE4100E0BF9C /* XCLocalSwiftPackageReference "Packages/NotificationsKit" */,
+				E7A80B47301DDE4B00E0BF9C /* XCLocalSwiftPackageReference "Packages/Persistence" */,
+				E7A80B4A301DDE5300E0BF9C /* XCLocalSwiftPackageReference "Packages/Domain" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E7A80B2B301DD76B00E0BF9C /* Products */;
 			projectDirPath = "";
@@ -328,6 +353,52 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		E7A80B3E301DDE2900E0BF9C /* XCLocalSwiftPackageReference "Packages/MedicationFeature" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/MedicationFeature;
+		};
+		E7A80B41301DDE3900E0BF9C /* XCLocalSwiftPackageReference "Packages/DesignSystem" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/DesignSystem;
+		};
+		E7A80B44301DDE4100E0BF9C /* XCLocalSwiftPackageReference "Packages/NotificationsKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/NotificationsKit;
+		};
+		E7A80B47301DDE4B00E0BF9C /* XCLocalSwiftPackageReference "Packages/Persistence" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Persistence;
+		};
+		E7A80B4A301DDE5300E0BF9C /* XCLocalSwiftPackageReference "Packages/Domain" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Domain;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E7A80B3F301DDE2900E0BF9C /* MedicationFeature */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MedicationFeature;
+		};
+		E7A80B42301DDE3900E0BF9C /* DesignSystem */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DesignSystem;
+		};
+		E7A80B45301DDE4100E0BF9C /* NotificationsKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = NotificationsKit;
+		};
+		E7A80B48301DDE4B00E0BF9C /* Persistence */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Persistence;
+		};
+		E7A80B4B301DDE5300E0BF9C /* Domain */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Domain;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E7A80B22301DD76B00E0BF9C /* Project object */;
 }
