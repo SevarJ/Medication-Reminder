@@ -3,6 +3,7 @@
 A medication reminder app for iOS. Add your medications, set one or more daily times, and get a repeating local notification for each dose.
 
 <p align="left">
+  <a href="https://github.com/SevarJ/Medication-Reminder/actions/workflows/ci.yml"><img src="https://github.com/SevarJ/Medication-Reminder/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/iOS-17%2B-blue" alt="iOS 17+">
   <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
   <img src="https://img.shields.io/badge/tests-55-brightgreen" alt="55 tests">
