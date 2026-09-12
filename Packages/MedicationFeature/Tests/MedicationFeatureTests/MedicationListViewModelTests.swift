@@ -122,6 +122,10 @@ struct MedicationListViewModelTests {
                 scheduler: scheduler
             ),
             toggleMedicationActive: ToggleMedicationActiveUseCase(saveMedication: saveMedication),
+            syncReminder: SyncReminderUseCase(
+                repository: repository,
+                scheduler: scheduler
+            ),
             authorizer: MockNotificationAuthorizer(result: authorizationResult)
         )
     }

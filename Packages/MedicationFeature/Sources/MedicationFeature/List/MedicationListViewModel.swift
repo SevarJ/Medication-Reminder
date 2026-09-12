@@ -20,6 +20,7 @@ public final class MedicationListViewModel {
     private let saveMedication: SaveMedicationUseCase
     private let deleteMedication: DeleteMedicationUseCase
     private let toggleMedicationActive: ToggleMedicationActiveUseCase
+    private let syncReminder: SyncReminderUseCase
     private let authorizer: any NotificationAuthorizing
     
     private(set) var state: MedicationListState = .loading
@@ -29,17 +30,21 @@ public final class MedicationListViewModel {
         saveMedication: SaveMedicationUseCase,
         deleteMedication: DeleteMedicationUseCase,
         toggleMedicationActive: ToggleMedicationActiveUseCase,
+        syncReminder: SyncReminderUseCase,
         authorizer: any NotificationAuthorizing
     ) {
         self.repository = repository
         self.saveMedication = saveMedication
         self.deleteMedication = deleteMedication
         self.toggleMedicationActive = toggleMedicationActive
+        self.syncReminder = syncReminder
         self.authorizer = authorizer
     }
     
     public func start() async {
-        await requestNotificationAccess()
+        let isAuthorized = (try? await authorizer.requestAuthorization()) ?? false
+        
+        await applyAuthorization(isAuthorized: isAuthorized, forceSync: true)
         await load()
     }
     
@@ -95,12 +100,28 @@ public final class MedicationListViewModel {
         )
     }
     
-    private func requestNotificationAccess() async {
+    func refreshNotificationAccess() async {
+        await applyAuthorization(
+            isAuthorized: await authorizer.isAuthorized(),
+            forceSync: false
+        )
+    }
+    
+    private func applyAuthorization(isAuthorized: Bool, forceSync: Bool) async {
+        let wasUnavailable = notificationsUnavailable
+        
+        notificationsUnavailable = isAuthorized == false
+        
+        guard isAuthorized, forceSync || wasUnavailable else { return }
+        
         do {
-            notificationsUnavailable = try await authorizer.requestAuthorization() == false
+            try await syncReminder.execute()
+        }
+        catch is ReminderError {
+            notificationsUnavailable = true
         }
         catch {
-            notificationsUnavailable = true
+            errorMessage = message(for: error)
         }
     }
 }

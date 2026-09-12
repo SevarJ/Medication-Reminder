@@ -29,6 +29,10 @@ enum AppComposition {
                 scheduler: scheduler
             ),
             toggleMedicationActive: ToggleMedicationActiveUseCase(saveMedication: saveMedication),
+            syncReminder: SyncReminderUseCase(
+                repository: repository,
+                scheduler: scheduler
+            ),
             authorizer: authorizer
         )
     }

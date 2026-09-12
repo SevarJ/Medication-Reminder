@@ -84,6 +84,10 @@ struct MockNotificationAuthorizer: NotificationAuthorizing {
     func requestAuthorization() async throws -> Bool {
         result
     }
+    
+    func isAuthorized() async -> Bool {
+        result
+    }
 }
 
 func makeMedication(
