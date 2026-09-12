@@ -78,15 +78,23 @@ actor MockReminderScheduler: ReminderScheduling {
 
 struct PersistenceFailure: Error {}
 
-struct MockNotificationAuthorizer: NotificationAuthorizing {
-    let result: Bool
+actor MockNotificationAuthorizer: NotificationAuthorizing {
+    private var isAuthorizedResult: Bool
+    
+    init(isAuthorized: Bool) {
+        self.isAuthorizedResult = isAuthorized
+    }
+    
+    func setAuthorized(_ isAuthorized: Bool) {
+        isAuthorizedResult = isAuthorized
+    }
     
     func requestAuthorization() async throws -> Bool {
-        result
+        isAuthorizedResult
     }
     
     func isAuthorized() async -> Bool {
-        result
+        isAuthorizedResult
     }
 }
 
