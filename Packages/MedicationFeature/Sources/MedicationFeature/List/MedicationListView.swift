@@ -26,7 +26,7 @@ public struct MedicationListView: View {
             VStack(spacing: Spacing.lg) {
                 if viewModel.notificationsUnavailable {
                     notificationBanner
-                        .padding(.top, Spacing.lg)
+                        .padding(.top, Spacing.sm)
                 }
                 
                 contentView
@@ -34,18 +34,20 @@ public struct MedicationListView: View {
             }
             .background(Color.theme.background)
             .navigationTitle("Medications")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        editorViewModel = viewModel.makeEditorViewModel(for: nil)
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.system(.body, weight: .semibold))
+            .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            editorViewModel = viewModel.makeEditorViewModel(for: nil)
+                        } label: {
+                            Image(systemName: "plus")
+                                .font(.system(.body, weight: .semibold))
                     }
                     .tint(Color.theme.accent)
                 }
             }
         }
+       
         .sheet(item: $editorViewModel) { editor in
             MedicationEditorView(
                 viewModel: editor,
