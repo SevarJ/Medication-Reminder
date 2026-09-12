@@ -17,7 +17,10 @@ struct MedicationEditorViewModelTests {
         let sut = makeSUT(repository: repository)
         sut.name = "Magnesium"
         sut.amountText = "2"
-        sut.times = [.at(hour: 21, minute: 30), .at(hour: 8, minute: 0)]
+        sut.times = [
+            try MedTime(hour: 21, minute: 30),
+            try MedTime(hour: 8, minute: 0),
+        ]
         
         #expect(await sut.save())
         
@@ -26,6 +29,24 @@ struct MedicationEditorViewModelTests {
         #expect(saved.name == "Magnesium")
         #expect(saved.dosage.amount == 2)
         #expect(saved.times.map { $0.hour } == [8, 21])
+    }
+    
+    @Test func removingTimeKeepsAtLeastOneReminder() async throws {
+        let sut = makeSUT()
+        sut.times = [
+            try MedTime(hour: 9, minute: 0),
+            try MedTime(hour: 21, minute: 0),
+        ]
+        
+        let removed = try #require(sut.times.last)
+        
+        sut.removeTime(id: removed.id)
+        
+        #expect(sut.times.count == 1)
+        
+        sut.removeTime(id: try #require(sut.times.first).id)
+        
+        #expect(sut.times.count == 1)
     }
     
     @Test func rejectsInvalidAmount() async throws {
@@ -48,7 +69,10 @@ struct MedicationEditorViewModelTests {
     @Test func reportsDuplicateTimes() async throws {
         let sut = makeSUT()
         sut.name = "Magnesium"
-        sut.times = [.at(hour: 9, minute: 0), .at(hour: 9, minute: 0)]
+        sut.times = [
+            try MedTime(hour: 9, minute: 0),
+            try MedTime(hour: 9, minute: 0),
+        ]
         
         #expect(await sut.save() == false)
         #expect(sut.errorMessage == "Reminder times must be different from each other.")

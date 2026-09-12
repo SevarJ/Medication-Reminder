@@ -129,15 +129,18 @@ struct MedicationEditorView: View {
             SectionHeader(title: "Reminders")
             
             CardSection {
-                ForEach(viewModel.times.indices, id: \.self) { index in
-                    if index > 0 {
+                ForEach(viewModel.times) { time in
+                    if time.id != viewModel.times.first?.id {
                         RowSeparator()
                     }
                     
                     HStack(spacing: Spacing.md) {
                         DatePicker(
                             "",
-                            selection: $viewModel.times[index],
+                            selection: Binding(
+                                get: { time.date },
+                                set: { viewModel.updateTime(id: time.id, to: $0) }
+                            ),
                             displayedComponents: .hourAndMinute
                         )
                         .labelsHidden()
@@ -146,7 +149,7 @@ struct MedicationEditorView: View {
                         
                         if viewModel.times.count > 1 {
                             Button {
-                                viewModel.removeTime(at: index)
+                                viewModel.removeTime(id: time.id)
                             } label: {
                                 Image(systemName: "minus.circle.fill")
                                     .foregroundStyle(Color.theme.danger)

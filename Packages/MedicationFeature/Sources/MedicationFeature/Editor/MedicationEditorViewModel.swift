@@ -17,7 +17,7 @@ public final class MedicationEditorViewModel: Identifiable {
     var name: String
     var amountText: String
     var unit: DosageUnit
-    var times: [Date]
+    var times: [MedTime]
     var isActive: Bool
     var errorMessage: String?
     private(set) var isSaving = false
@@ -31,7 +31,7 @@ public final class MedicationEditorViewModel: Identifiable {
         self.name = medication?.name ?? ""
         self.amountText = medication.map { Self.text(for: $0.dosage.amount) } ?? "1"
         self.unit = medication?.dosage.unit ?? .tablet
-        self.times = medication?.times.map { $0.date } ?? [.at(hour: 9, minute: 0)]
+        self.times = medication?.times ?? Self.defaultTimes()
         self.isActive = medication?.isActive ?? true
     }
     
@@ -44,12 +44,23 @@ public final class MedicationEditorViewModel: Identifiable {
     }
     
     func addTime() {
-        times.append(.at(hour: 12, minute: 0))
+        guard let time = try? MedTime(hour: 12, minute: 0) else { return }
+        times.append(time)
     }
     
-    func removeTime(at index: Int) {
-        guard times.indices.contains(index), times.count > 1 else { return }
-        times.remove(at: index)
+    func removeTime(id: UUID) {
+        guard times.count > 1 else { return }
+        times.removeAll { $0.id == id }
+    }
+    
+    func updateTime(id: UUID, to date: Date) {
+        guard let index = times.firstIndex(where: { $0.id == id }) else { return }
+        
+        let value = date.hourAndMinute
+        
+        guard let updated = try? MedTime(id: id, hour: value.hour, minute: value.minute) else { return }
+        
+        times[index] = updated
     }
     
     func save() async -> Bool {
@@ -64,16 +75,11 @@ public final class MedicationEditorViewModel: Identifiable {
         defer { isSaving = false }
         
         do {
-            let medTimes = try times.map { date -> MedTime in
-                let value = date.hourAndMinute
-                return try MedTime(hour: value.hour, minute: value.minute)
-            }
-            
             let updated = Medication(
                 id: medication?.id ?? UUID(),
                 name: name.trimmingCharacters(in: .whitespacesAndNewlines),
                 dosage: Dosage(amount: amount, unit: unit),
-                times: medTimes.sorted(),
+                times: times.sorted(),
                 isActive: isActive,
                 createdDate: medication?.createdDate ?? .now
             )
@@ -89,6 +95,11 @@ public final class MedicationEditorViewModel: Identifiable {
             errorMessage = message(for: error)
             return false
         }
+    }
+    
+    private static func defaultTimes() -> [MedTime] {
+        guard let time = try? MedTime(hour: 9, minute: 0) else { return [] }
+        return [time]
     }
     
     private static func text(for amount: Double) -> String {
