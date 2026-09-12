@@ -15,8 +15,6 @@ struct MedicationEditorView: View {
     let onFinish: (Bool) -> Void
     let onDelete: (() -> Void)?
     
-    @State private var isConfirmingDelete = false
-    
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -28,7 +26,7 @@ struct MedicationEditorView: View {
                     if onDelete != nil {
                         CardSection {
                             DestructiveRow(title: "Delete Medication") {
-                                isConfirmingDelete = true
+                                onDelete?()
                             }
                         }
                     }
@@ -57,17 +55,6 @@ struct MedicationEditorView: View {
                     .tint(Color.theme.accent)
                     .disabled(viewModel.isSaving)
                 }
-            }
-            .confirmationDialog(
-                "Delete this medication?",
-                isPresented: $isConfirmingDelete,
-                titleVisibility: .visible
-            ) {
-                Button("Delete", role: .destructive) {
-                    onDelete?()
-                }
-                
-                Button("Cancel", role: .cancel) {}
             }
             .alert(
                 "Check Your Input",
