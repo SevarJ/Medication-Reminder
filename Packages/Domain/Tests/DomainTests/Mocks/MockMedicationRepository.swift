@@ -12,8 +12,14 @@ actor MockMedicationRepository: MedicationRepository {
     private(set) var savedMedications: [Medication] = []
     private(set) var deletedIds: [UUID] = []
     
+    private let medications: [Medication]
+    
+    init(medications: [Medication] = []) {
+        self.medications = medications
+    }
+    
     func fetchAll() async throws -> [Medication] {
-        return []
+        return medications
     }
     
     func fetch(id: UUID) async throws -> Medication {
