@@ -15,6 +15,7 @@ public struct MedicationListView: View {
     @State private var editorViewModel: MedicationEditorViewModel?
     
     @Environment(\.openURL) private var openURL
+    @Environment(\.scenePhase) private var scenePhase
     
     public init(viewModel: MedicationListViewModel) {
         _viewModel = State(initialValue: viewModel)
@@ -76,6 +77,13 @@ public struct MedicationListView: View {
         }
         .task {
             await viewModel.start()
+        }
+        .onChange(of: scenePhase) { _, newValue in
+            if newValue == .active {
+                Task {
+                    await viewModel.refreshNotificationAccess()
+                }
+            }
         }
     }
     
