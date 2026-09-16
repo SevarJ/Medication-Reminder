@@ -45,6 +45,7 @@ final class SystemNotificationCenter: UserNotificationCenter, @unchecked Sendabl
         var components = DateComponents()
         components.hour = reminder.hour
         components.minute = reminder.minute
+        components.weekday = reminder.weekday
         
         let request = UNNotificationRequest(
             identifier: reminder.identifier,

@@ -14,4 +14,5 @@ struct ReminderRequest: Sendable, Equatable {
     let body: String
     let hour: Int
     let minute: Int
+    let weekday: Int?
 }
