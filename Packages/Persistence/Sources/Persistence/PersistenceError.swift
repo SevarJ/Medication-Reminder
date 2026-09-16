@@ -7,4 +7,5 @@
 
 enum PersistenceError: Error, Equatable {
     case unknownDosageUnit(String)
+    case unknownRecurrence(String)
 }

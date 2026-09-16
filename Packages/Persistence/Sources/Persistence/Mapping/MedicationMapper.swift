@@ -14,7 +14,11 @@ enum MedicationMapper {
             name: medication.name,
             dosageAmount: medication.dosage.amount,
             dosageUnit: unitCode(medication.dosage.unit),
-            times: medication.times.map(record),
+            times: medication.schedule.times.map(record),
+            recurrenceKind: recurrenceKind(medication.schedule.recurrence),
+            recurrenceDays: recurrenceDays(medication.schedule.recurrence),
+            startDate: medication.schedule.startDate,
+            endDate: medication.schedule.endDate,
             isActive: medication.isActive,
             createdDate: medication.createdDate
         )
@@ -27,7 +31,11 @@ enum MedicationMapper {
         entity.name = medication.name
         entity.dosageAmount = medication.dosage.amount
         entity.dosageUnit = unitCode(medication.dosage.unit)
-        entity.times = medication.times.map(record)
+        entity.times = medication.schedule.times.map(record)
+        entity.recurrenceKind = recurrenceKind(medication.schedule.recurrence)
+        entity.recurrenceDays = recurrenceDays(medication.schedule.recurrence)
+        entity.startDate = medication.schedule.startDate
+        entity.endDate = medication.schedule.endDate
         entity.isActive = medication.isActive
     }
 
@@ -41,12 +49,42 @@ enum MedicationMapper {
             id: entity.id,
             name: entity.name,
             dosage: Dosage(amount: entity.dosageAmount, unit: unit),
-            times: times,
+            schedule: MedicationSchedule(
+                times: times,
+                recurrence: try recurrence(from: entity),
+                startDate: entity.startDate,
+                endDate: entity.endDate
+            ),
             isActive: entity.isActive,
             createdDate: entity.createdDate
         )
     }
 
+    private static func recurrenceKind(_ recurrence: Recurrence) -> String {
+        switch recurrence {
+        case .daily: "daily"
+        case .daysOfWeek: "daysOfWeek"
+        }
+    }
+    
+    private static func recurrenceDays(_ recurrence: Recurrence) -> [Int] {
+        switch recurrence {
+        case .daily: []
+        case .daysOfWeek(let days): days.map { $0.rawValue }.sorted()
+        }
+    }
+    
+    private static func recurrence(from entity: MedicationEntity) throws -> Recurrence {
+        switch entity.recurrenceKind {
+        case "daily":
+            return .daily
+        case "daysOfWeek":
+            return .daysOfWeek(Set(entity.recurrenceDays.compactMap(Weekday.init(rawValue:))))
+        default:
+            throw PersistenceError.unknownRecurrence(entity.recurrenceKind)
+        }
+    }
+    
     private static func record(_ medTime: MedTime) -> MedTimeRecord {
         MedTimeRecord(
             id: medTime.id,

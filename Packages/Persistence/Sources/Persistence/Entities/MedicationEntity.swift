@@ -15,6 +15,10 @@ final class MedicationEntity {
     var dosageAmount: Double
     var dosageUnit: String
     var times: [MedTimeRecord]
+    var recurrenceKind: String
+    var recurrenceDays: [Int]
+    var startDate: Date
+    var endDate: Date?
     var isActive: Bool
     var createdDate: Date
     
@@ -24,6 +28,10 @@ final class MedicationEntity {
         dosageAmount: Double,
         dosageUnit: String,
         times: [MedTimeRecord],
+        recurrenceKind: String,
+        recurrenceDays: [Int],
+        startDate: Date,
+        endDate: Date?,
         isActive: Bool,
         createdDate: Date
     ) {
@@ -32,6 +40,10 @@ final class MedicationEntity {
         self.dosageAmount = dosageAmount
         self.dosageUnit = dosageUnit
         self.times = times
+        self.recurrenceKind = recurrenceKind
+        self.recurrenceDays = recurrenceDays
+        self.startDate = startDate
+        self.endDate = endDate
         self.isActive = isActive
         self.createdDate = createdDate
     }
