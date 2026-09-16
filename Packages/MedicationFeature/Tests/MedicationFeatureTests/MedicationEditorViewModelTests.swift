@@ -28,7 +28,7 @@ struct MedicationEditorViewModelTests {
         
         #expect(saved.name == "Magnesium")
         #expect(saved.dosage.amount == 2)
-        #expect(saved.times.map { $0.hour } == [8, 21])
+        #expect(saved.schedule.times.map { $0.hour } == [8, 21])
     }
     
     @Test func removingTimeKeepsAtLeastOneReminder() async throws {
@@ -47,6 +47,44 @@ struct MedicationEditorViewModelTests {
         sut.removeTime(id: try #require(sut.times.first).id)
         
         #expect(sut.times.count == 1)
+    }
+    
+    @Test func savesSelectedWeekdays() async throws {
+        let repository = MockMedicationRepository()
+        let sut = makeSUT(repository: repository)
+        sut.name = "Magnesium"
+        sut.repeatMode = .specificDays
+        sut.toggleWeekday(.monday)
+        sut.toggleWeekday(.friday)
+        
+        #expect(await sut.save())
+        
+        let saved = try #require(await repository.medications.first)
+        
+        #expect(saved.schedule.recurrence == .daysOfWeek([.monday, .friday]))
+    }
+    
+    @Test func reportsMissingWeekdays() async throws {
+        let sut = makeSUT()
+        sut.name = "Magnesium"
+        sut.repeatMode = .specificDays
+        
+        #expect(await sut.save() == false)
+        #expect(sut.errorMessage == "Select at least one day of the week.")
+    }
+    
+    @Test func savesEndDateOnlyWhenEnabled() async throws {
+        let repository = MockMedicationRepository()
+        let sut = makeSUT(repository: repository)
+        sut.name = "Magnesium"
+        sut.hasEndDate = true
+        sut.endDate = sut.startDate.addingTimeInterval(7 * 24 * 60 * 60)
+        
+        #expect(await sut.save())
+        
+        let saved = try #require(await repository.medications.first)
+        
+        #expect(saved.schedule.endDate != nil)
     }
     
     @Test func rejectsInvalidAmount() async throws {

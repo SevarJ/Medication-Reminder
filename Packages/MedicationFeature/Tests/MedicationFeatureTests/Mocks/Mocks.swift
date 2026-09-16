@@ -102,6 +102,7 @@ func makeMedication(
     id: UUID = UUID(),
     name: String = "Vitamin D",
     times: [(Int, Int)] = [(9, 0)],
+    recurrence: Recurrence = .daily,
     isActive: Bool = true,
     createdDate: Date = .now
 ) throws -> Medication {
@@ -109,7 +110,11 @@ func makeMedication(
         id: id,
         name: name,
         dosage: Dosage(amount: 1, unit: .tablet),
-        times: try times.map { try MedTime(hour: $0.0, minute: $0.1) },
+        schedule: MedicationSchedule(
+            times: try times.map { try MedTime(hour: $0.0, minute: $0.1) },
+            recurrence: recurrence,
+            startDate: createdDate
+        ),
         isActive: isActive,
         createdDate: createdDate
     )
