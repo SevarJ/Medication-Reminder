@@ -65,6 +65,55 @@ struct LocalNotificationSchedulerTests {
         #expect(await center.added.isEmpty)
     }
     
+    @Test func schedulesOneReminderPerWeekdayAndTime() async throws {
+        let center = MockUserNotificationCenter()
+        let sut = LocalNotificationScheduler(center: center)
+        let medication = try makeMedication(
+            times: [(9, 0)],
+            recurrence: .daysOfWeek([.monday, .friday])
+        )
+        
+        try await sut.schedule(for: medication)
+        
+        let added = await center.added
+        
+        #expect(added.count == 2)
+        #expect(added.map { $0.weekday } == [2, 6])
+        #expect(Set(added.map { $0.identifier }).count == 2)
+    }
+    
+    @Test func dailyRemindersCarryNoWeekday() async throws {
+        let center = MockUserNotificationCenter()
+        let sut = LocalNotificationScheduler(center: center)
+        
+        try await sut.schedule(for: try makeMedication())
+        
+        #expect(await center.added.allSatisfy { $0.weekday == nil })
+    }
+    
+    @Test func doesNotScheduleBeforeStartDate() async throws {
+        let center = MockUserNotificationCenter()
+        let sut = LocalNotificationScheduler(center: center)
+        let medication = try makeMedication(startDate: .now.addingTimeInterval(7 * 24 * 60 * 60))
+        
+        try await sut.schedule(for: medication)
+        
+        #expect(await center.added.isEmpty)
+    }
+    
+    @Test func doesNotScheduleAfterEndDate() async throws {
+        let center = MockUserNotificationCenter()
+        let sut = LocalNotificationScheduler(center: center)
+        let medication = try makeMedication(
+            startDate: .now.addingTimeInterval(-14 * 24 * 60 * 60),
+            endDate: .now.addingTimeInterval(-24 * 60 * 60)
+        )
+        
+        try await sut.schedule(for: medication)
+        
+        #expect(await center.added.isEmpty)
+    }
+    
     @Test func identifierIsNamespacedByMedication() async throws {
         let medicationId = UUID()
         let timeId = UUID()
