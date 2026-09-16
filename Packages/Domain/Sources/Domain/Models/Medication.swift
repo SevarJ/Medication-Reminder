@@ -11,7 +11,7 @@ public struct Medication: Identifiable, Equatable, Hashable, Sendable {
     public let id: UUID
     public let name: String
     public let dosage: Dosage
-    public let times: [MedTime]
+    public let schedule: MedicationSchedule
     public let isActive: Bool
     public let createdDate: Date
     
@@ -19,14 +19,14 @@ public struct Medication: Identifiable, Equatable, Hashable, Sendable {
         id: UUID = UUID(),
         name: String,
         dosage: Dosage,
-        times: [MedTime],
+        schedule: MedicationSchedule,
         isActive: Bool,
         createdDate: Date
     ) {
         self.id = id
         self.name = name
         self.dosage = dosage
-        self.times = times
+        self.schedule = schedule
         self.isActive = isActive
         self.createdDate = createdDate
     }
@@ -36,7 +36,7 @@ public struct Medication: Identifiable, Equatable, Hashable, Sendable {
             id: id,
             name: name,
             dosage: dosage,
-            times: times,
+            schedule: schedule,
             isActive: isActive,
             createdDate: createdDate
         )

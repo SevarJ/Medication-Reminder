@@ -11,4 +11,6 @@ public enum DomainError: Error, Equatable, Sendable {
     case invalidTime
     case medicationNotFound
     case duplicateTime
+    case weekdayUnselected
+    case invalidDateRange
 }

@@ -5,6 +5,8 @@
 //  Created by Sevar Jafarli on 01.08.26.
 //
 
+import Foundation
+
 public struct SaveMedicationUseCase: Sendable {
     private let repository: any MedicationRepository
     private let scheduler: any ReminderScheduling
@@ -22,12 +24,22 @@ public struct SaveMedicationUseCase: Sendable {
             throw DomainError.nameEmpty
         }
         
-        guard !medication.times.isEmpty else {
+        let schedule = medication.schedule
+        
+        guard !schedule.times.isEmpty else {
             throw DomainError.timeUnselected
         }
         
-        guard Set(medication.times.map({ $0.hour * 60 + $0.minute })).count == medication.times.count else {
+        guard Set(schedule.times.map({ $0.hour * 60 + $0.minute })).count == schedule.times.count else {
             throw DomainError.duplicateTime
+        }
+        
+        guard !schedule.recurrence.weekdays.isEmpty else {
+            throw DomainError.weekdayUnselected
+        }
+        
+        if let endDate = schedule.endDate, endDate < schedule.startDate {
+            throw DomainError.invalidDateRange
         }
         
         try await repository.save(medication)
