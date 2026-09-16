@@ -19,6 +19,7 @@ struct SwiftDataMedicationRepositoryTests {
         id: UUID = UUID(),
         name: String = "Vitamin D",
         times: [(Int, Int)] = [(9, 0), (21, 30)],
+        recurrence: Recurrence = .daily,
         isActive: Bool = true,
         createdDate: Date = .now
     ) throws -> Medication {
@@ -26,7 +27,11 @@ struct SwiftDataMedicationRepositoryTests {
             id: id,
             name: name,
             dosage: Dosage(amount: 2.5, unit: .ml),
-            times: try times.map { try MedTime(hour: $0.0, minute: $0.1) },
+            schedule: MedicationSchedule(
+                times: try times.map { try MedTime(hour: $0.0, minute: $0.1) },
+                recurrence: recurrence,
+                startDate: createdDate
+            ),
             isActive: isActive,
             createdDate: createdDate
         )
@@ -42,7 +47,7 @@ struct SwiftDataMedicationRepositoryTests {
         
         #expect(stored.name == medication.name)
         #expect(stored.dosage == medication.dosage)
-        #expect(stored.times.map { $0.hour } == [9, 21])
+        #expect(stored.schedule.times.map { $0.hour } == [9, 21])
         #expect(stored.isActive)
     }
     
@@ -88,6 +93,17 @@ struct SwiftDataMedicationRepositoryTests {
         }
     }
     
+    @Test func storesWeekdayRecurrence() async throws {
+        let sut = try makeSUT()
+        let medication = try makeMedication(recurrence: .daysOfWeek([.monday, .friday]))
+        
+        try await sut.save(medication)
+        
+        let stored = try await sut.fetch(id: medication.id)
+        
+        #expect(stored.schedule.recurrence == .daysOfWeek([.monday, .friday]))
+    }
+    
     @Test func mapperRejectsUnknownDosageUnit() async throws {
         let entity = MedicationEntity(
             id: UUID(),
@@ -95,6 +111,10 @@ struct SwiftDataMedicationRepositoryTests {
             dosageAmount: 1,
             dosageUnit: "spoon",
             times: [],
+            recurrenceKind: "daily",
+            recurrenceDays: [],
+            startDate: .now,
+            endDate: nil,
             isActive: true,
             createdDate: .now
         )
