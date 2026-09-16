@@ -18,6 +18,11 @@ public final class MedicationEditorViewModel: Identifiable {
     var amountText: String
     var unit: DosageUnit
     var times: [MedTime]
+    var repeatMode: RepeatMode
+    var weekdays: Set<Weekday>
+    var startDate: Date
+    var hasEndDate: Bool
+    var endDate: Date
     var isActive: Bool
     var errorMessage: String?
     private(set) var isSaving = false
@@ -31,8 +36,20 @@ public final class MedicationEditorViewModel: Identifiable {
         self.name = medication?.name ?? ""
         self.amountText = medication.map { Self.text(for: $0.dosage.amount) } ?? "1"
         self.unit = medication?.dosage.unit ?? .tablet
-        self.times = medication?.times ?? Self.defaultTimes()
+        self.times = medication?.schedule.times ?? Self.defaultTimes()
         self.isActive = medication?.isActive ?? true
+        self.startDate = medication?.schedule.startDate ?? .now
+        self.endDate = medication?.schedule.endDate ?? .now
+        self.hasEndDate = medication?.schedule.endDate != nil
+        
+        switch medication?.schedule.recurrence {
+        case .daysOfWeek(let days):
+            self.repeatMode = .specificDays
+            self.weekdays = days
+        default:
+            self.repeatMode = .daily
+            self.weekdays = []
+        }
     }
     
     var isEditing: Bool {
@@ -41,6 +58,15 @@ public final class MedicationEditorViewModel: Identifiable {
     
     var title: String {
         isEditing ? "Edit Medication" : "New Medication"
+    }
+    
+    func toggleWeekday(_ weekday: Weekday) {
+        if weekdays.contains(weekday) {
+            weekdays.remove(weekday)
+        }
+        else {
+            weekdays.insert(weekday)
+        }
     }
     
     func addTime() {
@@ -79,7 +105,12 @@ public final class MedicationEditorViewModel: Identifiable {
                 id: medication?.id ?? UUID(),
                 name: name.trimmingCharacters(in: .whitespacesAndNewlines),
                 dosage: Dosage(amount: amount, unit: unit),
-                times: times.sorted(),
+                schedule: MedicationSchedule(
+                    times: times.sorted(),
+                    recurrence: recurrence,
+                    startDate: startDate,
+                    endDate: hasEndDate ? endDate : nil
+                ),
                 isActive: isActive,
                 createdDate: medication?.createdDate ?? .now
             )
@@ -94,6 +125,13 @@ public final class MedicationEditorViewModel: Identifiable {
         catch {
             errorMessage = message(for: error)
             return false
+        }
+    }
+    
+    private var recurrence: Recurrence {
+        switch repeatMode {
+        case .daily: .daily
+        case .specificDays: .daysOfWeek(weekdays)
         }
     }
     

@@ -26,12 +26,12 @@ struct MedicationRow: View {
                     .font(Font.theme.rowTitle)
                     .foregroundStyle(Color.theme.textPrimary)
                 
-                Text(medication.dosage.displayText)
+                Text("\(medication.dosage.displayText) · \(medication.schedule.recurrence.displayText)")
                     .font(Font.theme.rowSubtitle)
                     .foregroundStyle(Color.theme.textSecondary)
                 
                 HStack(spacing: Spacing.xs) {
-                    ForEach(medication.times) { time in
+                    ForEach(medication.schedule.times) { time in
                         Badge(
                             title: time.displayText,
                             foreground: color(for: time),

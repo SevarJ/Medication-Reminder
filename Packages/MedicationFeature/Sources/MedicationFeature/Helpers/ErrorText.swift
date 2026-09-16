@@ -18,6 +18,10 @@ func message(for error: Error) -> String {
             return "Choose a valid reminder time."
         case .duplicateTime:
             return "Reminder times must be different from each other."
+        case .weekdayUnselected:
+            return "Select at least one day of the week."
+        case .invalidDateRange:
+            return "The end date cannot be earlier than the start date."
         case .medicationNotFound:
             return "This medication no longer exists."
         }

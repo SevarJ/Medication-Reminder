@@ -20,6 +20,8 @@ struct MedicationEditorView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.xl) {
                     detailsSection
+                    repeatSection
+                    durationSection
                     remindersSection
                     statusSection
                     
@@ -107,6 +109,93 @@ struct MedicationEditorView: View {
                 }
                 .pickerStyle(.segmented)
                 .padding(Spacing.lg)
+            }
+        }
+    }
+    
+    private var repeatSection: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            SectionHeader(title: "Repeat")
+            
+            CardSection {
+                Picker("Repeat", selection: $viewModel.repeatMode) {
+                    ForEach(RepeatMode.allCases) { mode in
+                        Text(mode.title).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .padding(Spacing.lg)
+                
+                if viewModel.repeatMode == .specificDays {
+                    RowSeparator()
+                    
+                    HStack(spacing: Spacing.sm) {
+                        ForEach(Weekday.allCases, id: \.self) { weekday in
+                            weekdayButton(weekday)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(Spacing.lg)
+                }
+            }
+        }
+    }
+    
+    private func weekdayButton(_ weekday: Weekday) -> some View {
+        let isSelected = viewModel.weekdays.contains(weekday)
+        
+        return Button {
+            viewModel.toggleWeekday(weekday)
+        } label: {
+            Text(weekday.shortSymbol)
+                .font(Font.theme.rowSubtitle)
+                .foregroundStyle(isSelected ? Color.theme.surface : Color.theme.textSecondary)
+                .frame(width: 36, height: 36)
+                .background(
+                    isSelected ? Color.theme.accent : Color.theme.accentTint,
+                    in: Circle()
+                )
+        }
+        .buttonStyle(.plain)
+    }
+    
+    private var durationSection: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            SectionHeader(title: "Duration")
+            
+            CardSection {
+                DatePicker(
+                    "Starts",
+                    selection: $viewModel.startDate,
+                    displayedComponents: .date
+                )
+                .font(Font.theme.rowTitle)
+                .foregroundStyle(Color.theme.textPrimary)
+                .padding(Spacing.lg)
+                
+                RowSeparator()
+                
+                Toggle(isOn: $viewModel.hasEndDate) {
+                    Text("End Date")
+                        .font(Font.theme.rowTitle)
+                        .foregroundStyle(Color.theme.textPrimary)
+                }
+                .tint(Color.theme.accent)
+                .padding(Spacing.lg)
+                
+                if viewModel.hasEndDate {
+                    RowSeparator()
+                    
+                    DatePicker(
+                        "Ends",
+                        selection: $viewModel.endDate,
+                        in: viewModel.startDate...,
+                        displayedComponents: .date
+                    )
+                    .font(Font.theme.rowTitle)
+                    .foregroundStyle(Color.theme.textPrimary)
+                    .padding(Spacing.lg)
+                }
             }
         }
     }

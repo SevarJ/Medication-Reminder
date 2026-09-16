@@ -33,3 +33,21 @@ extension MedTime {
         .at(hour: hour, minute: minute)
     }
 }
+
+extension Weekday {
+    var shortSymbol: String {
+        Calendar.current.veryShortWeekdaySymbols[rawValue - 1]
+    }
+}
+
+extension Recurrence {
+    var displayText: String {
+        switch self {
+        case .daily:
+            return "Every day"
+        case .daysOfWeek(let days):
+            guard !days.isEmpty else { return "No days selected" }
+            return days.sorted().map { Calendar.current.shortWeekdaySymbols[$0.rawValue - 1] }.joined(separator: ", ")
+        }
+    }
+}
