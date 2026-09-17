@@ -19,6 +19,16 @@ public struct ScheduledDose: Identifiable, Sendable {
         )
     }
     
+    public init(
+        medication: Medication,
+        scheduledDate: Date,
+        log: DoseLog? = nil
+    ) {
+        self.medication = medication
+        self.scheduledDate = scheduledDate
+        self.log = log
+    }
+    
     public func state(at now: Date) -> DoseState {
          if let status = log?.status {
              switch status {
