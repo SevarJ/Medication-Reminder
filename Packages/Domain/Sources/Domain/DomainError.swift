@@ -13,4 +13,5 @@ public enum DomainError: Error, Equatable, Sendable {
     case duplicateTime
     case weekdayUnselected
     case invalidDateRange
+    case doseOutsideEditableRange
 }
