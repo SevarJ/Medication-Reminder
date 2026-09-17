@@ -159,7 +159,8 @@ struct MedicationListViewModelTests {
     private func makeSUT(
         repository: MockMedicationRepository = MockMedicationRepository(),
         scheduler: MockReminderScheduler = MockReminderScheduler(),
-        authorizer: MockNotificationAuthorizer = MockNotificationAuthorizer(isAuthorized: true)
+        authorizer: MockNotificationAuthorizer = MockNotificationAuthorizer(isAuthorized: true),
+        logRepository: MockDoseLogRepository = MockDoseLogRepository()
     ) -> MedicationListViewModel {
         let saveMedication = SaveMedicationUseCase(
             repository: repository,
@@ -171,7 +172,8 @@ struct MedicationListViewModelTests {
             saveMedication: saveMedication,
             deleteMedication: DeleteMedicationUseCase(
                 repository: repository,
-                scheduler: scheduler
+                scheduler: scheduler,
+                doseLogRepository: logRepository
             ),
             toggleMedicationActive: ToggleMedicationActiveUseCase(saveMedication: saveMedication),
             syncReminder: SyncReminderUseCase(

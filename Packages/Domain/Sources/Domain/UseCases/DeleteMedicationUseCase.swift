@@ -24,9 +24,7 @@ public struct DeleteMedicationUseCase: Sendable {
     
     public func execute(id: UUID) async throws {
         try await scheduler.cancel(for: id)
-        
-        try await repository.delete(id: id)
-        
         try await doseLogRepository.deleteAll(medicationId: id)
+        try await repository.delete(id: id)
     }
 }

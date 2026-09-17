@@ -30,6 +30,29 @@ struct DeleteMedicationUseCaseTests {
         try await sut.execute(id: medication.id)
         #expect(await repository.deletedIds == [medication.id])
         #expect(await scheduler.cancelledIds == [medication.id])
-        #expect(await logRepository.logs == [])
+    }
+    
+    @Test func deletesLogsOfDeletedMedicationOnly() async throws {
+        let first = try makeMedication(name: "Vitamin D")
+        let second = try makeMedication(name: "Magnesium")
+        
+        let logRepository = MockDoseLogRepository(logs: [
+            DoseLog(medicationId: first.id, scheduledDate: .now, status: .taken, recordedAt: .now),
+            DoseLog(medicationId: first.id, scheduledDate: .now, status: .skipped, recordedAt: .now),
+            DoseLog(medicationId: second.id, scheduledDate: .now, status: .taken, recordedAt: .now),
+        ])
+        
+        let sut = DeleteMedicationUseCase(
+            repository: repository,
+            scheduler: scheduler,
+            doseLogRepository: logRepository
+        )
+        
+        try await sut.execute(id: first.id)
+        
+        let remaining = await logRepository.logs
+        
+        #expect(remaining.count == 1)
+        #expect(remaining.first?.medicationId == second.id)
     }
 }
