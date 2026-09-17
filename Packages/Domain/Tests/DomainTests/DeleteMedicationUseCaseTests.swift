@@ -14,10 +14,13 @@ struct DeleteMedicationUseCaseTests {
     
     private let scheduler = MockReminderScheduler()
     
+    private let logRepository = MockDoseLogRepository()
+    
     private var sut: DeleteMedicationUseCase {
         DeleteMedicationUseCase(
             repository: repository,
-            scheduler: scheduler
+            scheduler: scheduler,
+            doseLogRepository: logRepository
         )
     }
     
@@ -27,5 +30,6 @@ struct DeleteMedicationUseCaseTests {
         try await sut.execute(id: medication.id)
         #expect(await repository.deletedIds == [medication.id])
         #expect(await scheduler.cancelledIds == [medication.id])
+        #expect(await logRepository.logs == [])
     }
 }
