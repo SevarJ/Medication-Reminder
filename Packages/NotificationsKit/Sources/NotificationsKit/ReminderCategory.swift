@@ -22,9 +22,9 @@ public enum ReminderCategory {
         UNNotificationCategory(
             identifier: identifier,
             actions: [
-                UNNotificationAction(identifier: takenActionIdentifier, title: "Taken", options: []),
-                UNNotificationAction(identifier: skippedActionIdentifier, title: "Skip", options: []),
-                UNNotificationAction(identifier: snoozeActionIdentifier, title: "Snooze 10 min", options: [])
+                UNNotificationAction(identifier: takenActionIdentifier, title: L10n.Action.taken, options: []),
+                UNNotificationAction(identifier: skippedActionIdentifier, title: L10n.Action.skip, options: []),
+                UNNotificationAction(identifier: snoozeActionIdentifier, title: L10n.Action.snooze, options: [])
             ],
             intentIdentifiers: [],
             options: []

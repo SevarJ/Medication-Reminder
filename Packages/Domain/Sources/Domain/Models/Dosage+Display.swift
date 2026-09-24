@@ -9,25 +9,29 @@ import Foundation
 
 public extension Dosage {
     var displayText: String {
-        "\(Self.amountFormatter.string(from: NSNumber(value: amount)) ?? "\(amount)") \(unit.displayText)"
+        let amountText = amount.formatted(.number.precision(.fractionLength(0...2)))
+        let wholeAmount = Int(exactly: amount)
+        
+        switch unit {
+        case .mg:
+            return L10n.Dosage.milligrams(amountText)
+        case .ml:
+            return L10n.Dosage.milliliters(amountText)
+        case .tablet:
+            return wholeAmount.map(L10n.Dosage.tablets) ?? L10n.Dosage.tabletsFraction(amountText)
+        case .drop:
+            return wholeAmount.map(L10n.Dosage.drops) ?? L10n.Dosage.dropsFraction(amountText)
+        }
     }
-    
-    private static let amountFormatter: NumberFormatter = {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.maximumFractionDigits = 2
-        formatter.minimumFractionDigits = 0
-        return formatter
-    }()
 }
 
 public extension DosageUnit {
     var displayText: String {
         switch self {
-        case .mg: return "mg"
-        case .ml: return "ml"
-        case .tablet: return "tablet"
-        case .drop: return "drop"
+        case .mg: L10n.Unit.milligram
+        case .ml: L10n.Unit.milliliter
+        case .tablet: L10n.Unit.tablet
+        case .drop: L10n.Unit.drop
         }
     }
 }
