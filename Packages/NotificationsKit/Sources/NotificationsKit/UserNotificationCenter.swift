@@ -39,6 +39,7 @@ final class SystemNotificationCenter: UserNotificationCenter, @unchecked Sendabl
         content.title = reminder.title
         content.body = reminder.body
         content.sound = .default
+        content.interruptionLevel = .timeSensitive
         content.threadIdentifier = reminder.medicationId.uuidString
         content.categoryIdentifier = ReminderCategory.identifier
         content.userInfo = [

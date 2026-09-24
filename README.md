@@ -15,6 +15,7 @@ A medication reminder and adherence tracker for iOS. Schedule medications, get a
 - Schedule doses every day or on selected weekdays, with an optional start and end date
 - Multiple daily reminder times per medication
 - Repeating local notifications, rescheduled automatically whenever a medication changes
+- Reminders are time-sensitive, so they still arrive while a Focus mode is on
 - Mark a dose taken or skipped from the Today screen, or straight from the notification
 - Snooze a reminder without opening the app, for 5, 10, 15 or 30 minutes as chosen in Settings
 - Tapping a reminder opens a full-screen dose card to mark it taken or snooze it
