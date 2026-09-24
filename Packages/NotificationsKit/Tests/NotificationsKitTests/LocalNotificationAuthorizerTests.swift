@@ -5,7 +5,9 @@
 //  Created by Sevar Jafarli on 12.09.26.
 //
 
+import Domain
 import Testing
+import UserNotifications
 @testable import NotificationsKit
 
 struct LocalNotificationAuthorizerTests {
@@ -30,5 +32,20 @@ struct LocalNotificationAuthorizerTests {
         let sut = LocalNotificationAuthorizer(center: center)
         
         #expect(try await sut.requestAuthorization() == false)
+    }
+    
+    @Test func mapsSystemStatusToAccess() async throws {
+        let cases: [(UNAuthorizationStatus, NotificationAccess)] = [
+            (.notDetermined, .notDetermined),
+            (.denied, .denied),
+            (.authorized, .authorized),
+            (.provisional, .authorized)
+        ]
+        
+        for (status, expected) in cases {
+            let sut = LocalNotificationAuthorizer(center: MockUserNotificationCenter(status: status))
+            
+            #expect(await sut.access() == expected)
+        }
     }
 }

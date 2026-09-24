@@ -7,5 +7,5 @@
 
 public protocol NotificationAuthorizing: Sendable {
     func requestAuthorization() async throws -> Bool
-    func isAuthorized() async -> Bool
+    func access() async -> NotificationAccess
 }

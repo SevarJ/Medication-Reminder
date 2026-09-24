@@ -16,20 +16,26 @@ struct LocalNotificationAuthorizer: NotificationAuthorizing {
     }
     
     func requestAuthorization() async throws -> Bool {
-        switch await center.authorizationStatus() {
+        switch await access() {
         case .notDetermined:
             return try await center.requestAuthorization(options: [.alert, .sound, .badge])
-        default:
-            return await isAuthorized()
+        case .denied:
+            return false
+        case .authorized:
+            return true
         }
     }
     
-    func isAuthorized() async -> Bool {
+    func access() async -> NotificationAccess {
         switch await center.authorizationStatus() {
-        case .provisional, .authorized:
-            return true
-        default:
-            return false
+        case .notDetermined:
+            .notDetermined
+        case .authorized, .provisional, .ephemeral:
+            .authorized
+        case .denied:
+            .denied
+        @unknown default:
+            .denied
         }
     }
 }
