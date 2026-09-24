@@ -12,7 +12,7 @@ import Testing
 
 struct SwiftDataMedicationRepositoryTests {
     private func makeSUT() throws -> any MedicationRepository {
-        try PersistenceFactory.makeRepository(inMemory: true)
+        try PersistenceFactory.makeStore(inMemory: true).medications
     }
     
     private func makeMedication(
