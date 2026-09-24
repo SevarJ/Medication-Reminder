@@ -164,40 +164,49 @@ struct MedicationEditorView: View {
             SectionHeader(title: "Duration")
             
             CardSection {
-                DatePicker(
-                    "Starts",
-                    selection: $viewModel.startDate,
-                    displayedComponents: .date
-                )
-                .font(Font.theme.rowTitle)
-                .foregroundStyle(Color.theme.textPrimary)
-                .padding(Spacing.lg)
+                datePickerRow(title: "Starts", selection: $viewModel.startDate)
                 
                 RowSeparator()
                 
-                Toggle(isOn: $viewModel.hasEndDate) {
-                    Text("End Date")
-                        .font(Font.theme.rowTitle)
-                        .foregroundStyle(Color.theme.textPrimary)
-                }
-                .tint(Color.theme.accent)
-                .padding(Spacing.lg)
+                ToggleRow(title: "End Date", isOn: $viewModel.hasEndDate)
                 
                 if viewModel.hasEndDate {
                     RowSeparator()
                     
-                    DatePicker(
-                        "Ends",
+                    datePickerRow(
+                        title: "Ends",
                         selection: $viewModel.endDate,
-                        in: viewModel.startDate...,
-                        displayedComponents: .date
+                        in: viewModel.startDate...
                     )
-                    .font(Font.theme.rowTitle)
-                    .foregroundStyle(Color.theme.textPrimary)
-                    .padding(Spacing.lg)
                 }
             }
         }
+    }
+    
+    private func datePickerRow(
+        title: String,
+        selection: Binding<Date>,
+        in range: PartialRangeFrom<Date>? = nil
+    ) -> some View {
+        HStack {
+            Text(title)
+                .font(Font.theme.rowTitle)
+                .foregroundStyle(Color.theme.textPrimary)
+            
+            Spacer()
+            
+            Group {
+                if let range {
+                    DatePicker("", selection: selection, in: range, displayedComponents: .date)
+                }
+                else {
+                    DatePicker("", selection: selection, displayedComponents: .date)
+                }
+            }
+            .labelsHidden()
+            .fixedSize()
+        }
+        .padding(Spacing.lg)
     }
     
     private var remindersSection: some View {
@@ -260,13 +269,7 @@ struct MedicationEditorView: View {
             SectionHeader(title: "Status")
             
             CardSection {
-                Toggle(isOn: $viewModel.isActive) {
-                    Text("Reminders Enabled")
-                        .font(Font.theme.rowTitle)
-                        .foregroundStyle(Color.theme.textPrimary)
-                }
-                .tint(Color.theme.accent)
-                .padding(Spacing.lg)
+                ToggleRow(title: "Reminders Enabled", isOn: $viewModel.isActive)
             }
         }
     }
