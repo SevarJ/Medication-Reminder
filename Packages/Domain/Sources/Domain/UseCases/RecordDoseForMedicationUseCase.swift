@@ -8,8 +8,7 @@
 import Foundation
 
 public struct RecordDoseForMedicationUseCase: Sendable {
-    private let medicationRepository: any MedicationRepository
-    private let doseLogRepository: any DoseLogRepository
+    private let loadDose: LoadScheduledDoseUseCase
     private let recordDose: RecordDoseUseCase
     
     public init(
@@ -17,8 +16,10 @@ public struct RecordDoseForMedicationUseCase: Sendable {
         doseLogRepository: any DoseLogRepository,
         recordDose: RecordDoseUseCase
     ) {
-        self.medicationRepository = medicationRepository
-        self.doseLogRepository = doseLogRepository
+        self.loadDose = LoadScheduledDoseUseCase(
+            medicationRepository: medicationRepository,
+            doseLogRepository: doseLogRepository
+        )
         self.recordDose = recordDose
     }
     
@@ -29,17 +30,7 @@ public struct RecordDoseForMedicationUseCase: Sendable {
         status: DoseStatus,
         now: Date = .now
     ) async throws -> ScheduledDose {
-        let medication = try await medicationRepository.fetch(id: medicationId)
-        
-        let existingLog = try await doseLogRepository
-            .fetch(from: scheduledDate, to: scheduledDate.addingTimeInterval(1))
-            .first { $0.medicationId == medicationId }
-        
-        let dose = ScheduledDose(
-            medication: medication,
-            scheduledDate: scheduledDate,
-            log: existingLog
-        )
+        let dose = try await loadDose.execute(medicationId: medicationId, scheduledDate: scheduledDate)
         
         return try await recordDose.execute(dose, status: status, now: now)
     }

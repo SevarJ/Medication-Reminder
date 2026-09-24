@@ -18,17 +18,20 @@ public final class TodayViewModel {
     
     private let loadHistory: LoadDoseHistoryUseCase
     private let recordDose: RecordDoseUseCase
+    private let saveMedication: SaveMedicationUseCase
     private let calendar: Calendar
     private let currentDate: @Sendable () -> Date
     
     public init(
         loadHistory: LoadDoseHistoryUseCase,
         recordDose: RecordDoseUseCase,
+        saveMedication: SaveMedicationUseCase,
         calendar: Calendar = .current,
         currentDate: @escaping @Sendable () -> Date = { .now }
     ) {
         self.loadHistory = loadHistory
         self.recordDose = recordDose
+        self.saveMedication = saveMedication
         self.calendar = calendar
         self.currentDate = currentDate
         self.selectedDay = calendar.startOfDay(for: currentDate())
@@ -71,6 +74,10 @@ public final class TodayViewModel {
         catch {
             errorMessage = message(for: error)
         }
+    }
+    
+    func makeNewMedicationEditor() -> MedicationEditorViewModel {
+        MedicationEditorViewModel(medication: nil, saveMedication: saveMedication)
     }
     
     var week: [DoseDaySummary] {

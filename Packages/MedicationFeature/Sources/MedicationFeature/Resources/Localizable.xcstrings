@@ -139,6 +139,29 @@
         }
       }
     },
+    "common.delete": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sil"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить"
+          }
+        }
+      }
+    },
     "common.error.title": {
       "extractionState": "manual",
       "localizations": {
@@ -990,6 +1013,52 @@
         }
       }
     },
+    "list.delete.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Its reminders and dose history will be removed. This can't be undone."
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Onun xatırlatmaları və doza tarixçəsi silinəcək. Bunu geri qaytarmaq olmaz."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Напоминания и история приёма будут удалены. Это действие нельзя отменить."
+          }
+        }
+      }
+    },
+    "list.delete.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete %@?"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ silinsin?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить «%@»?"
+          }
+        }
+      }
+    },
     "list.empty.message": {
       "extractionState": "manual",
       "localizations": {
@@ -1216,6 +1285,121 @@
           "stringUnit": {
             "state": "translated",
             "value": "Не пропускайте приём"
+          }
+        }
+      }
+    },
+    "reminder.close": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağla"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закрыть"
+          }
+        }
+      }
+    },
+    "reminder.eyebrow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time for your medication"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dərman vaxtıdır"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Время принять лекарство"
+          }
+        }
+      }
+    },
+    "reminder.failure.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could Not Load This Dose"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doza yüklənmədi"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось загрузить приём"
+          }
+        }
+      }
+    },
+    "reminder.snooze": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remind Me in %lld Min"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld dəqiqə sonra xatırlat"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Напомнить через %lld мин"
+          }
+        }
+      }
+    },
+    "reminder.take": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I Took It"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qəbul etdim"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отметить приём"
           }
         }
       }

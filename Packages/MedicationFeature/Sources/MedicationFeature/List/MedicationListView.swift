@@ -13,6 +13,7 @@ import UIKit
 public struct MedicationListView: View {
     @State private var viewModel: MedicationListViewModel
     @State private var editorViewModel: MedicationEditorViewModel?
+    @State private var pendingDeletion: Medication?
     
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
@@ -103,34 +104,58 @@ public struct MedicationListView: View {
     }
     
     private func content(medications: [Medication]) -> some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: Spacing.lg) {
-                VStack(alignment: .leading, spacing: 0) {
-                    SectionHeader(title: L10n.List.allMedications)
-                    
-                    CardSection {
-                        ForEach(Array(medications.enumerated()), id: \.element.id) { index, medication in
-                            if index > 0 {
-                                RowSeparator(leadingInset: Spacing.lg)
-                            }
-                            
-                            Button {
-                                editorViewModel = viewModel.makeEditorViewModel(for: medication)
-                            } label: {
-                                MedicationRow(medication: medication)
-                            }
-                            .buttonStyle(.plain)
-                            .contextMenu {
-                                Button(medication.isActive ? L10n.List.pauseReminders : L10n.List.resumeReminders) {
-                                    Task { await viewModel.toggle(medication) }
-                                }
-                            }
+        List {
+            Section {
+                ForEach(medications) { medication in
+                    Button {
+                        editorViewModel = viewModel.makeEditorViewModel(for: medication)
+                    } label: {
+                        MedicationRow(medication: medication)
+                    }
+                    .buttonStyle(.plain)
+                    .contextMenu {
+                        Button(medication.isActive ? L10n.List.pauseReminders : L10n.List.resumeReminders) {
+                            Task { await viewModel.toggle(medication) }
                         }
                     }
+                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        Button {
+                            pendingDeletion = medication
+                        } label: {
+                            Label(L10n.Common.delete, systemImage: "trash")
+                        }
+                        .tint(Color.theme.danger)
+                    }
+                    .confirmationDialog(
+                        L10n.List.deleteTitle(medication.name),
+                        isPresented: Binding(
+                            get: { pendingDeletion?.id == medication.id },
+                            set: { if !$0 { pendingDeletion = nil } }
+                        ),
+                        titleVisibility: .visible
+                    ) {
+                        Button(L10n.Editor.deleteMedication, role: .destructive) {
+                            Task { await viewModel.delete(medication) }
+                        }
+                        
+                        Button(L10n.Common.cancel, role: .cancel) {}
+                    } message: {
+                        Text(L10n.List.deleteMessage)
+                    }
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.theme.surface)
+                    .listRowSeparatorTint(Color.theme.separator)
                 }
+            } header: {
+                Text(L10n.List.allMedications)
+                    .font(Font.theme.rowSubtitle)
+                    .foregroundStyle(Color.theme.textSecondary)
+                    .textCase(nil)
             }
-            .padding(.bottom, Spacing.lg)
         }
+        .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .animation(.default, value: medications)
     }
     
     private var notificationBanner: some View {

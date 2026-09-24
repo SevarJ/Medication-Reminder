@@ -12,13 +12,15 @@ import NotificationsKit
 import SwiftUI
 
 struct RootView: View {
+    @Bindable var router: ReminderRouter
+    
     @AppStorage(AppLanguage.storageKey) private var language: AppLanguage = .system
     @AppStorage(AppAppearance.storageKey) private var appearance: AppAppearance = .system
     @State private var selectedTab: AppTab = .today
     @State private var primingModel = AppComposition.makeNotificationPrimingModel()
     
     var body: some View {
-        MainTabView(selection: $selectedTab)
+        MainTabView(selection: $selectedTab, revision: router.revision)
             .id(language)
             .environment(\.locale, language.locale)
             .preferredColorScheme(appearance.colorScheme)
@@ -32,6 +34,9 @@ struct RootView: View {
                     onAllow: { Task { await primingModel.allow() } },
                     onNotNow: { primingModel.dismiss() }
                 )
+            }
+            .fullScreenCover(item: $router.doseReminder, onDismiss: router.didClose) { reminder in
+                DoseReminderView(viewModel: reminder, onClose: router.close)
             }
             .task {
                 await primingModel.evaluate()
@@ -50,6 +55,7 @@ private enum AppTab: Hashable {
 
 private struct MainTabView: View {
     @Binding var selection: AppTab
+    let revision: Int
     
     @State private var todayViewModel = AppComposition.makeTodayViewModel()
     @State private var listViewModel = AppComposition.makeListViewModel()
@@ -76,5 +82,8 @@ private struct MainTabView: View {
                 .tag(AppTab.settings)
         }
         .tint(Color.theme.accent)
+        .onChange(of: revision) {
+            Task { await todayViewModel.start() }
+        }
     }
 }

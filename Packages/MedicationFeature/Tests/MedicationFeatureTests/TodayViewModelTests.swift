@@ -59,6 +59,10 @@ struct TodayViewModelTests {
                 doseLogRepository: doseLogRepository,
                 calendar: calendar
             ),
+            saveMedication: SaveMedicationUseCase(
+                repository: medicationRepository,
+                scheduler: MockReminderScheduler()
+            ),
             calendar: calendar,
             currentDate: { now }
         )
@@ -261,6 +265,24 @@ struct TodayViewModelTests {
         
         #expect(sut.errorMessage == "Doses can only be updated within the last 7 days.")
         #expect(await logRepository.logs.isEmpty)
+    }
+    
+    @Test func addingMedicationShowsItsDosesAfterReload() async throws {
+        let repository = MockMedicationRepository()
+        let sut = makeSUT(medications: [], repository: repository, now: try date(day: 16, hour: 8))
+        
+        await sut.load()
+        
+        let editor = sut.makeNewMedicationEditor()
+        editor.name = "Omega 3"
+        editor.startDate = try date(day: 1)
+        
+        #expect(editor.isEditing == false)
+        #expect(await editor.save())
+        
+        await sut.load()
+        
+        #expect(sut.selectedDoses.map(\.medication.name) == ["Omega 3"])
     }
     
     @Test func groupsDosesByPeriod() async throws {

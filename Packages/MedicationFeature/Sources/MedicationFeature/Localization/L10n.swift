@@ -26,6 +26,10 @@ enum L10n {
             String(localized: "common.tryAgain", defaultValue: "Try Again", bundle: .module.localized())
         }
         
+        static var delete: String {
+            String(localized: "common.delete", defaultValue: "Delete", bundle: .module.localized())
+        }
+        
         static var errorTitle: String {
             String(localized: "common.error.title", defaultValue: "Something Went Wrong", bundle: .module.localized())
         }
@@ -58,6 +62,14 @@ enum L10n {
         
         static var pauseReminders: String {
             String(localized: "list.action.pause", defaultValue: "Pause Reminders", bundle: .module.localized())
+        }
+        
+        static func deleteTitle(_ name: String) -> String {
+            String(localized: "list.delete.title", defaultValue: "Delete \(name)?", bundle: .module.localized())
+        }
+        
+        static var deleteMessage: String {
+            String(localized: "list.delete.message", defaultValue: "Its reminders and dose history will be removed. This can't be undone.", bundle: .module.localized())
         }
         
         static var resumeReminders: String {
@@ -276,6 +288,28 @@ enum L10n {
         
         static var notNow: String {
             String(localized: "priming.action.notNow", defaultValue: "Not Now", bundle: .module.localized())
+        }
+    }
+    
+    enum Reminder {
+        static var close: String {
+            String(localized: "reminder.close", defaultValue: "Close", bundle: .module.localized())
+        }
+        
+        static var eyebrow: String {
+            String(localized: "reminder.eyebrow", defaultValue: "Time for your medication", bundle: .module.localized())
+        }
+        
+        static var take: String {
+            String(localized: "reminder.take", defaultValue: "I Took It", bundle: .module.localized())
+        }
+        
+        static func snooze(minutes: Int) -> String {
+            String(localized: "reminder.snooze", defaultValue: "Remind Me in \(minutes) Min", bundle: .module.localized())
+        }
+        
+        static var loadFailedTitle: String {
+            String(localized: "reminder.failure.title", defaultValue: "Could Not Load This Dose", bundle: .module.localized())
         }
     }
     

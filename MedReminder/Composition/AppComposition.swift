@@ -26,12 +26,31 @@ enum AppComposition {
     }
     
     static func makeNotificationCoordinator(
+        router: ReminderRouter,
         container: DependencyContainer = DependencyContainer()
     ) -> ReminderNotificationCoordinator {
         let services = Services(container: container)
         
         return ReminderNotificationCoordinator(
             recordDose: services.recordDoseForMedication,
+            snoozeReminder: services.snoozeReminder,
+            router: router
+        )
+    }
+    
+    @MainActor
+    static func makeDoseReminderViewModel(
+        medicationId: UUID,
+        scheduledDate: Date,
+        container: DependencyContainer = DependencyContainer()
+    ) -> DoseReminderViewModel {
+        let services = Services(container: container)
+        
+        return DoseReminderViewModel(
+            medicationId: medicationId,
+            scheduledDate: scheduledDate,
+            loadDose: services.loadScheduledDose,
+            recordDose: services.recordDose,
             snoozeReminder: services.snoozeReminder
         )
     }
@@ -54,7 +73,8 @@ enum AppComposition {
         
         return TodayViewModel(
             loadHistory: services.loadDoseHistory,
-            recordDose: services.recordDose
+            recordDose: services.recordDose,
+            saveMedication: services.saveMedication
         )
     }
     
@@ -117,6 +137,10 @@ private struct Services {
     
     var changeLanguage: ChangeLanguageUseCase {
         ChangeLanguageUseCase(store: languageStore, syncReminder: syncReminder)
+    }
+    
+    var loadScheduledDose: LoadScheduledDoseUseCase {
+        LoadScheduledDoseUseCase(medicationRepository: medications, doseLogRepository: doseLogs)
     }
     
     var recordDose: RecordDoseUseCase {

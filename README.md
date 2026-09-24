@@ -6,7 +6,7 @@ A medication reminder and adherence tracker for iOS. Schedule medications, get a
   <a href="https://github.com/SevarJ/Medication-Reminder/actions/workflows/ci.yml"><img src="https://github.com/SevarJ/Medication-Reminder/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/iOS-17%2B-blue" alt="iOS 17+">
   <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
-  <img src="https://img.shields.io/badge/tests-132-brightgreen" alt="132 tests">
+  <img src="https://img.shields.io/badge/tests-142-brightgreen" alt="142 tests">
 </p>
 
 ## Features
@@ -17,6 +17,7 @@ A medication reminder and adherence tracker for iOS. Schedule medications, get a
 - Repeating local notifications, rescheduled automatically whenever a medication changes
 - Mark a dose taken or skipped from the Today screen, or straight from the notification
 - Snooze a reminder for ten minutes without opening the app
+- Tapping a reminder opens a full-screen dose card to mark it taken or snooze it
 - Today screen with a daily progress ring, a next-dose card and a seven-day week strip for reviewing and correcting past days
 - Animated, haptic dose check-off with swipe to take or skip
 - Per-medication on/off switch that cancels or restores its reminders

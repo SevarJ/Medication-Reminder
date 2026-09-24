@@ -11,6 +11,7 @@ import SwiftUI
 
 public struct TodayView: View {
     @State private var viewModel: TodayViewModel
+    @State private var editorViewModel: MedicationEditorViewModel?
     
     @Environment(\.scenePhase) private var scenePhase
     
@@ -25,6 +26,30 @@ public struct TodayView: View {
                 .background(Color.theme.background)
                 .navigationTitle(L10n.Today.title)
                 .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            editorViewModel = viewModel.makeNewMedicationEditor()
+                        } label: {
+                            Image(systemName: "plus")
+                                .font(.system(.body, weight: .semibold))
+                        }
+                        .tint(Color.theme.accent)
+                    }
+                }
+        }
+        .sheet(item: $editorViewModel) { editor in
+            MedicationEditorView(
+                viewModel: editor,
+                onFinish: { saved in
+                    editorViewModel = nil
+                    
+                    if saved {
+                        Task { await viewModel.load() }
+                    }
+                },
+                onDelete: nil
+            )
         }
         .alert(
             L10n.Common.errorTitle,
