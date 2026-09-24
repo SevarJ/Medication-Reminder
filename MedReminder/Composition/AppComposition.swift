@@ -36,6 +36,18 @@ enum AppComposition {
     }
     
     @MainActor
+    static func makeNotificationPrimingModel(
+        container: DependencyContainer = DependencyContainer()
+    ) -> NotificationPrimingModel {
+        let services = Services(container: container)
+        
+        return NotificationPrimingModel(
+            authorizer: services.authorizer,
+            syncReminder: services.syncReminder
+        )
+    }
+    
+    @MainActor
     static func makeTodayViewModel(container: DependencyContainer = DependencyContainer()) -> TodayViewModel {
         let services = Services(container: container)
         

@@ -13,6 +13,7 @@ struct RootView: View {
     @State private var todayViewModel = AppComposition.makeTodayViewModel()
     @State private var historyViewModel = AppComposition.makeHistoryViewModel()
     @State private var listViewModel = AppComposition.makeListViewModel()
+    @State private var primingModel = AppComposition.makeNotificationPrimingModel()
     
     var body: some View {
         TabView {
@@ -32,5 +33,19 @@ struct RootView: View {
                 }
         }
         .tint(Color.theme.accent)
+        .sheet(
+            isPresented: Binding(
+                get: { primingModel.isPresented },
+                set: { if !$0 { primingModel.dismiss() } }
+            )
+        ) {
+            NotificationPrimingView(
+                onAllow: { Task { await primingModel.allow() } },
+                onNotNow: { primingModel.dismiss() }
+            )
+        }
+        .task {
+            await primingModel.evaluate()
+        }
     }
 }

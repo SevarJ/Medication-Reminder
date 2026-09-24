@@ -140,20 +140,42 @@ public struct MedicationListView: View {
                     .font(Font.theme.rowTitle)
                     .foregroundStyle(Color.theme.textPrimary)
                 
-                Text("Reminders cannot be delivered until notifications are enabled in Settings.")
+                Text(bannerMessage)
                     .font(Font.theme.rowSubtitle)
                     .foregroundStyle(Color.theme.textSecondary)
                 
-                Button("Open Settings") {
-                    guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
-                    openURL(url)
-                }
-                .font(Font.theme.rowSubtitle)
-                .tint(Color.theme.accent)
+                Button(bannerActionTitle, action: performBannerAction)
+                    .font(Font.theme.rowSubtitle)
+                    .tint(Color.theme.accent)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(Spacing.lg)
         }
+    }
+    
+    private var canRequestNotifications: Bool {
+        viewModel.notificationAccess == .notDetermined
+    }
+    
+    private var bannerMessage: String {
+        canRequestNotifications
+            ? "Turn on notifications so your reminders arrive on time."
+            : "Reminders cannot be delivered until notifications are enabled in Settings."
+    }
+    
+    private var bannerActionTitle: String {
+        canRequestNotifications ? "Turn On Notifications" : "Open Settings"
+    }
+    
+    private func performBannerAction() {
+        guard !canRequestNotifications else {
+            Task { await viewModel.enableNotifications() }
+            return
+        }
+        
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        
+        openURL(url)
     }
     
     private func failureState(message: String) -> some View {

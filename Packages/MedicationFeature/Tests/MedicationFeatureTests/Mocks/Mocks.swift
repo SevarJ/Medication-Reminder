@@ -109,22 +109,32 @@ actor MockDoseLogRepository: DoseLogRepository {
 struct PersistenceFailure: Error {}
 
 actor MockNotificationAuthorizer: NotificationAuthorizing {
-    private var isAuthorizedResult: Bool
+    private(set) var requestCount = 0
     
-    init(isAuthorized: Bool) {
-        self.isAuthorizedResult = isAuthorized
+    private var currentAccess: NotificationAccess
+    private let grantsOnRequest: Bool
+    
+    init(access: NotificationAccess = .authorized, grantsOnRequest: Bool = true) {
+        self.currentAccess = access
+        self.grantsOnRequest = grantsOnRequest
     }
     
-    func setAuthorized(_ isAuthorized: Bool) {
-        isAuthorizedResult = isAuthorized
+    func setAccess(_ access: NotificationAccess) {
+        currentAccess = access
     }
     
     func requestAuthorization() async throws -> Bool {
-        isAuthorizedResult
+        requestCount += 1
+        
+        if currentAccess == .notDetermined {
+            currentAccess = grantsOnRequest ? .authorized : .denied
+        }
+        
+        return currentAccess == .authorized
     }
     
-    func isAuthorized() async -> Bool {
-        isAuthorizedResult
+    func access() async -> NotificationAccess {
+        currentAccess
     }
 }
 

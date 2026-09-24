@@ -84,7 +84,7 @@ struct MedicationListViewModelTests {
     }
     
     @Test func flagsUnavailableNotificationsWhenAuthorizationRefused() async throws {
-        let sut = makeSUT(authorizer: MockNotificationAuthorizer(isAuthorized: false))
+        let sut = makeSUT(authorizer: MockNotificationAuthorizer(access: .denied))
         
         await sut.start()
         
@@ -95,12 +95,13 @@ struct MedicationListViewModelTests {
         let medication = try makeMedication(isActive: false)
         let sut = makeSUT(
             repository: MockMedicationRepository(medications: [medication]),
-            scheduler: MockReminderScheduler(failsWithAuthorizationDenied: true)
+            scheduler: MockReminderScheduler(failsWithAuthorizationDenied: true),
+            authorizer: MockNotificationAuthorizer(access: .denied)
         )
         
         await sut.toggle(medication)
         
-        #expect(sut.notificationsUnavailable)
+        #expect(sut.notificationAccess == .denied)
         #expect(sut.errorMessage == nil)
     }
     
@@ -121,7 +122,7 @@ struct MedicationListViewModelTests {
     @Test func schedulesRemindersWhenAccessIsGrantedLater() async throws {
         let medication = try makeMedication()
         let scheduler = MockReminderScheduler()
-        let authorizer = MockNotificationAuthorizer(isAuthorized: false)
+        let authorizer = MockNotificationAuthorizer(access: .denied)
         let sut = makeSUT(
             repository: MockMedicationRepository(medications: [medication]),
             scheduler: scheduler,
@@ -133,7 +134,7 @@ struct MedicationListViewModelTests {
         #expect(sut.notificationsUnavailable)
         #expect(await scheduler.scheduledIds.isEmpty)
         
-        await authorizer.setAuthorized(true)
+        await authorizer.setAccess(.authorized)
         await sut.refreshNotificationAccess()
         
         #expect(sut.notificationsUnavailable == false)
@@ -146,7 +147,7 @@ struct MedicationListViewModelTests {
         let sut = makeSUT(
             repository: MockMedicationRepository(medications: [medication]),
             scheduler: scheduler,
-            authorizer: MockNotificationAuthorizer(isAuthorized: false)
+            authorizer: MockNotificationAuthorizer(access: .denied)
         )
         
         await sut.start()
@@ -156,10 +157,50 @@ struct MedicationListViewModelTests {
         #expect(await scheduler.scheduledIds.isEmpty)
     }
     
+    @Test func startDoesNotPromptForPermission() async throws {
+        let authorizer = MockNotificationAuthorizer(access: .notDetermined)
+        let sut = makeSUT(authorizer: authorizer)
+        
+        await sut.start()
+        
+        #expect(await authorizer.requestCount == 0)
+        #expect(sut.notificationAccess == .notDetermined)
+        #expect(sut.notificationsUnavailable)
+    }
+    
+    @Test func enablingNotificationsRequestsAccessAndSchedulesReminders() async throws {
+        let medication = try makeMedication()
+        let scheduler = MockReminderScheduler()
+        let authorizer = MockNotificationAuthorizer(access: .notDetermined)
+        let sut = makeSUT(
+            repository: MockMedicationRepository(medications: [medication]),
+            scheduler: scheduler,
+            authorizer: authorizer
+        )
+        
+        await sut.start()
+        await sut.enableNotifications()
+        
+        #expect(await authorizer.requestCount == 1)
+        #expect(sut.notificationAccess == .authorized)
+        #expect(sut.notificationsUnavailable == false)
+        #expect(await scheduler.scheduledIds == [medication.id])
+    }
+    
+    @Test func refusingNotificationsLeavesBannerPointingToSettings() async throws {
+        let authorizer = MockNotificationAuthorizer(access: .notDetermined, grantsOnRequest: false)
+        let sut = makeSUT(authorizer: authorizer)
+        
+        await sut.start()
+        await sut.enableNotifications()
+        
+        #expect(sut.notificationAccess == .denied)
+    }
+    
     private func makeSUT(
         repository: MockMedicationRepository = MockMedicationRepository(),
         scheduler: MockReminderScheduler = MockReminderScheduler(),
-        authorizer: MockNotificationAuthorizer = MockNotificationAuthorizer(isAuthorized: true),
+        authorizer: MockNotificationAuthorizer = MockNotificationAuthorizer(access: .authorized),
         logRepository: MockDoseLogRepository = MockDoseLogRepository()
     ) -> MedicationListViewModel {
         let saveMedication = SaveMedicationUseCase(

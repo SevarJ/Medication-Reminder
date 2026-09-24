@@ -12,8 +12,7 @@ import Observation
 @MainActor
 @Observable
 public final class MedicationListViewModel {
-     
-    public private(set) var notificationsUnavailable = false
+    public private(set) var notificationAccess: NotificationAccess?
     public var errorMessage: String?
     
     private let repository: any MedicationRepository
@@ -41,10 +40,12 @@ public final class MedicationListViewModel {
         self.authorizer = authorizer
     }
     
+    public var notificationsUnavailable: Bool {
+        notificationAccess.map { $0 != .authorized } ?? false
+    }
+    
     public func start() async {
-        let isAuthorized = (try? await authorizer.requestAuthorization()) ?? false
-        
-        await applyAuthorization(isAuthorized: isAuthorized, forceSync: true)
+        await apply(await authorizer.access(), forceSync: true)
         await load()
     }
     
@@ -73,7 +74,7 @@ public final class MedicationListViewModel {
             _ = try await toggleMedicationActive.execute(medication)
         }
         catch is ReminderError {
-            notificationsUnavailable = true
+            notificationAccess = await authorizer.access()
         }
         catch {
             errorMessage = message(for: error)
@@ -101,24 +102,27 @@ public final class MedicationListViewModel {
     }
     
     func refreshNotificationAccess() async {
-        await applyAuthorization(
-            isAuthorized: await authorizer.isAuthorized(),
-            forceSync: false
-        )
+        await apply(await authorizer.access(), forceSync: false)
     }
     
-    private func applyAuthorization(isAuthorized: Bool, forceSync: Bool) async {
+    func enableNotifications() async {
+        _ = try? await authorizer.requestAuthorization()
+        
+        await apply(await authorizer.access(), forceSync: true)
+    }
+    
+    private func apply(_ access: NotificationAccess, forceSync: Bool) async {
         let wasUnavailable = notificationsUnavailable
         
-        notificationsUnavailable = isAuthorized == false
+        notificationAccess = access
         
-        guard isAuthorized, forceSync || wasUnavailable else { return }
+        guard access == .authorized, forceSync || wasUnavailable else { return }
         
         do {
             try await syncReminder.execute()
         }
         catch is ReminderError {
-            notificationsUnavailable = true
+            notificationAccess = await authorizer.access()
         }
         catch {
             errorMessage = message(for: error)
