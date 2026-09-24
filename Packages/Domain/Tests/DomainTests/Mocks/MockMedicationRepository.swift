@@ -23,7 +23,11 @@ actor MockMedicationRepository: MedicationRepository {
     }
     
     func fetch(id: UUID) async throws -> Medication {
-        throw DomainError.medicationNotFound
+        guard let medication = (medications + savedMedications).first(where: { $0.id == id }) else {
+            throw DomainError.medicationNotFound
+        }
+        
+        return medication
     }
     
     func save(_ medication: Medication) async throws {

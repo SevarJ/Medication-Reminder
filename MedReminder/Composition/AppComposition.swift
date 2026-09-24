@@ -24,6 +24,17 @@ enum AppComposition {
         )
     }
     
+    static func makeNotificationCoordinator(
+        container: DependencyContainer = DependencyContainer()
+    ) -> ReminderNotificationCoordinator {
+        let services = Services(container: container)
+        
+        return ReminderNotificationCoordinator(
+            recordDose: services.recordDoseForMedication,
+            snoozeReminder: services.snoozeReminder
+        )
+    }
+    
     @MainActor
     static func makeTodayViewModel(container: DependencyContainer = DependencyContainer()) -> TodayViewModel {
         let services = Services(container: container)
@@ -74,5 +85,17 @@ private struct Services {
     
     var recordDose: RecordDoseUseCase {
         RecordDoseUseCase(doseLogRepository: doseLogs)
+    }
+    
+    var recordDoseForMedication: RecordDoseForMedicationUseCase {
+        RecordDoseForMedicationUseCase(
+            medicationRepository: medications,
+            doseLogRepository: doseLogs,
+            recordDose: recordDose
+        )
+    }
+    
+    var snoozeReminder: SnoozeReminderUseCase {
+        SnoozeReminderUseCase(repository: medications, scheduler: scheduler)
     }
 }

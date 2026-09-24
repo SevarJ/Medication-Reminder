@@ -11,10 +11,10 @@ import UserNotifications
 
 @main
 struct MedReminderApp: App {
-    private let notificationPresenter = ForegroundNotificationPresenter()
+    private let notificationCoordinator = AppComposition.makeNotificationCoordinator()
     
     init() {
-        UNUserNotificationCenter.current().delegate = notificationPresenter
+        notificationCoordinator.start()
     }
     
     var body: some Scene {

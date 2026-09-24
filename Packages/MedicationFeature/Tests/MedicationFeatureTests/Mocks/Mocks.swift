@@ -56,6 +56,7 @@ actor MockMedicationRepository: MedicationRepository {
 actor MockReminderScheduler: ReminderScheduling {
     private(set) var scheduledIds: [UUID] = []
     private(set) var cancelledIds: [UUID] = []
+    private(set) var snoozedIds: [UUID] = []
     
     private let failsWithAuthorizationDenied: Bool
     
@@ -73,6 +74,10 @@ actor MockReminderScheduler: ReminderScheduling {
     
     func cancel(for medicationId: UUID) async throws {
         cancelledIds.append(medicationId)
+    }
+    
+    func snooze(_ medication: Medication, until date: Date) async throws {
+        snoozedIds.append(medication.id)
     }
 }
 

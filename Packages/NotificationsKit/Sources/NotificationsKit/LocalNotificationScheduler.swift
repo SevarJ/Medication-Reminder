@@ -53,12 +53,33 @@ struct LocalNotificationScheduler: ReminderScheduling {
                     medicationId: medication.id,
                     title: medication.name,
                     body: medication.dosage.displayText,
-                    hour: time.hour,
-                    minute: time.minute,
-                    weekday: weekday
+                    components: DateComponents(hour: time.hour, minute: time.minute, weekday: weekday),
+                    repeats: true
                 )
             }
         }
+    }
+    
+    func snooze(_ medication: Medication, until date: Date) async throws {
+        let components = Calendar.current.dateComponents(
+            [.year, .month, .day, .hour, .minute],
+            from: date
+        )
+        
+        try await center.add(
+            ReminderRequest(
+                identifier: Self.snoozeIdentifier(medicationId: medication.id),
+                medicationId: medication.id,
+                title: medication.name,
+                body: medication.dosage.displayText,
+                components: components,
+                repeats: false
+            )
+        )
+    }
+    
+    static func snoozeIdentifier(medicationId: UUID) -> String {
+        identifierPrefix(medicationId: medicationId) + "snooze." + UUID().uuidString
     }
     
     func cancel(for medicationId: UUID) async throws {

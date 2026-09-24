@@ -12,7 +12,10 @@ struct ReminderRequest: Sendable, Equatable {
     let medicationId: UUID
     let title: String
     let body: String
-    let hour: Int
-    let minute: Int
-    let weekday: Int?
+    let components: DateComponents
+    let repeats: Bool
+    
+    var hour: Int? { components.hour }
+    var minute: Int? { components.minute }
+    var weekday: Int? { components.weekday }
 }

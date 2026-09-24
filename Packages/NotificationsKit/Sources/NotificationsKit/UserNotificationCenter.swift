@@ -40,17 +40,20 @@ final class SystemNotificationCenter: UserNotificationCenter, @unchecked Sendabl
         content.body = reminder.body
         content.sound = .default
         content.threadIdentifier = reminder.medicationId.uuidString
-        content.userInfo = [ReminderUserInfoKey.medicationId: reminder.medicationId.uuidString]
-        
-        var components = DateComponents()
-        components.hour = reminder.hour
-        components.minute = reminder.minute
-        components.weekday = reminder.weekday
+        content.categoryIdentifier = ReminderCategory.identifier
+        content.userInfo = [
+            ReminderUserInfoKey.medicationId: reminder.medicationId.uuidString,
+            ReminderUserInfoKey.hour: reminder.hour as Any,
+            ReminderUserInfoKey.minute: reminder.minute as Any
+        ]
         
         let request = UNNotificationRequest(
             identifier: reminder.identifier,
             content: content,
-            trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+            trigger: UNCalendarNotificationTrigger(
+                dateMatching: reminder.components,
+                repeats: reminder.repeats
+            )
         )
         
         try await center.add(request)
@@ -65,6 +68,8 @@ final class SystemNotificationCenter: UserNotificationCenter, @unchecked Sendabl
     }
 }
 
-public enum ReminderUserInfoKey {
-    public static let medicationId = "medicationId"
+enum ReminderUserInfoKey {
+    static let medicationId = "medicationId"
+    static let hour = "hour"
+    static let minute = "minute"
 }

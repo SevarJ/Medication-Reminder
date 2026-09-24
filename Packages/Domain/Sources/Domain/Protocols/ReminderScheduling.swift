@@ -10,4 +10,5 @@ import Foundation
 public protocol ReminderScheduling: Sendable {
     func schedule(for medication: Medication) async throws
     func cancel(for medicationId: UUID) async throws
+    func snooze(_ medication: Medication, until date: Date) async throws
 }

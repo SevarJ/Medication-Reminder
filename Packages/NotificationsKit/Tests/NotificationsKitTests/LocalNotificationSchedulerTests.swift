@@ -21,8 +21,8 @@ struct LocalNotificationSchedulerTests {
         let added = await center.added
         
         #expect(added.count == 2)
-        #expect(added.map { $0.hour } == [9, 21])
-        #expect(added.map { $0.minute } == [0, 30])
+        #expect(added.compactMap { $0.hour } == [9, 21])
+        #expect(added.compactMap { $0.minute } == [0, 30])
         #expect(added.allSatisfy { $0.title == medication.name })
         #expect(added.allSatisfy { $0.medicationId == medication.id })
     }
@@ -78,7 +78,7 @@ struct LocalNotificationSchedulerTests {
         let added = await center.added
         
         #expect(added.count == 2)
-        #expect(added.map { $0.weekday } == [2, 6])
+        #expect(added.compactMap { $0.weekday } == [2, 6])
         #expect(Set(added.map { $0.identifier }).count == 2)
     }
     
@@ -112,6 +112,34 @@ struct LocalNotificationSchedulerTests {
         try await sut.schedule(for: medication)
         
         #expect(await center.added.isEmpty)
+    }
+    
+    @Test func dailyRemindersRepeat() async throws {
+        let center = MockUserNotificationCenter()
+        let sut = LocalNotificationScheduler(center: center)
+        
+        try await sut.schedule(for: try makeMedication())
+        
+        #expect(await center.added.allSatisfy { $0.repeats })
+    }
+    
+    @Test func snoozeAddsSingleReminderForGivenDate() async throws {
+        let center = MockUserNotificationCenter()
+        let sut = LocalNotificationScheduler(center: center)
+        let medication = try makeMedication()
+        let until = try #require(
+            Calendar.current.date(bySettingHour: 9, minute: 10, second: 0, of: .now)
+        )
+        
+        try await sut.snooze(medication, until: until)
+        
+        let added = try #require(await center.added.first)
+        
+        #expect(await center.added.count == 1)
+        #expect(added.repeats == false)
+        #expect(added.hour == 9)
+        #expect(added.minute == 10)
+        #expect(added.identifier.hasPrefix(LocalNotificationScheduler.identifierPrefix(medicationId: medication.id)))
     }
     
     @Test func identifierIsNamespacedByMedication() async throws {
