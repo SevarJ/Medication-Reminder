@@ -27,7 +27,7 @@ struct MedicationEditorView: View {
                     
                     if onDelete != nil {
                         CardSection {
-                            DestructiveRow(title: "Delete Medication") {
+                            DestructiveRow(title: L10n.Editor.deleteMedication) {
                                 onDelete?()
                             }
                         }
@@ -40,14 +40,14 @@ struct MedicationEditorView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancel") {
+                    Button(L10n.Common.cancel) {
                         onFinish(false)
                     }
                     .tint(Color.theme.accent)
                 }
                 
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Save") {
+                    Button(L10n.Common.save) {
                         Task {
                             if await viewModel.save() {
                                 onFinish(true)
@@ -59,13 +59,13 @@ struct MedicationEditorView: View {
                 }
             }
             .alert(
-                "Check Your Input",
+                L10n.Editor.invalidInputTitle,
                 isPresented: Binding(
                     get: { viewModel.errorMessage != nil },
                     set: { if !$0 { viewModel.errorMessage = nil } }
                 )
             ) {
-                Button("OK", role: .cancel) {}
+                Button(L10n.Common.ok, role: .cancel) {}
             } message: {
                 Text(viewModel.errorMessage ?? "")
             }
@@ -74,10 +74,10 @@ struct MedicationEditorView: View {
     
     private var detailsSection: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SectionHeader(title: "Details")
+            SectionHeader(title: L10n.Editor.details)
             
             CardSection {
-                TextField("Medication name", text: $viewModel.name)
+                TextField(L10n.Editor.namePlaceholder, text: $viewModel.name)
                     .font(Font.theme.rowTitle)
                     .foregroundStyle(Color.theme.textPrimary)
                     .padding(Spacing.lg)
@@ -85,13 +85,13 @@ struct MedicationEditorView: View {
                 RowSeparator()
                 
                 HStack(spacing: Spacing.md) {
-                    Text("Dosage")
+                    Text(L10n.Editor.dosage)
                         .font(Font.theme.rowTitle)
                         .foregroundStyle(Color.theme.textPrimary)
                     
                     Spacer()
                     
-                    TextField("Amount", text: $viewModel.amountText)
+                    TextField(L10n.Editor.amount, text: $viewModel.amountText)
                         .keyboardType(.decimalPad)
                         .multilineTextAlignment(.trailing)
                         .font(Font.theme.rowSubtitle)
@@ -102,7 +102,7 @@ struct MedicationEditorView: View {
                 
                 RowSeparator()
                 
-                Picker("Unit", selection: $viewModel.unit) {
+                Picker(L10n.Editor.unit, selection: $viewModel.unit) {
                     ForEach(DosageUnit.allCases, id: \.self) { unit in
                         Text(unit.displayText).tag(unit)
                     }
@@ -115,10 +115,10 @@ struct MedicationEditorView: View {
     
     private var repeatSection: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SectionHeader(title: "Repeat")
+            SectionHeader(title: L10n.Editor.repeatSection)
             
             CardSection {
-                Picker("Repeat", selection: $viewModel.repeatMode) {
+                Picker(L10n.Editor.repeatSection, selection: $viewModel.repeatMode) {
                     ForEach(RepeatMode.allCases) { mode in
                         Text(mode.title).tag(mode)
                     }
@@ -161,20 +161,20 @@ struct MedicationEditorView: View {
     
     private var durationSection: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SectionHeader(title: "Duration")
+            SectionHeader(title: L10n.Editor.duration)
             
             CardSection {
-                datePickerRow(title: "Starts", selection: $viewModel.startDate)
+                datePickerRow(title: L10n.Editor.starts, selection: $viewModel.startDate)
                 
                 RowSeparator()
                 
-                ToggleRow(title: "End Date", isOn: $viewModel.hasEndDate)
+                ToggleRow(title: L10n.Editor.endDate, isOn: $viewModel.hasEndDate)
                 
                 if viewModel.hasEndDate {
                     RowSeparator()
                     
                     datePickerRow(
-                        title: "Ends",
+                        title: L10n.Editor.ends,
                         selection: $viewModel.endDate,
                         in: viewModel.startDate...
                     )
@@ -211,7 +211,7 @@ struct MedicationEditorView: View {
     
     private var remindersSection: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SectionHeader(title: "Reminders")
+            SectionHeader(title: L10n.Editor.reminders)
             
             CardSection {
                 ForEach(viewModel.times) { time in
@@ -252,7 +252,7 @@ struct MedicationEditorView: View {
                 } label: {
                     HStack(spacing: Spacing.sm) {
                         Image(systemName: "plus.circle.fill")
-                        Text("Add Time")
+                        Text(L10n.Editor.addTime)
                     }
                     .font(Font.theme.rowTitle)
                     .foregroundStyle(Color.theme.accent)
@@ -266,10 +266,10 @@ struct MedicationEditorView: View {
     
     private var statusSection: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SectionHeader(title: "Status")
+            SectionHeader(title: L10n.Editor.status)
             
             CardSection {
-                ToggleRow(title: "Reminders Enabled", isOn: $viewModel.isActive)
+                ToggleRow(title: L10n.Editor.remindersEnabled, isOn: $viewModel.isActive)
             }
         }
     }

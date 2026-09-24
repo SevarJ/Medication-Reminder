@@ -23,17 +23,17 @@ public struct TodayView: View {
             content
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color.theme.background)
-                .navigationTitle("Today")
+                .navigationTitle(L10n.Today.title)
                 .navigationBarTitleDisplayMode(.inline)
         }
         .alert(
-            "Something Went Wrong",
+            L10n.Common.errorTitle,
             isPresented: Binding(
                 get: { viewModel.errorMessage != nil },
                 set: { if !$0 { viewModel.errorMessage = nil } }
             )
         ) {
-            Button("OK", role: .cancel) {}
+            Button(L10n.Common.ok, role: .cancel) {}
         } message: {
             Text(viewModel.errorMessage ?? "")
         }
@@ -120,11 +120,11 @@ public struct TodayView: View {
                 background: Color.theme.accentTint
             )
             
-            Text("Nothing Scheduled Today")
+            Text(L10n.Today.emptyTitle)
                 .font(Font.theme.rowTitle)
                 .foregroundStyle(Color.theme.textPrimary)
             
-            Text("Medications scheduled for today will appear here.")
+            Text(L10n.Today.emptyMessage)
                 .font(Font.theme.rowSubtitle)
                 .foregroundStyle(Color.theme.textSecondary)
                 .multilineTextAlignment(.center)
@@ -140,7 +140,7 @@ public struct TodayView: View {
                 background: Color.theme.surface
             )
             
-            Text("Could Not Load Today")
+            Text(L10n.Today.loadFailedTitle)
                 .font(Font.theme.rowTitle)
                 .foregroundStyle(Color.theme.textPrimary)
             
@@ -149,7 +149,7 @@ public struct TodayView: View {
                 .foregroundStyle(Color.theme.textSecondary)
                 .multilineTextAlignment(.center)
             
-            Button("Try Again") {
+            Button(L10n.Common.tryAgain) {
                 Task { await viewModel.load() }
             }
             .font(Font.theme.rowTitle)

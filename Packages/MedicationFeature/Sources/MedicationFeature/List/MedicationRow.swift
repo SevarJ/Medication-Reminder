@@ -45,7 +45,7 @@ struct MedicationRow: View {
             
             if !medication.isActive {
                 Badge(
-                    title: "Paused",
+                    title: L10n.List.paused,
                     foreground: Color.theme.textSecondary,
                     background: Color.theme.separator
                 )

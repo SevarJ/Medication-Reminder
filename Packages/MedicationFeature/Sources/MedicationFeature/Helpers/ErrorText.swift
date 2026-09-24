@@ -11,27 +11,27 @@ func message(for error: Error) -> String {
     if let domainError = error as? DomainError {
         switch domainError {
         case .nameEmpty:
-            return "Enter a medication name."
+            return L10n.Error.nameEmpty
         case .timeUnselected:
-            return "Add at least one reminder time."
+            return L10n.Error.timeUnselected
         case .invalidTime:
-            return "Choose a valid reminder time."
+            return L10n.Error.invalidTime
         case .duplicateTime:
-            return "Reminder times must be different from each other."
+            return L10n.Error.duplicateTime
         case .weekdayUnselected:
-            return "Select at least one day of the week."
+            return L10n.Error.weekdayUnselected
         case .invalidDateRange:
-            return "The end date cannot be earlier than the start date."
+            return L10n.Error.invalidDateRange
         case .doseOutsideEditableRange:
-            return "Doses can only be updated within the last 7 days."
+            return L10n.Error.doseOutsideEditableRange
         case .medicationNotFound:
-            return "This medication no longer exists."
+            return L10n.Error.medicationNotFound
         }
     }
     
     if error is ReminderError {
-        return "Notifications are turned off, so reminders were not scheduled."
+        return L10n.Error.notificationsOff
     }
     
-    return "Something went wrong. Please try again."
+    return L10n.Error.generic
 }

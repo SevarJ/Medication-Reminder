@@ -21,6 +21,7 @@ A medication reminder and adherence tracker for iOS. Schedule medications, get a
 - Per-medication on/off switch that cancels or restores its reminders
 - Warning banner when notification permission is missing, with reminders re-synced as soon as it is granted
 - Local persistence with SwiftData
+- Available in English, Azerbaijani and Russian, including plural-aware dosage text
 - Light and dark appearance, Dynamic Type support
 
 ## Architecture

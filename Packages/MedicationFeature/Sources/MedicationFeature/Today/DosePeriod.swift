@@ -24,9 +24,9 @@ enum DosePeriod: CaseIterable, Identifiable {
     
     var title: String {
         switch self {
-        case .morning: "Morning"
-        case .afternoon: "Afternoon"
-        case .evening: "Evening"
+        case .morning: L10n.Today.morning
+        case .afternoon: L10n.Today.afternoon
+        case .evening: L10n.Today.evening
         }
     }
     

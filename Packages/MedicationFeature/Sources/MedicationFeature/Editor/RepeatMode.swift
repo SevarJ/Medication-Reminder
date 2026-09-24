@@ -15,8 +15,8 @@ enum RepeatMode: CaseIterable, Identifiable {
     
     var title: String {
         switch self {
-        case .daily: "Every Day"
-        case .specificDays: "Specific Days"
+        case .daily: L10n.Editor.everyDay
+        case .specificDays: L10n.Editor.specificDays
         }
     }
 }

@@ -57,7 +57,7 @@ public final class MedicationEditorViewModel: Identifiable {
     }
     
     var title: String {
-        isEditing ? "Edit Medication" : "New Medication"
+        isEditing ? L10n.Editor.editTitle : L10n.Editor.newTitle
     }
     
     func toggleWeekday(_ weekday: Weekday) {
@@ -93,7 +93,7 @@ public final class MedicationEditorViewModel: Identifiable {
         guard let amount = Double(amountText.replacingOccurrences(of: ",", with: ".")),
               amount > 0
         else {
-            errorMessage = "Enter a dosage amount greater than zero."
+            errorMessage = L10n.Error.invalidAmount
             return false
         }
         

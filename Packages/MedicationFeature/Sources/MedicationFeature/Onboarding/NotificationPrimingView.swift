@@ -28,12 +28,12 @@ public struct NotificationPrimingView: View {
                 .background(Color.theme.accentTint, in: Circle())
             
             VStack(spacing: Spacing.md) {
-                Text("Never Miss a Dose")
+                Text(L10n.Priming.title)
                     .font(Font.theme.screenTitle)
                     .foregroundStyle(Color.theme.textPrimary)
                     .multilineTextAlignment(.center)
                 
-                Text("MedReminder uses notifications to remind you when it's time to take your medication. You can mark doses as taken or snooze them right from the notification.")
+                Text(L10n.Priming.message)
                     .font(Font.theme.rowSubtitle)
                     .foregroundStyle(Color.theme.textSecondary)
                     .multilineTextAlignment(.center)
@@ -43,7 +43,7 @@ public struct NotificationPrimingView: View {
             
             VStack(spacing: Spacing.md) {
                 Button(action: onAllow) {
-                    Text("Allow Notifications")
+                    Text(L10n.Priming.allow)
                         .font(Font.theme.rowTitle)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, Spacing.md)
@@ -51,7 +51,7 @@ public struct NotificationPrimingView: View {
                 .buttonStyle(.borderedProminent)
                 .tint(Color.theme.accent)
                 
-                Button("Not Now", action: onNotNow)
+                Button(L10n.Priming.notNow, action: onNotNow)
                     .font(Font.theme.rowSubtitle)
                     .tint(Color.theme.textSecondary)
             }

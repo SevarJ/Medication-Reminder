@@ -44,18 +44,18 @@ struct DoseRow: View {
                 .foregroundStyle(state == .taken ? Color.theme.accent : Color.theme.textSecondary)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(state == .taken ? "Mark as not taken" : "Mark as taken")
+        .accessibilityLabel(state == .taken ? L10n.Today.markNotTaken : L10n.Today.markTaken)
     }
     
     @ViewBuilder private var trailing: some View {
         switch state {
         case .taken:
             if let recordedAt = dose.log?.recordedAt {
-                Badge(title: "Taken \(recordedAt.timeText)")
+                Badge(title: L10n.Today.takenAt(recordedAt.timeText))
             }
         case .skipped, .pending, .missed:
             Button(action: onSkip) {
-                Text(state == .skipped ? "Skipped" : "Skip")
+                Text(state == .skipped ? L10n.Today.skipped : L10n.Today.skip)
                     .font(Font.theme.rowSubtitle)
                     .foregroundStyle(Color.theme.textSecondary)
                     .padding(.horizontal, Spacing.md)
@@ -72,6 +72,6 @@ struct DoseRow: View {
     private var subtitle: String {
         let details = "\(dose.scheduledDate.timeText) · \(dose.medication.dosage.displayText)"
         
-        return state == .missed ? "\(details) · Missed" : details
+        return state == .missed ? "\(details) · \(L10n.Today.missed)" : details
     }
 }

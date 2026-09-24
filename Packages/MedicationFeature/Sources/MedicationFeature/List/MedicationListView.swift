@@ -33,7 +33,7 @@ public struct MedicationListView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .background(Color.theme.background)
-            .navigationTitle("Medications")
+            .navigationTitle(L10n.List.title)
             .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
@@ -67,13 +67,13 @@ public struct MedicationListView: View {
             )
         }
         .alert(
-            "Something Went Wrong",
+            L10n.Common.errorTitle,
             isPresented: Binding(
                 get: { viewModel.errorMessage != nil },
                 set: { if !$0 { viewModel.errorMessage = nil } }
             )
         ) {
-            Button("OK", role: .cancel) {}
+            Button(L10n.Common.ok, role: .cancel) {}
         } message: {
             Text(viewModel.errorMessage ?? "")
         }
@@ -106,7 +106,7 @@ public struct MedicationListView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 VStack(alignment: .leading, spacing: 0) {
-                    SectionHeader(title: "All Medications")
+                    SectionHeader(title: L10n.List.allMedications)
                     
                     CardSection {
                         ForEach(Array(medications.enumerated()), id: \.element.id) { index, medication in
@@ -121,7 +121,7 @@ public struct MedicationListView: View {
                             }
                             .buttonStyle(.plain)
                             .contextMenu {
-                                Button(medication.isActive ? "Pause Reminders" : "Resume Reminders") {
+                                Button(medication.isActive ? L10n.List.pauseReminders : L10n.List.resumeReminders) {
                                     Task { await viewModel.toggle(medication) }
                                 }
                             }
@@ -136,7 +136,7 @@ public struct MedicationListView: View {
     private var notificationBanner: some View {
         CardSection {
             VStack(alignment: .leading, spacing: Spacing.sm) {
-                Text("Notifications Are Off")
+                Text(L10n.Banner.title)
                     .font(Font.theme.rowTitle)
                     .foregroundStyle(Color.theme.textPrimary)
                 
@@ -159,12 +159,12 @@ public struct MedicationListView: View {
     
     private var bannerMessage: String {
         canRequestNotifications
-            ? "Turn on notifications so your reminders arrive on time."
-            : "Reminders cannot be delivered until notifications are enabled in Settings."
+            ? L10n.Banner.requestMessage
+            : L10n.Banner.settingsMessage
     }
     
     private var bannerActionTitle: String {
-        canRequestNotifications ? "Turn On Notifications" : "Open Settings"
+        canRequestNotifications ? L10n.Banner.turnOn : L10n.Banner.openSettings
     }
     
     private func performBannerAction() {
@@ -186,7 +186,7 @@ public struct MedicationListView: View {
                 background: Color.theme.surface
             )
             
-            Text("Could Not Load Medications")
+            Text(L10n.List.loadFailedTitle)
                 .font(Font.theme.rowTitle)
                 .foregroundStyle(Color.theme.textPrimary)
             
@@ -195,7 +195,7 @@ public struct MedicationListView: View {
                 .foregroundStyle(Color.theme.textSecondary)
                 .multilineTextAlignment(.center)
             
-            Button("Try Again") {
+            Button(L10n.Common.tryAgain) {
                 Task { await viewModel.load() }
             }
             .font(Font.theme.rowTitle)
@@ -213,11 +213,11 @@ public struct MedicationListView: View {
                 background: Color.theme.accentTint
             )
             
-            Text("No Medications Yet")
+            Text(L10n.List.emptyTitle)
                 .font(Font.theme.rowTitle)
                 .foregroundStyle(Color.theme.textPrimary)
             
-            Text("Add your first medication to start receiving reminders.")
+            Text(L10n.List.emptyMessage)
                 .font(Font.theme.rowSubtitle)
                 .foregroundStyle(Color.theme.textSecondary)
                 .multilineTextAlignment(.center)

@@ -49,9 +49,9 @@ extension Recurrence {
     var displayText: String {
         switch self {
         case .daily:
-            return "Every day"
+            return L10n.Schedule.everyDay
         case .daysOfWeek(let days):
-            guard !days.isEmpty else { return "No days selected" }
+            guard !days.isEmpty else { return L10n.Schedule.noDaysSelected }
             return days.sorted().map { Calendar.current.shortWeekdaySymbols[$0.rawValue - 1] }.joined(separator: ", ")
         }
     }

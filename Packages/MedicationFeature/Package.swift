@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "MedicationFeature",
+    defaultLocalization: "en",
     platforms: [.iOS(.v17)],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
@@ -31,7 +32,8 @@ let package = Package(
                     name: "DesignSystem",
                     package: "DesignSystem"
                 ),
-            ]
+            ],
+            resources: [.process("Resources")]
         ),
         .testTarget(
             name: "MedicationFeatureTests",
