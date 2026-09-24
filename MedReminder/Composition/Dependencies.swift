@@ -36,3 +36,7 @@ enum ReminderSchedulerKey: DependencyKey {
 enum NotificationAuthorizerKey: DependencyKey {
     static let liveValue: any NotificationAuthorizing = NotificationsFactory.makeAuthorizer()
 }
+
+enum LanguageStoreKey: DependencyKey {
+    static let liveValue: any LanguagePreferenceStoring = UserDefaultsLanguageStore()
+}

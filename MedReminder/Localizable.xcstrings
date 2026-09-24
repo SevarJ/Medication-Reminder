@@ -1,29 +1,6 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "History": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "History"
-          }
-        },
-        "az": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tarixçə"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "История"
-          }
-        }
-      }
-    },
     "Medications": {
       "extractionState": "manual",
       "localizations": {
@@ -43,6 +20,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Лекарства"
+          }
+        }
+      }
+    },
+    "Settings": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ayarlar"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Настройки"
           }
         }
       }

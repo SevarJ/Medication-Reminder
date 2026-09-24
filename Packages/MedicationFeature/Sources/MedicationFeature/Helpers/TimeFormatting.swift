@@ -29,6 +29,14 @@ extension Date {
     }
 }
 
+extension Calendar {
+    static var localized: Calendar {
+        var calendar = Calendar.current
+        calendar.locale = AppLanguage.current.locale
+        return calendar
+    }
+}
+
 extension MedTime {
     var displayText: String {
         String(format: "%02d:%02d", hour, minute)
@@ -41,7 +49,7 @@ extension MedTime {
 
 extension Weekday {
     var shortSymbol: String {
-        Calendar.current.veryShortWeekdaySymbols[rawValue - 1]
+        Calendar.localized.veryShortWeekdaySymbols[rawValue - 1]
     }
 }
 
@@ -52,7 +60,7 @@ extension Recurrence {
             return L10n.Schedule.everyDay
         case .daysOfWeek(let days):
             guard !days.isEmpty else { return L10n.Schedule.noDaysSelected }
-            return days.sorted().map { Calendar.current.shortWeekdaySymbols[$0.rawValue - 1] }.joined(separator: ", ")
+            return days.sorted().map { Calendar.localized.shortWeekdaySymbols[$0.rawValue - 1] }.joined(separator: ", ")
         }
     }
 }

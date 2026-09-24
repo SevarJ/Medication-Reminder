@@ -9,7 +9,7 @@ import Foundation
 
 public extension Dosage {
     var displayText: String {
-        let amountText = amount.formatted(.number.precision(.fractionLength(0...2)))
+        let amountText = amount.formatted(.number.precision(.fractionLength(0...2)).locale(AppLanguage.current.locale))
         let wholeAmount = Int(exactly: amount)
         
         switch unit {

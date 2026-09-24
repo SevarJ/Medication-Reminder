@@ -7,6 +7,7 @@
 
 import DIContainer
 import Domain
+import Foundation
 import MedicationFeature
 
 enum AppComposition {
@@ -52,19 +53,30 @@ enum AppComposition {
         let services = Services(container: container)
         
         return TodayViewModel(
-            loadDoses: services.loadDoses,
+            loadHistory: services.loadDoseHistory,
             recordDose: services.recordDose
         )
     }
     
     @MainActor
-    static func makeHistoryViewModel(container: DependencyContainer = DependencyContainer()) -> HistoryViewModel {
+    static func makeSettingsViewModel(container: DependencyContainer = DependencyContainer()) -> SettingsViewModel {
         let services = Services(container: container)
         
-        return HistoryViewModel(
-            loadHistory: services.loadDoseHistory,
-            recordDose: services.recordDose
+        return SettingsViewModel(
+            languageStore: services.languageStore,
+            changeLanguage: services.changeLanguage,
+            syncReminder: services.syncReminder,
+            authorizer: services.authorizer,
+            appVersion: appVersion
         )
+    }
+    
+    private static var appVersion: String {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? ""
+        let build = info?["CFBundleVersion"] as? String ?? ""
+        
+        return "\(version) (\(build))"
     }
 }
 
@@ -73,12 +85,14 @@ private struct Services {
     let doseLogs: any DoseLogRepository
     let scheduler: any ReminderScheduling
     let authorizer: any NotificationAuthorizing
+    let languageStore: any LanguagePreferenceStoring
     
     init(container: DependencyContainer) {
         medications = container.resolve(MedicationRepositoryKey.self)
         doseLogs = container.resolve(DoseLogRepositoryKey.self)
         scheduler = container.resolve(ReminderSchedulerKey.self)
         authorizer = container.resolve(NotificationAuthorizerKey.self)
+        languageStore = container.resolve(LanguageStoreKey.self)
     }
     
     var saveMedication: SaveMedicationUseCase {
@@ -101,8 +115,8 @@ private struct Services {
         SyncReminderUseCase(repository: medications, scheduler: scheduler)
     }
     
-    var loadDoses: LoadDosesUseCase {
-        LoadDosesUseCase(medicationRepository: medications, doseLogRepository: doseLogs)
+    var changeLanguage: ChangeLanguageUseCase {
+        ChangeLanguageUseCase(store: languageStore, syncReminder: syncReminder)
     }
     
     var recordDose: RecordDoseUseCase {

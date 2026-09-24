@@ -9,7 +9,6 @@ import Domain
 
 enum TodayState: Equatable {
     case loading
-    case empty
-    case loaded([ScheduledDose])
+    case loaded([DoseDaySummary])
     case failure(message: String)
 }

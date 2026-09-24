@@ -51,64 +51,135 @@ public struct TodayView: View {
         switch viewModel.state {
         case .loading:
             ProgressView()
-        case .empty:
-            emptyState
-        case .loaded(let doses):
-            schedule(for: doses)
+        case .loaded:
+            schedule
         case .failure(let message):
             failureState(message: message)
         }
     }
     
-    private func schedule(for doses: [ScheduledDose]) -> some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: Spacing.lg) {
+    private var schedule: some View {
+        List {
+            Section {
                 header
                 
-                ForEach(DosePeriod.allCases) { period in
-                    let periodDoses = viewModel.doses(in: period, from: doses)
-                    
-                    if !periodDoses.isEmpty {
-                        section(period, doses: periodDoses)
-                    }
+                WeekStrip(
+                    days: viewModel.week,
+                    isSelected: viewModel.isSelected,
+                    onSelect: viewModel.select
+                )
+            }
+            .listRowInsets(EdgeInsets(top: Spacing.sm, leading: 0, bottom: Spacing.sm, trailing: 0))
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
+            
+            highlight
+            
+            if viewModel.selectedDoses.isEmpty {
+                Section {
+                    emptyState
+                        .frame(maxWidth: .infinity)
+                }
+                .listRowBackground(Color.clear)
+            }
+            
+            ForEach(DosePeriod.allCases) { period in
+                let doses = viewModel.doses(in: period)
+                
+                if !doses.isEmpty {
+                    section(period, doses: doses)
                 }
             }
-            .padding(.bottom, Spacing.lg)
+        }
+        .listStyle(.insetGrouped)
+        .listSectionSpacing(Spacing.lg)
+        .contentMargins(.top, Spacing.sm, for: .scrollContent)
+        .scrollContentBackground(.hidden)
+        .animation(.spring(duration: 0.35), value: viewModel.week)
+        .animation(.spring(duration: 0.35), value: viewModel.selectedDay)
+        .refreshable {
+            await viewModel.load()
         }
     }
     
     private var header: some View {
-        Text(viewModel.title)
-            .font(Font.theme.rowSubtitle)
-            .foregroundStyle(Color.theme.textSecondary)
-            .padding(.horizontal, Spacing.lg)
-            .padding(.top, Spacing.sm)
+        HStack(spacing: Spacing.lg) {
+            ProgressRing(progress: viewModel.progress, lineWidth: 10)
+                .frame(width: 96, height: 96)
+                .overlay {
+                    VStack(spacing: 0) {
+                        Text(viewModel.selectedDoses.isEmpty ? "–" : "\(viewModel.takenCount)/\(viewModel.selectedDoses.count)")
+                            .font(.system(.title2, design: .rounded, weight: .bold))
+                            .foregroundStyle(Color.theme.textPrimary)
+                            .contentTransition(.numericText())
+                        
+                        Text(L10n.Today.taken)
+                            .font(Font.theme.caption)
+                            .foregroundStyle(Color.theme.textSecondary)
+                    }
+                    .animation(.spring, value: viewModel.takenCount)
+                }
+            
+            VStack(alignment: .leading, spacing: Spacing.xs) {
+                Text(viewModel.title)
+                    .font(.system(.title3, weight: .bold))
+                    .foregroundStyle(Color.theme.textPrimary)
+                
+                Text(L10n.Today.weekAdherence(viewModel.weekAdherence.formatted(.percent.precision(.fractionLength(0)).locale(AppLanguage.current.locale))))
+                    .font(Font.theme.rowSubtitle)
+                    .foregroundStyle(Color.theme.textSecondary)
+            }
+            
+            Spacer(minLength: 0)
+        }
+        .padding(.bottom, Spacing.sm)
     }
     
-    private func section(_ period: DosePeriod, doses: [ScheduledDose]) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: Spacing.sm) {
-                Image(systemName: period.iconName)
-                    .foregroundStyle(Color.theme.accent)
-                
-                SectionHeader(title: period.title)
-            }
-            .padding(.leading, Spacing.lg)
-            
-            CardSection {
-                ForEach(Array(doses.enumerated()), id: \.element.id) { index, dose in
-                    if index > 0 {
-                        RowSeparator()
-                    }
-                    
-                    DoseRow(
+    @ViewBuilder private var highlight: some View {
+        if let dose = viewModel.nextDose {
+            Section {
+                TimelineView(.everyMinute) { _ in
+                    NextDoseCard(
                         dose: dose,
-                        state: viewModel.state(of: dose),
-                        onTake: { record(dose, as: .taken) },
-                        onSkip: { record(dose, as: .skipped) }
+                        countdown: viewModel.countdown(to: dose),
+                        onTake: { record(dose, as: .taken) }
                     )
                 }
             }
+            .listRowInsets(EdgeInsets())
+            .listRowBackground(Color.clear)
+            .transition(.opacity.combined(with: .scale(scale: 0.95)))
+        }
+        else if viewModel.isDayComplete {
+            Section {
+                DayCompleteCard()
+            }
+            .listRowInsets(EdgeInsets())
+            .listRowBackground(Color.clear)
+            .transition(.opacity.combined(with: .scale(scale: 0.95)))
+        }
+    }
+    
+    private func section(_ period: DosePeriod, doses: [ScheduledDose]) -> some View {
+        Section {
+            ForEach(doses) { dose in
+                let state = viewModel.state(of: dose)
+                
+                DoseRow(
+                    dose: dose,
+                    state: state,
+                    onTake: { record(dose, as: .taken) },
+                    onSkip: { record(dose, as: .skipped) }
+                )
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(state == .taken ? Color.theme.accentTint : Color.theme.surface)
+                .listRowSeparatorTint(Color.theme.separator)
+            }
+        } header: {
+            Label(period.title, systemImage: period.iconName)
+                .font(Font.theme.rowSubtitle)
+                .foregroundStyle(Color.theme.textSecondary)
+                .textCase(nil)
         }
     }
     
@@ -120,14 +191,16 @@ public struct TodayView: View {
                 background: Color.theme.accentTint
             )
             
-            Text(L10n.Today.emptyTitle)
+            Text(viewModel.isTodaySelected ? L10n.Today.emptyTitle : L10n.Today.emptyDayTitle)
                 .font(Font.theme.rowTitle)
                 .foregroundStyle(Color.theme.textPrimary)
             
-            Text(L10n.Today.emptyMessage)
-                .font(Font.theme.rowSubtitle)
-                .foregroundStyle(Color.theme.textSecondary)
-                .multilineTextAlignment(.center)
+            if viewModel.isTodaySelected {
+                Text(L10n.Today.emptyMessage)
+                    .font(Font.theme.rowSubtitle)
+                    .foregroundStyle(Color.theme.textSecondary)
+                    .multilineTextAlignment(.center)
+            }
         }
         .padding(Spacing.xxl)
     }

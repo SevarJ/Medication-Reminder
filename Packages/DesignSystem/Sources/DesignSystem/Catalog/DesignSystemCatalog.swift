@@ -128,6 +128,17 @@ struct DesignSystemCatalog: View {
 
                 RowSeparator()
 
+                HStack(spacing: Spacing.lg) {
+                    ProgressRing(progress: 0.6)
+                        .frame(width: 64, height: 64)
+                    ProgressRing(progress: 1, lineWidth: 4)
+                        .frame(width: 32, height: 32)
+                    Spacer()
+                }
+                .padding(Spacing.md)
+
+                RowSeparator()
+
                 DestructiveRow(title: "Delete medication") {}
             }
         }

@@ -22,7 +22,8 @@ struct DoseRow: View {
             VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(dose.medication.name)
                     .font(Font.theme.rowTitle)
-                    .foregroundStyle(Color.theme.textPrimary)
+                    .foregroundStyle(state == .taken ? Color.theme.textSecondary : Color.theme.textPrimary)
+                    .strikethrough(state == .taken, color: Color.theme.textSecondary)
                 
                 Text(subtitle)
                     .font(Font.theme.rowSubtitle)
@@ -35,13 +36,39 @@ struct DoseRow: View {
         }
         .padding(Spacing.lg)
         .opacity(state == .skipped ? 0.6 : 1)
+        .animation(.spring(duration: 0.35), value: state)
+        .sensoryFeedback(trigger: state) { _, newValue in
+            newValue == .taken ? .success : nil
+        }
+        .swipeActions(edge: .leading, allowsFullSwipe: true) {
+            Button(action: onTake) {
+                Label(
+                    state == .taken ? L10n.Today.markNotTaken : L10n.Today.take,
+                    systemImage: state == .taken ? "arrow.uturn.backward" : "checkmark"
+                )
+            }
+            .tint(Color.theme.accent)
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            if state != .taken {
+                Button(action: onSkip) {
+                    Label(
+                        state == .skipped ? L10n.Today.markNotTaken : L10n.Today.skip,
+                        systemImage: state == .skipped ? "arrow.uturn.backward" : "forward.end"
+                    )
+                }
+                .tint(Color.theme.textSecondary)
+            }
+        }
     }
     
     private var checkbox: some View {
         Button(action: onTake) {
             Image(systemName: state == .taken ? "checkmark.circle.fill" : "circle")
-                .font(.system(size: 26))
+                .font(.system(size: 28))
                 .foregroundStyle(state == .taken ? Color.theme.accent : Color.theme.textSecondary)
+                .contentTransition(.symbolEffect(.replace))
+                .symbolEffect(.bounce, value: state == .taken)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(state == .taken ? L10n.Today.markNotTaken : L10n.Today.markTaken)
@@ -52,6 +79,7 @@ struct DoseRow: View {
         case .taken:
             if let recordedAt = dose.log?.recordedAt {
                 Badge(title: L10n.Today.takenAt(recordedAt.timeText))
+                    .transition(.scale.combined(with: .opacity))
             }
         case .skipped, .pending, .missed:
             Button(action: onSkip) {
