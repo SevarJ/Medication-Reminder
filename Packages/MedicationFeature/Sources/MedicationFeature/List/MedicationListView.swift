@@ -114,11 +114,16 @@ public struct MedicationListView: View {
                                 RowSeparator(leadingInset: Spacing.lg)
                             }
                             
-                            MedicationRow(medication: medication) {
-                                Task { await viewModel.toggle(medication) }
-                            }
-                            .onTapGesture {
+                            Button {
                                 editorViewModel = viewModel.makeEditorViewModel(for: medication)
+                            } label: {
+                                MedicationRow(medication: medication)
+                            }
+                            .buttonStyle(.plain)
+                            .contextMenu {
+                                Button(medication.isActive ? "Pause Reminders" : "Resume Reminders") {
+                                    Task { await viewModel.toggle(medication) }
+                                }
                             }
                         }
                     }

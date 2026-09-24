@@ -11,7 +11,6 @@ import SwiftUI
 
 struct MedicationRow: View {
     let medication: Medication
-    let onToggle: () -> Void
     
     var body: some View {
         HStack(spacing: Spacing.md) {
@@ -40,18 +39,21 @@ struct MedicationRow: View {
                     }
                 }
             }
+            .opacity(medication.isActive ? 1 : 0.6)
             
             Spacer(minLength: Spacing.sm)
             
-            Toggle(
-                "",
-                isOn: Binding(
-                    get: { medication.isActive },
-                    set: { _ in onToggle() }
+            if !medication.isActive {
+                Badge(
+                    title: "Paused",
+                    foreground: Color.theme.textSecondary,
+                    background: Color.theme.separator
                 )
-            )
-            .labelsHidden()
-            .tint(Color.theme.accent)
+            }
+            
+            Image(systemName: "chevron.right")
+                .font(Font.theme.caption)
+                .foregroundStyle(Color.theme.textSecondary)
         }
         .padding(Spacing.lg)
         .contentShape(Rectangle())
