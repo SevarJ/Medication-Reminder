@@ -16,6 +16,7 @@ struct RootView: View {
     
     @AppStorage(AppLanguage.storageKey) private var language: AppLanguage = .system
     @AppStorage(AppAppearance.storageKey) private var appearance: AppAppearance = .system
+    @AppStorage(SnoozeDuration.storageKey) private var snoozeDuration: SnoozeDuration = .default
     @State private var selectedTab: AppTab = .today
     @State private var primingModel = AppComposition.makeNotificationPrimingModel()
     
@@ -42,7 +43,10 @@ struct RootView: View {
                 await primingModel.evaluate()
             }
             .onChange(of: language) {
-                ReminderCategory.register()
+                ReminderCategory.register(snoozeMinutes: snoozeDuration.minutes)
+            }
+            .onChange(of: snoozeDuration) {
+                ReminderCategory.register(snoozeMinutes: snoozeDuration.minutes)
             }
     }
 }

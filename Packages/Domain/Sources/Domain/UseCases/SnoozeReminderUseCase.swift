@@ -8,7 +8,7 @@
 import Foundation
 
 public struct SnoozeReminderUseCase: Sendable {
-    public static let defaultDelay: TimeInterval = 10 * 60
+    public static let defaultDelay: TimeInterval = SnoozeDuration.default.interval
     
     private let repository: any MedicationRepository
     private let scheduler: any ReminderScheduling

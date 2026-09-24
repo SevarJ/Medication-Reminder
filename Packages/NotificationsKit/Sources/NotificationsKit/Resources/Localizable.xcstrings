@@ -30,19 +30,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Snooze 10 min"
+            "value": "Snooze %lld min"
           }
         },
         "az": {
           "stringUnit": {
             "state": "translated",
-            "value": "10 dəq. təxirə sal"
+            "value": "%lld dəq. təxirə sal"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Отложить на 10 мин"
+            "value": "Отложить на %lld мин"
           }
         }
       }

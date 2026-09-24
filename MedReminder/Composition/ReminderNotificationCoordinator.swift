@@ -27,7 +27,7 @@ final class ReminderNotificationCoordinator: NSObject, UNUserNotificationCenterD
     func start(on center: UNUserNotificationCenter = .current()) {
         center.delegate = self
         
-        ReminderCategory.register(on: center)
+        ReminderCategory.register(snoozeMinutes: SnoozeDuration.current.minutes, on: center)
     }
     
     func userNotificationCenter(
@@ -49,7 +49,10 @@ final class ReminderNotificationCoordinator: NSObject, UNUserNotificationCenterD
         case .skipped:
             await record(reminder, as: .skipped)
         case .snooze:
-            try? await snoozeReminder.execute(medicationId: reminder.medicationId)
+            try? await snoozeReminder.execute(
+                medicationId: reminder.medicationId,
+                delay: SnoozeDuration.current.interval
+            )
         case .opened:
             await router.open(medicationId: reminder.medicationId, scheduledDate: reminder.scheduledDate)
         }

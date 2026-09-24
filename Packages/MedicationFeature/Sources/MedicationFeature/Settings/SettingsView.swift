@@ -14,6 +14,7 @@ public struct SettingsView: View {
     @State private var viewModel: SettingsViewModel
     
     @AppStorage(AppAppearance.storageKey) private var appearance: AppAppearance = .system
+    @AppStorage(SnoozeDuration.storageKey) private var snoozeDuration: SnoozeDuration = .default
     
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
@@ -159,6 +160,16 @@ public struct SettingsView: View {
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                
+                RowSeparator(leadingInset: 58)
+                
+                pickerRow(
+                    title: L10n.Settings.snooze,
+                    systemName: "clock.arrow.circlepath",
+                    selection: $snoozeDuration,
+                    options: SnoozeDuration.allCases,
+                    label: \.displayName
+                )
             }
         }
     }

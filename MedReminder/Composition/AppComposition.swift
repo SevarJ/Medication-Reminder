@@ -51,7 +51,8 @@ enum AppComposition {
             scheduledDate: scheduledDate,
             loadDose: services.loadScheduledDose,
             recordDose: services.recordDose,
-            snoozeReminder: services.snoozeReminder
+            snoozeReminder: services.snoozeReminder,
+            snoozeDelay: SnoozeDuration.current.interval
         )
     }
     

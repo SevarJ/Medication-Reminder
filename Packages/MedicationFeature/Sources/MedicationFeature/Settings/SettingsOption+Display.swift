@@ -19,6 +19,12 @@ extension AppLanguage {
     }
 }
 
+extension SnoozeDuration {
+    var displayName: String {
+        L10n.Settings.snoozeOption(minutes: minutes)
+    }
+}
+
 extension AppAppearance {
     var displayName: String {
         switch self {

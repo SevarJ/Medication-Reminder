@@ -18,8 +18,8 @@ enum L10n {
             String(localized: "action.skip", defaultValue: "Skip", bundle: .module.localized())
         }
         
-        static var snooze: String {
-            String(localized: "action.snooze", defaultValue: "Snooze 10 min", bundle: .module.localized())
+        static func snooze(minutes: Int) -> String {
+            String(localized: "action.snooze", defaultValue: "Snooze \(minutes) min", bundle: .module.localized())
         }
     }
 }

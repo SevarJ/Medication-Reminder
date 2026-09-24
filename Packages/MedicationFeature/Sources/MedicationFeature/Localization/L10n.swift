@@ -366,6 +366,14 @@ enum L10n {
             String(localized: "settings.notifications.notSetUp", defaultValue: "Not Set Up", bundle: .module.localized())
         }
         
+        static var snooze: String {
+            String(localized: "settings.snooze", defaultValue: "Snooze For", bundle: .module.localized())
+        }
+        
+        static func snoozeOption(minutes: Int) -> String {
+            String(localized: "settings.snooze.option", defaultValue: "\(minutes) min", bundle: .module.localized())
+        }
+        
         static var about: String {
             String(localized: "settings.section.about", defaultValue: "About", bundle: .module.localized())
         }
