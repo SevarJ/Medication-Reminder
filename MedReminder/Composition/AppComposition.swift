@@ -44,6 +44,16 @@ enum AppComposition {
             recordDose: services.recordDose
         )
     }
+    
+    @MainActor
+    static func makeHistoryViewModel(container: DependencyContainer = DependencyContainer()) -> HistoryViewModel {
+        let services = Services(container: container)
+        
+        return HistoryViewModel(
+            loadHistory: services.loadDoseHistory,
+            recordDose: services.recordDose
+        )
+    }
 }
 
 private struct Services {
@@ -85,6 +95,10 @@ private struct Services {
     
     var recordDose: RecordDoseUseCase {
         RecordDoseUseCase(doseLogRepository: doseLogs)
+    }
+    
+    var loadDoseHistory: LoadDoseHistoryUseCase {
+        LoadDoseHistoryUseCase(medicationRepository: medications, doseLogRepository: doseLogs)
     }
     
     var recordDoseForMedication: RecordDoseForMedicationUseCase {
