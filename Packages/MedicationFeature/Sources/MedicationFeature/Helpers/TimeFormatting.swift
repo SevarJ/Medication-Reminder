@@ -49,7 +49,10 @@ extension MedTime {
 
 extension Weekday {
     var shortSymbol: String {
-        Calendar.localized.veryShortWeekdaySymbols[rawValue - 1]
+        let calendar = Calendar.localized
+        let symbol = calendar.veryShortWeekdaySymbols[rawValue - 1]
+        
+        return symbol.allSatisfy(\.isNumber) ? calendar.shortStandaloneWeekdaySymbols[rawValue - 1] : symbol
     }
 }
 

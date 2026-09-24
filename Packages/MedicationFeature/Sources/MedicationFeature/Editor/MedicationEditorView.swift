@@ -39,14 +39,15 @@ struct MedicationEditorView: View {
             .navigationTitle(viewModel.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button(L10n.Common.cancel) {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(L10n.Common.cancel, systemImage: "xmark") {
                         onFinish(false)
                     }
+                    .labelStyle(.iconOnly)
                     .tint(Color.theme.accent)
                 }
                 
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .confirmationAction) {
                     Button(L10n.Common.save) {
                         Task {
                             if await viewModel.save() {
@@ -149,6 +150,8 @@ struct MedicationEditorView: View {
         } label: {
             Text(weekday.shortSymbol)
                 .font(Font.theme.rowSubtitle)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
                 .foregroundStyle(isSelected ? Color.theme.surface : Color.theme.textSecondary)
                 .frame(width: 36, height: 36)
                 .background(
