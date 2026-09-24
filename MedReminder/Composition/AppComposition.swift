@@ -12,28 +12,67 @@ import MedicationFeature
 enum AppComposition {
     @MainActor
     static func makeListViewModel(container: DependencyContainer = DependencyContainer()) -> MedicationListViewModel {
-        let repository = container.resolve(MedicationRepositoryKey.self)
-        let scheduler = container.resolve(ReminderSchedulerKey.self)
-        let authorizer = container.resolve(NotificationAuthorizerKey.self)
-        
-        let saveMedication = SaveMedicationUseCase(
-            repository: repository,
-            scheduler: scheduler
-        )
+        let services = Services(container: container)
         
         return MedicationListViewModel(
-            repository: repository,
-            saveMedication: saveMedication,
-            deleteMedication: DeleteMedicationUseCase(
-                repository: repository,
-                scheduler: scheduler
-            ),
-            toggleMedicationActive: ToggleMedicationActiveUseCase(saveMedication: saveMedication),
-            syncReminder: SyncReminderUseCase(
-                repository: repository,
-                scheduler: scheduler
-            ),
-            authorizer: authorizer
+            repository: services.medications,
+            saveMedication: services.saveMedication,
+            deleteMedication: services.deleteMedication,
+            toggleMedicationActive: services.toggleMedicationActive,
+            syncReminder: services.syncReminder,
+            authorizer: services.authorizer
         )
+    }
+    
+    @MainActor
+    static func makeTodayViewModel(container: DependencyContainer = DependencyContainer()) -> TodayViewModel {
+        let services = Services(container: container)
+        
+        return TodayViewModel(
+            loadDoses: services.loadDoses,
+            recordDose: services.recordDose
+        )
+    }
+}
+
+private struct Services {
+    let medications: any MedicationRepository
+    let doseLogs: any DoseLogRepository
+    let scheduler: any ReminderScheduling
+    let authorizer: any NotificationAuthorizing
+    
+    init(container: DependencyContainer) {
+        medications = container.resolve(MedicationRepositoryKey.self)
+        doseLogs = container.resolve(DoseLogRepositoryKey.self)
+        scheduler = container.resolve(ReminderSchedulerKey.self)
+        authorizer = container.resolve(NotificationAuthorizerKey.self)
+    }
+    
+    var saveMedication: SaveMedicationUseCase {
+        SaveMedicationUseCase(repository: medications, scheduler: scheduler)
+    }
+    
+    var deleteMedication: DeleteMedicationUseCase {
+        DeleteMedicationUseCase(
+            repository: medications,
+            scheduler: scheduler,
+            doseLogRepository: doseLogs
+        )
+    }
+    
+    var toggleMedicationActive: ToggleMedicationActiveUseCase {
+        ToggleMedicationActiveUseCase(saveMedication: saveMedication)
+    }
+    
+    var syncReminder: SyncReminderUseCase {
+        SyncReminderUseCase(repository: medications, scheduler: scheduler)
+    }
+    
+    var loadDoses: LoadDosesUseCase {
+        LoadDosesUseCase(medicationRepository: medications, doseLogRepository: doseLogs)
+    }
+    
+    var recordDose: RecordDoseUseCase {
+        RecordDoseUseCase(doseLogRepository: doseLogs)
     }
 }

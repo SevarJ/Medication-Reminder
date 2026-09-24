@@ -11,8 +11,6 @@ import UserNotifications
 
 @main
 struct MedReminderApp: App {
-    @State private var listViewModel = AppComposition.makeListViewModel()
-    
     private let notificationPresenter = ForegroundNotificationPresenter()
     
     init() {
@@ -21,7 +19,7 @@ struct MedReminderApp: App {
     
     var body: some Scene {
         WindowGroup {
-            MedicationListView(viewModel: listViewModel)
+            RootView()
         }
     }
 }

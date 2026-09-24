@@ -10,15 +10,23 @@ import Domain
 import NotificationsKit
 import Persistence
 
-enum MedicationRepositoryKey: DependencyKey {
-    static let liveValue: any MedicationRepository = {
+enum PersistenceStoreKey: DependencyKey {
+    static let liveValue: PersistenceStore = {
         do {
-            return try PersistenceFactory.makeRepository()
+            return try PersistenceFactory.makeStore()
         }
         catch {
-            return try! PersistenceFactory.makeRepository(inMemory: true)
+            return try! PersistenceFactory.makeStore(inMemory: true)
         }
     }()
+}
+
+enum MedicationRepositoryKey: DependencyKey {
+    static let liveValue: any MedicationRepository = PersistenceStoreKey.liveValue.medications
+}
+
+enum DoseLogRepositoryKey: DependencyKey {
+    static let liveValue: any DoseLogRepository = PersistenceStoreKey.liveValue.doseLogs
 }
 
 enum ReminderSchedulerKey: DependencyKey {
