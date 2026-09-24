@@ -18,6 +18,11 @@ extension Date {
         ) ?? .now
     }
     
+    var timeText: String {
+        let value = hourAndMinute
+        return String(format: "%02d:%02d", value.hour, value.minute)
+    }
+    
     var hourAndMinute: (hour: Int, minute: Int) {
         let components = Calendar.current.dateComponents([.hour, .minute], from: self)
         return (components.hour ?? 0, components.minute ?? 0)

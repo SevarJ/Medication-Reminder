@@ -22,6 +22,8 @@ func message(for error: Error) -> String {
             return "Select at least one day of the week."
         case .invalidDateRange:
             return "The end date cannot be earlier than the start date."
+        case .doseOutsideEditableRange:
+            return "Doses can only be updated within the last 7 days."
         case .medicationNotFound:
             return "This medication no longer exists."
         }

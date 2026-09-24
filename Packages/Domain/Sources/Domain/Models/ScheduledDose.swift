@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct ScheduledDose: Identifiable, Sendable {
+public struct ScheduledDose: Identifiable, Equatable, Sendable {
     public let medication: Medication
     public let scheduledDate: Date
     public let log: DoseLog?

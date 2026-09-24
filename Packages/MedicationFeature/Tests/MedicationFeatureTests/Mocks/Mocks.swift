@@ -76,6 +76,31 @@ actor MockReminderScheduler: ReminderScheduling {
     }
 }
 
+actor MockDoseLogRepository: DoseLogRepository {
+    private(set) var logs: [DoseLog]
+    
+    init(logs: [DoseLog] = []) {
+        self.logs = logs
+    }
+    
+    func fetch(from: Date, to: Date) async throws -> [DoseLog] {
+        logs.filter { $0.scheduledDate >= from && $0.scheduledDate < to }
+    }
+    
+    func save(_ log: DoseLog) async throws {
+        logs.removeAll { $0.id == log.id }
+        logs.append(log)
+    }
+    
+    func delete(id: UUID) async throws {
+        logs.removeAll { $0.id == id }
+    }
+    
+    func deleteAll(medicationId: UUID) async throws {
+        logs.removeAll { $0.medicationId == medicationId }
+    }
+}
+
 struct PersistenceFailure: Error {}
 
 actor MockNotificationAuthorizer: NotificationAuthorizing {
