@@ -35,27 +35,11 @@ public struct LoadDosesUseCase: Sendable {
         
         let logs = try await doseLogRepository.fetch(from: startOfDay, to: startOfNextDay)
         
-        let logsByDose = Dictionary(
-            logs.map { log in
-                (ScheduledDose.ID(medicationId: log.medicationId, scheduledDate: log.scheduledDate), log)
-            },
-            uniquingKeysWith: { _, latest in latest }
+        return DoseAssembler.doses(
+            for: medications,
+            on: date,
+            logs: logs,
+            calendar: calendar
         )
-        
-        return medications
-            .flatMap { medication in
-                medication.schedule
-                    .doses(on: date, calendar: calendar)
-                    .map { scheduledDate in
-                        let id = ScheduledDose.ID(medicationId: medication.id, scheduledDate: scheduledDate)
-                        
-                        return ScheduledDose(
-                            medication: medication,
-                            scheduledDate: scheduledDate,
-                            log: logsByDose[id]
-                        )
-                    }
-            }
-            .sorted { ($0.scheduledDate, $0.medication.name) < ($1.scheduledDate, $1.medication.name) }
     }
 }
