@@ -5,8 +5,9 @@
 //  Created by Sevar Jafarli on 01.08.26.
 //
 
-import Testing
+import DomainTesting
 import Foundation
+import Testing
 @testable import Domain
 
 struct SaveMedicationUseCaseTests {

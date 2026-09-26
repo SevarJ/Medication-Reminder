@@ -5,9 +5,10 @@
 //  Created by Sevar Jafarli on 17.09.26.
 //
 
-@testable import Domain
+import DomainTesting
 import Foundation
 import Testing
+@testable import Domain
 
 struct RecordDoseUseCaseTests {
     private let calendar = Calendar(identifier: .gregorian)

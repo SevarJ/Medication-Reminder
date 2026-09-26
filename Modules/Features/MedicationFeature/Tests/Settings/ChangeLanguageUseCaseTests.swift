@@ -7,6 +7,7 @@
 
 import AppLocalization
 import Domain
+import DomainTesting
 import Foundation
 import Testing
 @testable import MedicationFeature

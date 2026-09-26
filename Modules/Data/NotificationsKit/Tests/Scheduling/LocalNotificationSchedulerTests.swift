@@ -6,6 +6,7 @@
 //
 
 import Domain
+import DomainTesting
 import Foundation
 import Testing
 @testable import NotificationsKit

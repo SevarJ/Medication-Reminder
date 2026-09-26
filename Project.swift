@@ -6,15 +6,15 @@ let appPreferences = Module.foundation("AppPreferences")
 let diContainer = Module.foundation("DIContainer")
 let designSystem = Module.foundation("DesignSystem", hasTests: false)
 
-let domain = Module.domain("Domain", dependencies: [appLocalization], hasResources: true)
+let domain = Module.domain("Domain", dependencies: [appLocalization], hasResources: true, hasTesting: true)
 
 let persistence = Module.data("Persistence", dependencies: [domain], testDependencies: [domain])
-let notificationsKit = Module.data("NotificationsKit", dependencies: [domain, appLocalization], testDependencies: [domain], hasResources: true)
+let notificationsKit = Module.data("NotificationsKit", dependencies: [domain, appLocalization], testDependencies: [domain, domain.testing], hasResources: true)
 
 let medicationFeature = Module.plainFeature(
     "MedicationFeature",
     dependencies: [domain, appLocalization, appPreferences, designSystem],
-    testDependencies: [domain, appLocalization, appPreferences],
+    testDependencies: [domain, domain.testing, appLocalization, appPreferences],
     hasResources: true
 )
 

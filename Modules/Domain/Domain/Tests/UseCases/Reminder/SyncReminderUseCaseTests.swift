@@ -5,9 +5,10 @@
 //  Created by Sevar Jafarli on 12.09.26.
 //
 
-@testable import Domain
-import Testing
+import DomainTesting
 import Foundation
+import Testing
+@testable import Domain
 
 struct SyncReminderUseCaseTests {
     

@@ -5,6 +5,7 @@
 //  Created by Sevar Jafarli on 17.09.26.
 //
 
+import DomainTesting
 import Foundation
 import Testing
 @testable import Domain

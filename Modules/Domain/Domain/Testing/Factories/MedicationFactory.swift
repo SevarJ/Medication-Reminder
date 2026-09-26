@@ -1,24 +1,28 @@
 //
 //  MedicationFactory.swift
-//  Domain
+//  DomainTesting
 //
 //  Created by Sevar Jafarli on 01.08.26.
 //
 
+import Domain
 import Foundation
-@testable import Domain
 
-func makeMedication(
+public func makeMedication(
+    id: UUID = UUID(),
     name: String = "Vitamin D",
+    dosage: Dosage = Dosage(amount: 10, unit: .drop),
     times: [(Int, Int)] = [(9, 0)],
     recurrence: Recurrence = .daily,
     startDate: Date = .now,
     endDate: Date? = nil,
-    isActive: Bool = true
+    isActive: Bool = true,
+    createdDate: Date = .now
 ) throws -> Medication {
     Medication(
+        id: id,
         name: name,
-        dosage: Dosage(amount: 10, unit: .drop),
+        dosage: dosage,
         schedule: MedicationSchedule(
             times: try times.map { try MedTime(hour: $0.0, minute: $0.1) },
             recurrence: recurrence,
@@ -26,6 +30,6 @@ func makeMedication(
             endDate: endDate
         ),
         isActive: isActive,
-        createdDate: .now
+        createdDate: createdDate
     )
 }
