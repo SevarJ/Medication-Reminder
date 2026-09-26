@@ -7,42 +7,39 @@
 
 import AppLocalization
 import AppPreferences
-import DashboardImpl
+import Dashboard
 import DesignSystem
 import Domain
 import NotificationsKit
-import OnboardingImpl
-import SettingsImpl
+import Onboarding
+import Settings
 import SwiftUI
 
-struct RootView: View {
+struct RootView<Dashboard: DashboardModule, Settings: SettingsModule, Onboarding: OnboardingModule>: View {
     @Bindable var router: ReminderRouter
+    let dashboard: Dashboard
+    let settings: Settings
+    let onboarding: Onboarding
     
     @AppStorage(AppLanguage.storageKey) private var language: AppLanguage = .system
     @AppStorage(PreferenceKey.appearance) private var appearance: AppAppearance = .system
     @AppStorage(PreferenceKey.snoozeMinutes) private var snoozeDuration: SnoozeDuration = .default
     @State private var selectedTab: AppTab = .today
-    @State private var isShowingNotificationPriming = false
+    @State private var onboardingRoute: OnboardingRoute?
     
     var body: some View {
-        MainTabView(selection: $selectedTab, revision: router.revision)
+        MainTabView(dashboard: dashboard, settings: settings, selection: $selectedTab, revision: router.revision)
             .id(language)
             .environment(\.locale, language.locale)
             .preferredColorScheme(appearance.colorScheme)
-            .sheet(isPresented: $isShowingNotificationPriming) {
-                OnboardingModule.makeNotificationPrimingView {
-                    isShowingNotificationPriming = false
-                }
+            .sheet(item: $onboardingRoute) { route in
+                onboarding.makeScreen(route)
             }
             .fullScreenCover(item: $router.doseReminder, onDismiss: router.didClose) { route in
-                DashboardModule.makeDoseReminderView(
-                    medicationId: route.medicationId,
-                    scheduledDate: route.scheduledDate,
-                    onClose: router.close
-                )
+                dashboard.makeScreen(route)
             }
             .task {
-                isShowingNotificationPriming = await OnboardingModule.shouldShowNotificationPriming()
+                onboardingRoute = await onboarding.pendingRoute()
             }
             .onChange(of: language) {
                 ReminderCategory.register(snoozeMinutes: snoozeDuration.minutes)
@@ -59,25 +56,27 @@ private enum AppTab: Hashable {
     case settings
 }
 
-private struct MainTabView: View {
+private struct MainTabView<Dashboard: DashboardModule, Settings: SettingsModule>: View {
+    let dashboard: Dashboard
+    let settings: Settings
     @Binding var selection: AppTab
     let revision: Int
     
     var body: some View {
         TabView(selection: $selection) {
-            DashboardModule.makeTodayView(reloadToken: revision)
+            dashboard.makeScreen(.today(reloadToken: revision))
                 .tabItem {
                     Label("Today", systemImage: "checklist")
                 }
                 .tag(AppTab.today)
             
-            DashboardModule.makeMedicationsView()
+            dashboard.makeScreen(.medications)
                 .tabItem {
                     Label("Medications", systemImage: "pills.fill")
                 }
                 .tag(AppTab.medications)
             
-            SettingsModule.makeSettingsView()
+            settings.makeScreen(.settings)
                 .tabItem {
                     Label("Settings", systemImage: "gearshape.fill")
                 }

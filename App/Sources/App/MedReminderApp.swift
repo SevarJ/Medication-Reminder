@@ -6,10 +6,13 @@
 //
 
 import AppPreferences
+import DashboardImpl
 import DependencyInjection
 import Domain
 import NotificationsKit
+import OnboardingImpl
 import Persistence
+import SettingsImpl
 import SwiftUI
 
 @main
@@ -42,7 +45,12 @@ struct MedReminderApp: App {
     
     var body: some Scene {
         WindowGroup {
-            RootView(router: router)
+            RootView(
+                router: router,
+                dashboard: DashboardModuleConfigurator.makeModule(),
+                settings: SettingsModuleConfigurator.makeModule(),
+                onboarding: OnboardingModuleConfigurator.makeModule()
+            )
         }
     }
 }
