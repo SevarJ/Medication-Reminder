@@ -8,13 +8,13 @@
 import Domain
 internal import SwiftData
 
-public struct PersistenceStore: Sendable {
-    public let medications: any MedicationRepository
-    public let doseLogs: any DoseLogRepository
+struct PersistenceStore: Sendable {
+    let medications: any MedicationRepository
+    let doseLogs: any DoseLogRepository
 }
 
-public enum PersistenceFactory {
-    public static func makeStore(inMemory: Bool = false) throws -> PersistenceStore {
+enum PersistenceFactory {
+    static func makeStore(inMemory: Bool = false) throws -> PersistenceStore {
         let container = try ModelContainer(
             for: MedicationEntity.self, DoseLogEntity.self,
             configurations: ModelConfiguration(isStoredInMemoryOnly: inMemory)

@@ -5,6 +5,8 @@
 //  Created by Sevar Jafarli on 01.08.26.
 //
 
+import NotificationsKit
+import Persistence
 import SwiftUI
 import UserNotifications
 
@@ -15,6 +17,9 @@ struct MedReminderApp: App {
     private let notificationCoordinator: ReminderNotificationCoordinator
     
     init() {
+        PersistenceConfigurator.setup()
+        NotificationsConfigurator.setup()
+        
         let container = AppContainer()
         let router = ReminderRouter()
         

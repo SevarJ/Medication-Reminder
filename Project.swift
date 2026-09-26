@@ -3,14 +3,20 @@ import ProjectDescriptionHelpers
 
 let appLocalization = Module.foundation("AppLocalization", hasResources: true)
 let appPreferences = Module.foundation("AppPreferences")
+let dependencyInjection = Module.foundation("DependencyInjection")
 let designSystem = Module.foundation("DesignSystem", hasTests: false)
 
 let domain = Module.domain("Domain", hasTesting: true)
 
 let appFormatters = Module.shared("AppFormatters", dependencies: [domain, appLocalization], testDependencies: [domain, domain.testing], hasResources: true)
 
-let persistence = Module.data("Persistence", dependencies: [domain], testDependencies: [domain])
-let notificationsKit = Module.data("NotificationsKit", dependencies: [domain, appLocalization, appFormatters], testDependencies: [domain, domain.testing], hasResources: true)
+let persistence = Module.data("Persistence", dependencies: [domain, dependencyInjection], testDependencies: [domain, dependencyInjection])
+let notificationsKit = Module.data(
+    "NotificationsKit",
+    dependencies: [domain, appLocalization, appFormatters, dependencyInjection],
+    testDependencies: [domain, domain.testing, dependencyInjection],
+    hasResources: true
+)
 
 let onboarding = Feature.feature(
     "Onboarding",
@@ -33,7 +39,7 @@ let settings = Feature.feature(
     testDependencies: [domain, domain.testing, appLocalization]
 )
 
-let modules = [appLocalization, appPreferences, designSystem, domain, appFormatters, persistence, notificationsKit]
+let modules = [appLocalization, appPreferences, dependencyInjection, designSystem, domain, appFormatters, persistence, notificationsKit]
 let features = [onboarding, dashboard, settings]
 
 let project = Project(

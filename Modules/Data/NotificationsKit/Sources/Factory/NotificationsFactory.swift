@@ -7,12 +7,12 @@
 
 import Domain
 
-public enum NotificationsFactory {
-    public static func makeScheduler() -> any ReminderScheduling {
+enum NotificationsFactory {
+    static func makeScheduler() -> any ReminderScheduling {
         LocalNotificationScheduler(center: SystemNotificationCenter())
     }
     
-    public static func makeAuthorizer() -> any NotificationAuthorizing {
+    static func makeAuthorizer() -> any NotificationAuthorizing {
         LocalNotificationAuthorizer(center: SystemNotificationCenter())
     }
 }

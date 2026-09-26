@@ -8,11 +8,10 @@
 import AppLocalization
 import AppPreferences
 import Dashboard
+import DependencyInjection
 import Domain
 import Foundation
-import NotificationsKit
 import Onboarding
-import Persistence
 import Settings
 
 struct AppContainer {
@@ -24,11 +23,10 @@ struct AppContainer {
     let preferences: AppPreferences
 
     init(bundle: Bundle = .main) {
-        let store = Self.makeStore()
-        let medications = store.medications
-        let doseLogs = store.doseLogs
-        let scheduler = NotificationsFactory.makeScheduler()
-        let authorizer = NotificationsFactory.makeAuthorizer()
+        let medications: any MedicationRepository = resolve()
+        let doseLogs: any DoseLogRepository = resolve()
+        let scheduler: any ReminderScheduling = resolve()
+        let authorizer: any NotificationAuthorizing = resolve()
         let preferences = AppPreferences()
 
         let saveMedication = SaveMedicationUseCase(repository: medications, scheduler: scheduler)
@@ -73,15 +71,6 @@ struct AppContainer {
         )
         self.snoozeReminder = snoozeReminder
         self.preferences = preferences
-    }
-
-    private static func makeStore() -> PersistenceStore {
-        do {
-            return try PersistenceFactory.makeStore()
-        }
-        catch {
-            return try! PersistenceFactory.makeStore(inMemory: true)
-        }
     }
 
     private static func appVersion(in bundle: Bundle) -> String {
