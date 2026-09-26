@@ -39,18 +39,14 @@ struct NotificationPrimingModelTests {
     @Test func presentsWhenPermissionWasNeverAsked() async throws {
         let sut = makeSUT(authorizer: MockNotificationAuthorizer(access: .notDetermined))
         
-        await sut.evaluate()
-        
-        #expect(sut.isPresented)
+        #expect(await sut.shouldPresent())
     }
     
     @Test func staysHiddenOncePermissionIsDecided() async throws {
         for access in [NotificationAccess.authorized, .denied] {
             let sut = makeSUT(authorizer: MockNotificationAuthorizer(access: access))
             
-            await sut.evaluate()
-            
-            #expect(sut.isPresented == false)
+            #expect(await sut.shouldPresent() == false)
         }
     }
     
@@ -58,14 +54,11 @@ struct NotificationPrimingModelTests {
         let authorizer = MockNotificationAuthorizer(access: .notDetermined)
         let first = makeSUT(authorizer: authorizer)
         
-        await first.evaluate()
         first.dismiss()
         
         let second = makeSUT(authorizer: authorizer)
         
-        await second.evaluate()
-        
-        #expect(second.isPresented == false)
+        #expect(await second.shouldPresent() == false)
         #expect(await authorizer.requestCount == 0)
     }
     
@@ -75,10 +68,9 @@ struct NotificationPrimingModelTests {
         let scheduler = MockReminderScheduler()
         let sut = makeSUT(authorizer: authorizer, scheduler: scheduler, medications: [medication])
         
-        await sut.evaluate()
         await sut.allow()
         
-        #expect(sut.isPresented == false)
+        #expect(await sut.shouldPresent() == false)
         #expect(await authorizer.requestCount == 1)
         #expect(await scheduler.scheduledIds == [medication.id])
     }
@@ -92,10 +84,9 @@ struct NotificationPrimingModelTests {
             medications: [medication]
         )
         
-        await sut.evaluate()
         await sut.allow()
         
-        #expect(sut.isPresented == false)
+        #expect(await sut.shouldPresent() == false)
         #expect(await scheduler.scheduledIds.isEmpty)
     }
 }

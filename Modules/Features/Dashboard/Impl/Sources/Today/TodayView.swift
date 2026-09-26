@@ -16,8 +16,11 @@ struct TodayView: View {
     
     @Environment(\.scenePhase) private var scenePhase
     
-    init(viewModel: TodayViewModel) {
+    private let reloadToken: Int
+    
+    init(viewModel: TodayViewModel, reloadToken: Int = 0) {
         _viewModel = State(initialValue: viewModel)
+        self.reloadToken = reloadToken
     }
     
     var body: some View {
@@ -65,6 +68,9 @@ struct TodayView: View {
         }
         .task {
             await viewModel.start()
+        }
+        .onChange(of: reloadToken) {
+            Task { await viewModel.start() }
         }
         .onChange(of: scenePhase) { _, newValue in
             if newValue == .active {

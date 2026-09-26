@@ -7,14 +7,9 @@
 
 import AppPreferences
 import Domain
-import Foundation
-import Observation
 
 @MainActor
-@Observable
 final class NotificationPrimingModel {
-    private(set) var isPresented = false
-    
     private let authorizer: any NotificationAuthorizing
     private let syncReminder: SyncReminderUseCase
     private let preferences: AppPreferences
@@ -29,22 +24,16 @@ final class NotificationPrimingModel {
         self.preferences = preferences
     }
     
-    func evaluate() async {
-        guard !preferences.hasShownNotificationPriming,
-              await authorizer.access() == .notDetermined
-        else {
-            return
-        }
+    func shouldPresent() async -> Bool {
+        guard !preferences.hasShownNotificationPriming else { return false }
         
-        isPresented = true
+        return await authorizer.access() == .notDetermined
     }
     
     func allow() async {
-        markPrompted()
+        preferences.markNotificationPrimingShown()
         
         let isGranted = (try? await authorizer.requestAuthorization()) ?? false
-        
-        isPresented = false
         
         guard isGranted else { return }
         
@@ -52,11 +41,6 @@ final class NotificationPrimingModel {
     }
     
     func dismiss() {
-        markPrompted()
-        isPresented = false
-    }
-    
-    private func markPrompted() {
         preferences.markNotificationPrimingShown()
     }
 }

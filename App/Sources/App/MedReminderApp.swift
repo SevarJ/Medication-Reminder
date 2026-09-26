@@ -5,14 +5,15 @@
 //  Created by Sevar Jafarli on 01.08.26.
 //
 
+import AppPreferences
+import DependencyInjection
+import Domain
 import NotificationsKit
 import Persistence
 import SwiftUI
-import UserNotifications
 
 @main
 struct MedReminderApp: App {
-    private let container: AppContainer
     private let router: ReminderRouter
     private let notificationCoordinator: ReminderNotificationCoordinator
     
@@ -20,15 +21,20 @@ struct MedReminderApp: App {
         PersistenceConfigurator.setup()
         NotificationsConfigurator.setup()
         
-        let container = AppContainer()
         let router = ReminderRouter()
+        let medications: any MedicationRepository = resolve()
+        let doseLogs: any DoseLogRepository = resolve()
+        let scheduler: any ReminderScheduling = resolve()
         
-        self.container = container
         self.router = router
         notificationCoordinator = ReminderNotificationCoordinator(
-            recordDose: container.recordDoseForMedication,
-            snoozeReminder: container.snoozeReminder,
-            preferences: container.preferences,
+            recordDose: RecordDoseForMedicationUseCase(
+                medicationRepository: medications,
+                doseLogRepository: doseLogs,
+                recordDose: RecordDoseUseCase(doseLogRepository: doseLogs)
+            ),
+            snoozeReminder: SnoozeReminderUseCase(repository: medications, scheduler: scheduler),
+            preferences: AppPreferences(),
             router: router
         )
         notificationCoordinator.start()
@@ -36,7 +42,7 @@ struct MedReminderApp: App {
     
     var body: some Scene {
         WindowGroup {
-            RootView(container: container, router: router)
+            RootView(router: router)
         }
     }
 }

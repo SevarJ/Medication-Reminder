@@ -20,22 +20,19 @@ let notificationsKit = Module.data(
 
 let onboarding = Feature.feature(
     "Onboarding",
-    interfaceDependencies: [domain, appPreferences],
-    dependencies: [domain, appLocalization, appPreferences, designSystem],
+    dependencies: [domain, appLocalization, appPreferences, dependencyInjection, designSystem],
     testDependencies: [domain, domain.testing, appPreferences]
 )
 
 let dashboard = Feature.feature(
     "Dashboard",
-    interfaceDependencies: [domain],
-    dependencies: [domain, appLocalization, appFormatters, designSystem],
+    dependencies: [domain, appLocalization, appPreferences, appFormatters, dependencyInjection, designSystem],
     testDependencies: [domain, domain.testing]
 )
 
 let settings = Feature.feature(
     "Settings",
-    interfaceDependencies: [domain, appLocalization],
-    dependencies: [domain, appLocalization, appPreferences, appFormatters, designSystem],
+    dependencies: [domain, appLocalization, appPreferences, appFormatters, dependencyInjection, designSystem],
     testDependencies: [domain, domain.testing, appLocalization]
 )
 
@@ -50,7 +47,7 @@ let project = Project(
         disableSynthesizedResourceAccessors: true
     ),
     settings: .project,
-    targets: [.app(dependencies: modules.map(\.dependency) + features.flatMap { [$0.interface, $0.implementation] })]
+    targets: [.app(dependencies: modules.map(\.dependency) + features.map(\.implementation))]
         + modules.flatMap(\.targets)
         + features.flatMap(\.targets),
     schemes: [.app(testTargets: modules.compactMap(\.testTargetName) + features.map(\.testTargetName))]
