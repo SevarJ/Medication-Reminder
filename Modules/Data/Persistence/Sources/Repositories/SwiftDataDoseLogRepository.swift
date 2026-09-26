@@ -7,7 +7,7 @@
 
 import Domain
 import Foundation
-import SwiftData
+internal import SwiftData
 
 @ModelActor
 actor SwiftDataDoseLogRepository: DoseLogRepository {

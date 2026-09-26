@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import SwiftData
+internal import SwiftData
 
 @Model
 final class DoseLogEntity {

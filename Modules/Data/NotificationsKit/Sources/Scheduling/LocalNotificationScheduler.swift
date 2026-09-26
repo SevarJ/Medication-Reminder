@@ -5,10 +5,10 @@
 //  Created by Sevar Jafarli on 12.09.26.
 //
 
-import AppFormatters
+internal import AppFormatters
 import Domain
 import Foundation
-import UserNotifications
+internal import UserNotifications
 
 struct LocalNotificationScheduler: ReminderScheduling {
     private let center: any UserNotificationCenter

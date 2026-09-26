@@ -6,7 +6,7 @@
 //
 
 import Domain
-import SwiftData
+internal import SwiftData
 import Foundation
 
 @ModelActor

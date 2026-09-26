@@ -6,7 +6,7 @@
 //
 
 import Domain
-import SwiftData
+internal import SwiftData
 
 public struct PersistenceStore: Sendable {
     public let medications: any MedicationRepository

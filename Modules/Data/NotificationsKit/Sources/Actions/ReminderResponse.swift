@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import UserNotifications
+public import UserNotifications
 
 public struct ReminderResponse: Sendable, Equatable {
     public enum Action: Sendable, Equatable {

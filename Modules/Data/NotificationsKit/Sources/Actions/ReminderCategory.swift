@@ -5,10 +5,10 @@
 //  Created by Sevar Jafarli on 24.09.26.
 //
 
-import UserNotifications
+public import UserNotifications
 
 public enum ReminderCategory {
-    public static let identifier = "medication.reminder"
+    static let identifier = "medication.reminder"
     
     public static func register(
         snoozeMinutes: Int,

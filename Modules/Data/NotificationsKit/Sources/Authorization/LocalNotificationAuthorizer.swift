@@ -6,7 +6,7 @@
 //
 
 import Domain
-import UserNotifications
+internal import UserNotifications
 
 struct LocalNotificationAuthorizer: NotificationAuthorizing {
     private let center: any UserNotificationCenter

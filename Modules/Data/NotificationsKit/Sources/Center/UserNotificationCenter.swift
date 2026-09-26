@@ -5,7 +5,7 @@
 //  Created by Sevar Jafarli on 09.09.26.
 //
 
-import UserNotifications
+internal import UserNotifications
 
 protocol UserNotificationCenter: Sendable {
     func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool
