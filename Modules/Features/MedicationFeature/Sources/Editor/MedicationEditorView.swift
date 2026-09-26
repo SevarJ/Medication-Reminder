@@ -5,6 +5,7 @@
 //  Created by Sevar Jafarli on 12.09.26.
 //
 
+import AppLocalization
 import DesignSystem
 import Domain
 import SwiftUI
@@ -40,7 +41,7 @@ struct MedicationEditorView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(L10n.Common.cancel, systemImage: "xmark") {
+                    Button(CommonText.cancel, systemImage: "xmark") {
                         onFinish(false)
                     }
                     .labelStyle(.iconOnly)
@@ -48,7 +49,7 @@ struct MedicationEditorView: View {
                 }
                 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(L10n.Common.save) {
+                    Button(CommonText.save) {
                         Task {
                             if await viewModel.save() {
                                 onFinish(true)
@@ -66,7 +67,7 @@ struct MedicationEditorView: View {
                     set: { if !$0 { viewModel.errorMessage = nil } }
                 )
             ) {
-                Button(L10n.Common.ok, role: .cancel) {}
+                Button(CommonText.ok, role: .cancel) {}
             } message: {
                 Text(viewModel.errorMessage ?? "")
             }

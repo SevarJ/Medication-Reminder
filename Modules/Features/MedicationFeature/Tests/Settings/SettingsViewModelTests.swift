@@ -5,6 +5,7 @@
 //  Created by Sevar Jafarli on 24.09.26.
 //
 
+import AppLocalization
 import Domain
 import Foundation
 import Testing
@@ -31,7 +32,6 @@ struct SettingsViewModelTests {
         
         return SettingsViewModel(
             languageStore: store,
-            changeLanguage: ChangeLanguageUseCase(store: store, syncReminder: syncReminder),
             syncReminder: syncReminder,
             authorizer: authorizer,
             appVersion: "1.0 (1)"

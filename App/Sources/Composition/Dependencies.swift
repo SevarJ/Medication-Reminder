@@ -5,6 +5,7 @@
 //  Created by Sevar Jafarli on 12.09.26.
 //
 
+import AppLocalization
 import DIContainer
 import Domain
 import NotificationsKit

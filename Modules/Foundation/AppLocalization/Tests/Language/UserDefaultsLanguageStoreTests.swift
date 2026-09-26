@@ -1,15 +1,15 @@
 //
-//  AppLanguageTests.swift
-//  Domain
+//  UserDefaultsLanguageStoreTests.swift
+//  AppLocalizationTests
 //
 //  Created by Sevar Jafarli on 24.09.26.
 //
 
-@testable import Domain
+@testable import AppLocalization
 import Foundation
 import Testing
 
-struct AppLanguageTests {
+struct UserDefaultsLanguageStoreTests {
     private let defaults: UserDefaults
     
     init() throws {

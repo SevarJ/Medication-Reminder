@@ -5,6 +5,7 @@
 //  Created by Sevar Jafarli on 24.09.26.
 //
 
+import AppLocalization
 import Domain
 import Foundation
 import Observation

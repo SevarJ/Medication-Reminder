@@ -5,6 +5,7 @@
 //  Created by Sevar Jafarli on 24.09.26.
 //
 
+import AppLocalization
 import DesignSystem
 import Domain
 import SwiftUI

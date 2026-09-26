@@ -5,6 +5,7 @@
 //  Created by Sevar Jafarli on 12.09.26.
 //
 
+import AppLocalization
 import Foundation
 
 public extension Dosage {

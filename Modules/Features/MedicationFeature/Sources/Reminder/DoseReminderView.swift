@@ -5,6 +5,7 @@
 //  Created by Sevar Jafarli on 24.09.26.
 //
 
+import AppLocalization
 import DesignSystem
 import Domain
 import SwiftUI
@@ -29,13 +30,13 @@ public struct DoseReminderView: View {
         .padding(Spacing.xl)
         .background(Color.theme.background)
         .alert(
-            L10n.Common.errorTitle,
+            CommonText.errorTitle,
             isPresented: Binding(
                 get: { viewModel.errorMessage != nil },
                 set: { if !$0 { viewModel.errorMessage = nil } }
             )
         ) {
-            Button(L10n.Common.ok, role: .cancel) {}
+            Button(CommonText.ok, role: .cancel) {}
         } message: {
             Text(viewModel.errorMessage ?? "")
         }

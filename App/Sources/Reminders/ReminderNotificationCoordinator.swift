@@ -5,6 +5,7 @@
 //  Created by Sevar Jafarli on 24.09.26.
 //
 
+import AppPreferences
 import Domain
 import NotificationsKit
 import UserNotifications
@@ -27,7 +28,7 @@ final class ReminderNotificationCoordinator: NSObject, UNUserNotificationCenterD
     func start(on center: UNUserNotificationCenter = .current()) {
         center.delegate = self
         
-        ReminderCategory.register(snoozeMinutes: SnoozeDuration.current.minutes, on: center)
+        ReminderCategory.register(snoozeMinutes: SnoozeDuration(minutes: AppPreferences().snoozeMinutes).minutes, on: center)
     }
     
     func userNotificationCenter(
@@ -51,7 +52,7 @@ final class ReminderNotificationCoordinator: NSObject, UNUserNotificationCenterD
         case .snooze:
             try? await snoozeReminder.execute(
                 medicationId: reminder.medicationId,
-                delay: SnoozeDuration.current.interval
+                delay: SnoozeDuration(minutes: AppPreferences().snoozeMinutes).interval
             )
         case .opened:
             await router.open(medicationId: reminder.medicationId, scheduledDate: reminder.scheduledDate)

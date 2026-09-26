@@ -5,6 +5,8 @@
 //  Created by Sevar Jafarli on 24.09.26.
 //
 
+import AppLocalization
+import AppPreferences
 import DesignSystem
 import Domain
 import SwiftUI
@@ -13,8 +15,8 @@ import UIKit
 public struct SettingsView: View {
     @State private var viewModel: SettingsViewModel
     
-    @AppStorage(AppAppearance.storageKey) private var appearance: AppAppearance = .system
-    @AppStorage(SnoozeDuration.storageKey) private var snoozeDuration: SnoozeDuration = .default
+    @AppStorage(PreferenceKey.appearance) private var appearance: AppAppearance = .system
+    @AppStorage(PreferenceKey.snoozeMinutes) private var snoozeDuration: SnoozeDuration = .default
     
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
@@ -38,13 +40,13 @@ public struct SettingsView: View {
             .navigationBarTitleDisplayMode(.inline)
         }
         .alert(
-            L10n.Common.errorTitle,
+            CommonText.errorTitle,
             isPresented: Binding(
                 get: { viewModel.errorMessage != nil },
                 set: { if !$0 { viewModel.errorMessage = nil } }
             )
         ) {
-            Button(L10n.Common.ok, role: .cancel) {}
+            Button(CommonText.ok, role: .cancel) {}
         } message: {
             Text(viewModel.errorMessage ?? "")
         }

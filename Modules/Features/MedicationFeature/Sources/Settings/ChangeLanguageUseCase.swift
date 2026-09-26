@@ -1,15 +1,18 @@
 //
 //  ChangeLanguageUseCase.swift
-//  Domain
+//  MedicationFeature
 //
 //  Created by Sevar Jafarli on 24.09.26.
 //
 
-public struct ChangeLanguageUseCase: Sendable {
+import AppLocalization
+import Domain
+
+struct ChangeLanguageUseCase: Sendable {
     private let store: any LanguagePreferenceStoring
     private let syncReminder: SyncReminderUseCase
     
-    public init(
+    init(
         store: any LanguagePreferenceStoring,
         syncReminder: SyncReminderUseCase
     ) {
@@ -17,7 +20,7 @@ public struct ChangeLanguageUseCase: Sendable {
         self.syncReminder = syncReminder
     }
     
-    public func execute(_ language: AppLanguage) async throws {
+    func execute(_ language: AppLanguage) async throws {
         guard language != store.language else { return }
         
         store.save(language)

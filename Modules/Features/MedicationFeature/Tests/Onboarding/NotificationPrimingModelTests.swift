@@ -5,6 +5,7 @@
 //  Created by Sevar Jafarli on 24.09.26.
 //
 
+import AppPreferences
 import Domain
 import Foundation
 import Testing
@@ -30,7 +31,7 @@ struct NotificationPrimingModelTests {
                 repository: MockMedicationRepository(medications: medications),
                 scheduler: scheduler
             ),
-            defaults: defaults
+            preferences: AppPreferences(defaults: defaults)
         )
     }
     

@@ -1,6 +1,6 @@
 //
 //  AppLanguage.swift
-//  Domain
+//  AppLocalization
 //
 //  Created by Sevar Jafarli on 24.09.26.
 //

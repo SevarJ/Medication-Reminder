@@ -5,36 +5,11 @@
 //  Created by Sevar Jafarli on 24.09.26.
 //
 
+import AppLocalization
 import Domain
 import Foundation
 
 enum L10n {
-    enum Common {
-        static var ok: String {
-            String(localized: "common.ok", defaultValue: "OK", bundle: .module.localized())
-        }
-        
-        static var cancel: String {
-            String(localized: "common.cancel", defaultValue: "Cancel", bundle: .module.localized())
-        }
-        
-        static var save: String {
-            String(localized: "common.save", defaultValue: "Save", bundle: .module.localized())
-        }
-        
-        static var tryAgain: String {
-            String(localized: "common.tryAgain", defaultValue: "Try Again", bundle: .module.localized())
-        }
-        
-        static var delete: String {
-            String(localized: "common.delete", defaultValue: "Delete", bundle: .module.localized())
-        }
-        
-        static var errorTitle: String {
-            String(localized: "common.error.title", defaultValue: "Something Went Wrong", bundle: .module.localized())
-        }
-    }
-    
     enum List {
         static var title: String {
             String(localized: "list.title", defaultValue: "Medications", bundle: .module.localized())

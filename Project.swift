@@ -1,17 +1,24 @@
 import ProjectDescription
 import ProjectDescriptionHelpers
 
+let appLocalization = Module.foundation("AppLocalization", hasResources: true)
+let appPreferences = Module.foundation("AppPreferences")
 let diContainer = Module.foundation("DIContainer")
 let designSystem = Module.foundation("DesignSystem", hasTests: false)
 
-let domain = Module.domain("Domain", hasResources: true)
+let domain = Module.domain("Domain", dependencies: [appLocalization], hasResources: true)
 
 let persistence = Module.data("Persistence", dependencies: [domain], testDependencies: [domain])
-let notificationsKit = Module.data("NotificationsKit", dependencies: [domain], testDependencies: [domain], hasResources: true)
+let notificationsKit = Module.data("NotificationsKit", dependencies: [domain, appLocalization], testDependencies: [domain], hasResources: true)
 
-let medicationFeature = Module.plainFeature("MedicationFeature", dependencies: [domain, designSystem], testDependencies: [domain], hasResources: true)
+let medicationFeature = Module.plainFeature(
+    "MedicationFeature",
+    dependencies: [domain, appLocalization, appPreferences, designSystem],
+    testDependencies: [domain, appLocalization, appPreferences],
+    hasResources: true
+)
 
-let modules = [diContainer, designSystem, domain, persistence, notificationsKit, medicationFeature]
+let modules = [appLocalization, appPreferences, diContainer, designSystem, domain, persistence, notificationsKit, medicationFeature]
 
 let project = Project(
     name: AppConfig.name,

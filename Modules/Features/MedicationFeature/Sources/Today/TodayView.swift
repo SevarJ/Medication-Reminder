@@ -5,6 +5,7 @@
 //  Created by Sevar Jafarli on 24.09.26.
 //
 
+import AppLocalization
 import DesignSystem
 import Domain
 import SwiftUI
@@ -52,13 +53,13 @@ public struct TodayView: View {
             )
         }
         .alert(
-            L10n.Common.errorTitle,
+            CommonText.errorTitle,
             isPresented: Binding(
                 get: { viewModel.errorMessage != nil },
                 set: { if !$0 { viewModel.errorMessage = nil } }
             )
         ) {
-            Button(L10n.Common.ok, role: .cancel) {}
+            Button(CommonText.ok, role: .cancel) {}
         } message: {
             Text(viewModel.errorMessage ?? "")
         }
@@ -247,7 +248,7 @@ public struct TodayView: View {
                 .foregroundStyle(Color.theme.textSecondary)
                 .multilineTextAlignment(.center)
             
-            Button(L10n.Common.tryAgain) {
+            Button(CommonText.tryAgain) {
                 Task { await viewModel.load() }
             }
             .font(Font.theme.rowTitle)

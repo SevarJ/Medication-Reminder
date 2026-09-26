@@ -5,6 +5,7 @@
 //  Created by Sevar Jafarli on 12.09.26.
 //
 
+import AppLocalization
 import DesignSystem
 import Domain
 import SwiftUI
@@ -68,13 +69,13 @@ public struct MedicationListView: View {
             )
         }
         .alert(
-            L10n.Common.errorTitle,
+            CommonText.errorTitle,
             isPresented: Binding(
                 get: { viewModel.errorMessage != nil },
                 set: { if !$0 { viewModel.errorMessage = nil } }
             )
         ) {
-            Button(L10n.Common.ok, role: .cancel) {}
+            Button(CommonText.ok, role: .cancel) {}
         } message: {
             Text(viewModel.errorMessage ?? "")
         }
@@ -122,7 +123,7 @@ public struct MedicationListView: View {
                         Button {
                             pendingDeletion = medication
                         } label: {
-                            Label(L10n.Common.delete, systemImage: "trash")
+                            Label(CommonText.delete, systemImage: "trash")
                         }
                         .tint(Color.theme.danger)
                     }
@@ -138,7 +139,7 @@ public struct MedicationListView: View {
                             Task { await viewModel.delete(medication) }
                         }
                         
-                        Button(L10n.Common.cancel, role: .cancel) {}
+                        Button(CommonText.cancel, role: .cancel) {}
                     } message: {
                         Text(L10n.List.deleteMessage)
                     }
@@ -220,7 +221,7 @@ public struct MedicationListView: View {
                 .foregroundStyle(Color.theme.textSecondary)
                 .multilineTextAlignment(.center)
             
-            Button(L10n.Common.tryAgain) {
+            Button(CommonText.tryAgain) {
                 Task { await viewModel.load() }
             }
             .font(Font.theme.rowTitle)

@@ -5,6 +5,7 @@
 //  Created by Sevar Jafarli on 24.09.26.
 //
 
+import AppLocalization
 import Domain
 import Foundation
 import Observation
@@ -24,13 +25,12 @@ public final class SettingsViewModel {
     
     public init(
         languageStore: any LanguagePreferenceStoring,
-        changeLanguage: ChangeLanguageUseCase,
         syncReminder: SyncReminderUseCase,
         authorizer: any NotificationAuthorizing,
         appVersion: String
     ) {
         self.language = languageStore.language
-        self.changeLanguage = changeLanguage
+        self.changeLanguage = ChangeLanguageUseCase(store: languageStore, syncReminder: syncReminder)
         self.syncReminder = syncReminder
         self.authorizer = authorizer
         self.appVersion = appVersion

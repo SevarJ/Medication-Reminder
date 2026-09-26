@@ -13,15 +13,10 @@ public enum SnoozeDuration: Int, CaseIterable, Identifiable, Sendable {
     case fifteenMinutes = 15
     case thirtyMinutes = 30
     
-    public static let storageKey = "reminder.snoozeMinutes"
     public static let `default`: SnoozeDuration = .tenMinutes
     
-    public static var current: SnoozeDuration {
-        stored(in: .standard)
-    }
-    
-    public static func stored(in defaults: UserDefaults) -> SnoozeDuration {
-        SnoozeDuration(rawValue: defaults.integer(forKey: storageKey)) ?? .default
+    public init(minutes: Int?) {
+        self = minutes.flatMap(SnoozeDuration.init(rawValue:)) ?? .default
     }
     
     public var id: Int { rawValue }

@@ -5,7 +5,9 @@
 //  Created by Sevar Jafarli on 12.09.26.
 //
 
+import AppPreferences
 import DIContainer
+import AppLocalization
 import Domain
 import Foundation
 import MedicationFeature
@@ -52,7 +54,7 @@ enum AppComposition {
             loadDose: services.loadScheduledDose,
             recordDose: services.recordDose,
             snoozeReminder: services.snoozeReminder,
-            snoozeDelay: SnoozeDuration.current.interval
+            snoozeDelay: SnoozeDuration(minutes: AppPreferences().snoozeMinutes).interval
         )
     }
     
@@ -85,7 +87,6 @@ enum AppComposition {
         
         return SettingsViewModel(
             languageStore: services.languageStore,
-            changeLanguage: services.changeLanguage,
             syncReminder: services.syncReminder,
             authorizer: services.authorizer,
             appVersion: appVersion
@@ -134,10 +135,6 @@ private struct Services {
     
     var syncReminder: SyncReminderUseCase {
         SyncReminderUseCase(repository: medications, scheduler: scheduler)
-    }
-    
-    var changeLanguage: ChangeLanguageUseCase {
-        ChangeLanguageUseCase(store: languageStore, syncReminder: syncReminder)
     }
     
     var loadScheduledDose: LoadScheduledDoseUseCase {

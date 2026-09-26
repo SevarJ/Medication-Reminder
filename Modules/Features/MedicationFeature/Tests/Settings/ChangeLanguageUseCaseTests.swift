@@ -1,13 +1,15 @@
 //
 //  ChangeLanguageUseCaseTests.swift
-//  Domain
+//  MedicationFeatureTests
 //
 //  Created by Sevar Jafarli on 24.09.26.
 //
 
-@testable import Domain
+import AppLocalization
+import Domain
 import Foundation
 import Testing
+@testable import MedicationFeature
 
 struct ChangeLanguageUseCaseTests {
     private let store: UserDefaultsLanguageStore

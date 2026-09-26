@@ -5,6 +5,8 @@
 //  Created by Sevar Jafarli on 24.09.26.
 //
 
+import AppLocalization
+import AppPreferences
 import DesignSystem
 import Domain
 import MedicationFeature
@@ -15,8 +17,8 @@ struct RootView: View {
     @Bindable var router: ReminderRouter
     
     @AppStorage(AppLanguage.storageKey) private var language: AppLanguage = .system
-    @AppStorage(AppAppearance.storageKey) private var appearance: AppAppearance = .system
-    @AppStorage(SnoozeDuration.storageKey) private var snoozeDuration: SnoozeDuration = .default
+    @AppStorage(PreferenceKey.appearance) private var appearance: AppAppearance = .system
+    @AppStorage(PreferenceKey.snoozeMinutes) private var snoozeDuration: SnoozeDuration = .default
     @State private var selectedTab: AppTab = .today
     @State private var primingModel = AppComposition.makeNotificationPrimingModel()
     
