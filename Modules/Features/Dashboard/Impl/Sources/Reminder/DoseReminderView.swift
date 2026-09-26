@@ -14,11 +14,10 @@ import SwiftUI
 struct DoseReminderView: View {
     @State private var viewModel: DoseReminderViewModel
     
-    private let onClose: () -> Void
+    @Environment(\.dismiss) private var dismiss
     
-    init(viewModel: DoseReminderViewModel, onClose: @escaping () -> Void) {
+    init(viewModel: DoseReminderViewModel) {
         _viewModel = State(initialValue: viewModel)
-        self.onClose = onClose
     }
     
     var body: some View {
@@ -54,13 +53,15 @@ struct DoseReminderView: View {
                 try? await Task.sleep(for: .milliseconds(900))
             }
             
-            onClose()
+            dismiss()
         }
     }
     
     private var closeButton: some View {
         HStack {
-            Button(action: onClose) {
+            Button {
+                dismiss()
+            } label: {
                 Image(systemName: "xmark")
                     .font(.system(.body, weight: .semibold))
                     .foregroundStyle(Color.theme.textSecondary)

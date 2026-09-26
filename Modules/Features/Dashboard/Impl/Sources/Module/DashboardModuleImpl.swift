@@ -6,12 +6,13 @@
 //
 
 import AppPreferences
+import Dashboard
 import DependencyInjection
 import Domain
 import Foundation
 import SwiftUI
 
-struct DashboardModuleImpl {
+struct DashboardModuleImpl: DashboardModule {
     private let medications: any MedicationRepository
     private let doseLogs: any DoseLogRepository
     private let scheduler: any ReminderScheduling
@@ -33,7 +34,20 @@ struct DashboardModuleImpl {
     }
 
     @MainActor
-    func makeTodayView(reloadToken: Int) -> some View {
+    @ViewBuilder
+    func makeScreen(_ route: DashboardRoute) -> some View {
+        switch route {
+        case .today(let reloadToken):
+            makeTodayView(reloadToken: reloadToken)
+        case .medications:
+            makeMedicationsView()
+        case .doseReminder(let medicationId, let scheduledDate):
+            makeDoseReminderView(medicationId: medicationId, scheduledDate: scheduledDate)
+        }
+    }
+
+    @MainActor
+    private func makeTodayView(reloadToken: Int) -> some View {
         TodayView(
             viewModel: TodayViewModel(
                 loadHistory: LoadDoseHistoryUseCase(medicationRepository: medications, doseLogRepository: doseLogs),
@@ -45,7 +59,7 @@ struct DashboardModuleImpl {
     }
 
     @MainActor
-    func makeMedicationsView() -> some View {
+    private func makeMedicationsView() -> some View {
         MedicationListView(
             viewModel: MedicationListViewModel(
                 repository: medications,
@@ -63,11 +77,7 @@ struct DashboardModuleImpl {
     }
 
     @MainActor
-    func makeDoseReminderView(
-        medicationId: UUID,
-        scheduledDate: Date,
-        onClose: @escaping () -> Void
-    ) -> some View {
+    private func makeDoseReminderView(medicationId: UUID, scheduledDate: Date) -> some View {
         DoseReminderView(
             viewModel: DoseReminderViewModel(
                 medicationId: medicationId,
@@ -76,8 +86,7 @@ struct DashboardModuleImpl {
                 recordDose: recordDose,
                 snoozeReminder: SnoozeReminderUseCase(repository: medications, scheduler: scheduler),
                 snoozeDelay: SnoozeDuration(minutes: preferences.snoozeMinutes).interval
-            ),
-            onClose: onClose
+            )
         )
     }
 

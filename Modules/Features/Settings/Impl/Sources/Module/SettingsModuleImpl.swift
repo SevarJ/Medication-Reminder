@@ -9,9 +9,10 @@ import AppLocalization
 import DependencyInjection
 import Domain
 import Foundation
+import Settings
 import SwiftUI
 
-struct SettingsModuleImpl {
+struct SettingsModuleImpl: SettingsModule {
     private let medications: any MedicationRepository
     private let scheduler: any ReminderScheduling
     private let authorizer: any NotificationAuthorizing
@@ -33,7 +34,15 @@ struct SettingsModuleImpl {
     }
 
     @MainActor
-    func makeSettingsView() -> some View {
+    func makeScreen(_ route: SettingsRoute) -> some View {
+        switch route {
+        case .settings:
+            makeSettingsView()
+        }
+    }
+
+    @MainActor
+    private func makeSettingsView() -> some View {
         SettingsView(
             viewModel: SettingsViewModel(
                 languageStore: languageStore,

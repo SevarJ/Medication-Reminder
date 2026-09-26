@@ -8,9 +8,10 @@
 import AppPreferences
 import DependencyInjection
 import Domain
+import Onboarding
 import SwiftUI
 
-struct OnboardingModuleImpl {
+struct OnboardingModuleImpl: OnboardingModule {
     private let medications: any MedicationRepository
     private let scheduler: any ReminderScheduling
     private let authorizer: any NotificationAuthorizing
@@ -29,13 +30,16 @@ struct OnboardingModuleImpl {
     }
 
     @MainActor
-    func shouldShowNotificationPriming() async -> Bool {
-        await makePrimingModel().shouldPresent()
+    func pendingRoute() async -> OnboardingRoute? {
+        await makePrimingModel().shouldPresent() ? .notificationPriming : nil
     }
 
     @MainActor
-    func makeNotificationPrimingView(onFinish: @escaping () -> Void) -> some View {
-        NotificationPrimingScreen(model: makePrimingModel(), onFinish: onFinish)
+    func makeScreen(_ route: OnboardingRoute) -> some View {
+        switch route {
+        case .notificationPriming:
+            NotificationPrimingScreen(model: makePrimingModel())
+        }
     }
 
     @MainActor
