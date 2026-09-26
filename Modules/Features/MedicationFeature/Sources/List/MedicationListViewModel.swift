@@ -5,6 +5,7 @@
 //  Created by Sevar Jafarli on 12.09.26.
 //
 
+import AppFormatters
 import Domain
 import Foundation
 import Observation
@@ -65,7 +66,7 @@ public final class MedicationListViewModel {
             state = medications.isEmpty ? .empty : .loaded(medications)
         }
         catch {
-            state = .failure(message: message(for: error))
+            state = .failure(message: ErrorFormatter.message(for: error))
         }
     }
     
@@ -77,7 +78,7 @@ public final class MedicationListViewModel {
             notificationAccess = await authorizer.access()
         }
         catch {
-            errorMessage = message(for: error)
+            errorMessage = ErrorFormatter.message(for: error)
         }
         
         await load()
@@ -88,7 +89,7 @@ public final class MedicationListViewModel {
             try await deleteMedication.execute(id: medication.id)
         }
         catch {
-            errorMessage = message(for: error)
+            errorMessage = ErrorFormatter.message(for: error)
         }
         
         await load()
@@ -125,7 +126,7 @@ public final class MedicationListViewModel {
             notificationAccess = await authorizer.access()
         }
         catch {
-            errorMessage = message(for: error)
+            errorMessage = ErrorFormatter.message(for: error)
         }
     }
 }

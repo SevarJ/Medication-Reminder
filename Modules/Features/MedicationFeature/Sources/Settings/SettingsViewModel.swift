@@ -5,6 +5,7 @@
 //  Created by Sevar Jafarli on 24.09.26.
 //
 
+import AppFormatters
 import AppLocalization
 import Domain
 import Foundation
@@ -51,7 +52,7 @@ public final class SettingsViewModel {
         }
         catch {
             self.language = previous
-            errorMessage = message(for: error)
+            errorMessage = ErrorFormatter.message(for: error)
         }
     }
     
@@ -73,7 +74,7 @@ public final class SettingsViewModel {
             await refreshNotificationAccess()
         }
         catch {
-            errorMessage = message(for: error)
+            errorMessage = ErrorFormatter.message(for: error)
         }
     }
 }

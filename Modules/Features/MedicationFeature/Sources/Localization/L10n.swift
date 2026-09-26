@@ -359,48 +359,8 @@ enum L10n {
     }
     
     enum Error {
-        static var nameEmpty: String {
-            String(localized: "error.nameEmpty", defaultValue: "Enter a medication name.", bundle: .module.localized())
-        }
-        
-        static var timeUnselected: String {
-            String(localized: "error.timeUnselected", defaultValue: "Add at least one reminder time.", bundle: .module.localized())
-        }
-        
-        static var invalidTime: String {
-            String(localized: "error.invalidTime", defaultValue: "Choose a valid reminder time.", bundle: .module.localized())
-        }
-        
-        static var duplicateTime: String {
-            String(localized: "error.duplicateTime", defaultValue: "Reminder times must be different from each other.", bundle: .module.localized())
-        }
-        
-        static var weekdayUnselected: String {
-            String(localized: "error.weekdayUnselected", defaultValue: "Select at least one day of the week.", bundle: .module.localized())
-        }
-        
-        static var invalidDateRange: String {
-            String(localized: "error.invalidDateRange", defaultValue: "The end date cannot be earlier than the start date.", bundle: .module.localized())
-        }
-        
-        static var doseOutsideEditableRange: String {
-            String(localized: "error.doseOutsideEditableRange", defaultValue: "Doses can only be updated within the last 7 days.", bundle: .module.localized())
-        }
-        
-        static var medicationNotFound: String {
-            String(localized: "error.medicationNotFound", defaultValue: "This medication no longer exists.", bundle: .module.localized())
-        }
-        
-        static var notificationsOff: String {
-            String(localized: "error.notificationsOff", defaultValue: "Notifications are turned off, so reminders were not scheduled.", bundle: .module.localized())
-        }
-        
         static var invalidAmount: String {
             String(localized: "error.invalidAmount", defaultValue: "Enter a dosage amount greater than zero.", bundle: .module.localized())
-        }
-        
-        static var generic: String {
-            String(localized: "error.generic", defaultValue: "Something went wrong. Please try again.", bundle: .module.localized())
         }
     }
 }

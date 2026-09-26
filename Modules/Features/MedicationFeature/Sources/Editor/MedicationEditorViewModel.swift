@@ -5,6 +5,7 @@
 //  Created by Sevar Jafarli on 12.09.26.
 //
 
+import AppFormatters
 import Domain
 import Foundation
 import Observation
@@ -123,7 +124,7 @@ public final class MedicationEditorViewModel: Identifiable {
             return true
         }
         catch {
-            errorMessage = message(for: error)
+            errorMessage = ErrorFormatter.message(for: error)
             return false
         }
     }

@@ -33,18 +33,12 @@ public struct Module: Sendable {
         )
     }
 
-    public static func domain(
-        _ name: String,
-        dependencies: [Module] = [],
-        hasResources: Bool = false,
-        hasTesting: Bool = false
-    ) -> Module {
+    public static func domain(_ name: String, hasTesting: Bool = false) -> Module {
         Module(
             name: name,
             layer: .domain,
-            dependencies: dependencies,
-            allowedLayers: [.foundation],
-            hasResources: hasResources,
+            dependencies: [],
+            allowedLayers: [],
             hasTesting: hasTesting
         )
     }

@@ -5,6 +5,7 @@
 //  Created by Sevar Jafarli on 24.09.26.
 //
 
+import AppFormatters
 import AppLocalization
 import Domain
 import Foundation
@@ -60,7 +61,7 @@ public final class TodayViewModel {
             }
         }
         catch {
-            state = .failure(message: message(for: error))
+            state = .failure(message: ErrorFormatter.message(for: error))
         }
     }
     
@@ -73,7 +74,7 @@ public final class TodayViewModel {
             replace(try await recordDose.execute(dose, status: status, now: currentDate()))
         }
         catch {
-            errorMessage = message(for: error)
+            errorMessage = ErrorFormatter.message(for: error)
         }
     }
     

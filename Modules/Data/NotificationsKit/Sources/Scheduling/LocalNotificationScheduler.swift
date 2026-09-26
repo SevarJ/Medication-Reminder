@@ -5,6 +5,7 @@
 //  Created by Sevar Jafarli on 12.09.26.
 //
 
+import AppFormatters
 import Domain
 import Foundation
 import UserNotifications

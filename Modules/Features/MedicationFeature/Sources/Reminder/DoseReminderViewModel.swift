@@ -5,6 +5,7 @@
 //  Created by Sevar Jafarli on 24.09.26.
 //
 
+import AppFormatters
 import Domain
 import Foundation
 import Observation
@@ -53,7 +54,7 @@ public final class DoseReminderViewModel: Identifiable {
             state = .loaded(try await loadDose.execute(medicationId: medicationId, scheduledDate: scheduledDate))
         }
         catch {
-            state = .failure(message: message(for: error))
+            state = .failure(message: ErrorFormatter.message(for: error))
         }
     }
     
@@ -65,7 +66,7 @@ public final class DoseReminderViewModel: Identifiable {
             isFinished = true
         }
         catch {
-            errorMessage = message(for: error)
+            errorMessage = ErrorFormatter.message(for: error)
         }
     }
     
@@ -75,7 +76,7 @@ public final class DoseReminderViewModel: Identifiable {
             isFinished = true
         }
         catch {
-            errorMessage = message(for: error)
+            errorMessage = ErrorFormatter.message(for: error)
         }
     }
 }

@@ -1,3 +1,8 @@
 import ProjectDescription
 
-let tuist = Tuist(project: .tuist())
+let tuist = Tuist(
+    inspectOptions: .options(
+        redundantDependencies: .redundantDependencies(ignoreTagsMatching: ["composition-root"])
+    ),
+    project: .tuist()
+)

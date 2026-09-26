@@ -5,6 +5,7 @@
 //  Created by Sevar Jafarli on 12.09.26.
 //
 
+import AppFormatters
 import DesignSystem
 import Domain
 import SwiftUI

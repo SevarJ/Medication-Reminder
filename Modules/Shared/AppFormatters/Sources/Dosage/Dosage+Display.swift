@@ -1,11 +1,12 @@
 //
 //  Dosage+Display.swift
-//  Domain
+//  AppFormatters
 //
 //  Created by Sevar Jafarli on 12.09.26.
 //
 
 import AppLocalization
+import Domain
 import Foundation
 
 public extension Dosage {

@@ -16,7 +16,8 @@ public extension Target {
             entitlements: .file(path: .relativeToRoot("App/MedReminder.entitlements")),
             dependencies: dependencies,
             settings: .app,
-            mergedBinaryType: .automatic
+            mergedBinaryType: .automatic,
+            metadata: .metadata(tags: [AppConfig.compositionRootTag])
         )
     }
 }
