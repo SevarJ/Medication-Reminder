@@ -1,14 +1,17 @@
 import ProjectDescription
 import ProjectDescriptionHelpers
 
-let domain = Module.module("Domain", hasResources: true)
-let diContainer = Module.module("DIContainer")
-let designSystem = Module.module("DesignSystem", hasTests: false)
-let persistence = Module.module("Persistence", dependencies: [domain], testDependencies: [domain])
-let notificationsKit = Module.module("NotificationsKit", dependencies: [domain], testDependencies: [domain], hasResources: true)
-let medicationFeature = Module.module("MedicationFeature", dependencies: [domain, designSystem], testDependencies: [domain], hasResources: true)
+let diContainer = Module.foundation("DIContainer")
+let designSystem = Module.foundation("DesignSystem", hasTests: false)
 
-let modules = [domain, diContainer, designSystem, persistence, notificationsKit, medicationFeature]
+let domain = Module.domain("Domain", hasResources: true)
+
+let persistence = Module.data("Persistence", dependencies: [domain], testDependencies: [domain])
+let notificationsKit = Module.data("NotificationsKit", dependencies: [domain], testDependencies: [domain], hasResources: true)
+
+let medicationFeature = Module.plainFeature("MedicationFeature", dependencies: [domain, designSystem], testDependencies: [domain], hasResources: true)
+
+let modules = [diContainer, designSystem, domain, persistence, notificationsKit, medicationFeature]
 
 let project = Project(
     name: AppConfig.name,
@@ -18,6 +21,6 @@ let project = Project(
         disableSynthesizedResourceAccessors: true
     ),
     settings: .project,
-    targets: [.app(modules: modules)] + modules.flatMap(\.targets),
-    schemes: [.app(modules: modules)]
+    targets: [.app(dependencies: modules.map(\.dependency))] + modules.flatMap(\.targets),
+    schemes: [.app(testTargets: modules.compactMap(\.testTargetName))]
 )

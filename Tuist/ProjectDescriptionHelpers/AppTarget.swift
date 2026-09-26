@@ -1,7 +1,7 @@
 import ProjectDescription
 
 public extension Target {
-    static func app(modules: [Module]) -> Target {
+    static func app(dependencies: [TargetDependency]) -> Target {
         .target(
             name: AppConfig.name,
             destinations: AppConfig.destinations,
@@ -14,7 +14,7 @@ public extension Target {
                 .folder(.relativeToRoot("App/Resources")),
             ],
             entitlements: .file(path: .relativeToRoot("App/MedReminder.entitlements")),
-            dependencies: modules.map(\.dependency),
+            dependencies: dependencies,
             settings: .app,
             mergedBinaryType: .automatic
         )
@@ -22,13 +22,11 @@ public extension Target {
 }
 
 public extension Scheme {
-    static func app(modules: [Module]) -> Scheme {
+    static func app(testTargets: [String]) -> Scheme {
         .scheme(
             name: AppConfig.name,
             buildAction: .buildAction(targets: [.target(AppConfig.name)]),
-            testAction: .targets(
-                modules.compactMap(\.testTargetName).map { .testableTarget(target: .target($0)) }
-            ),
+            testAction: .targets(testTargets.map { .testableTarget(target: .target($0)) }),
             runAction: .runAction(executable: .target(AppConfig.name))
         )
     }

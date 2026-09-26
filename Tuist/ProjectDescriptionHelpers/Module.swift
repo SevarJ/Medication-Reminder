@@ -1,30 +1,145 @@
 import ProjectDescription
 
+public enum Layer: String, Sendable {
+    case foundation = "Foundation"
+    case domain = "Domain"
+    case shared = "Shared"
+    case data = "Data"
+    case features = "Features"
+}
+
 public struct Module: Sendable {
     public let name: String
-    public let dependencies: [TargetDependency]
-    public let testDependencies: [TargetDependency]
-    public let hasResources: Bool
-    public let hasTests: Bool
+    public let layer: Layer
+    let dependencies: [TargetDependency]
+    let testDependencies: [TargetDependency]
+    let hasResources: Bool
+    let hasTests: Bool
+    let hasTesting: Bool
 
-    public static func module(
+    public static func foundation(
         _ name: String,
         dependencies: [Module] = [],
-        testDependencies: [Module] = [],
         hasResources: Bool = false,
         hasTests: Bool = true
     ) -> Module {
         Module(
             name: name,
-            dependencies: dependencies.map(\.dependency),
-            testDependencies: testDependencies.map(\.dependency),
+            layer: .foundation,
+            dependencies: dependencies,
+            allowedLayers: [.foundation],
             hasResources: hasResources,
             hasTests: hasTests
         )
     }
 
+    public static func domain(
+        _ name: String,
+        dependencies: [Module] = [],
+        hasResources: Bool = false,
+        hasTesting: Bool = false
+    ) -> Module {
+        Module(
+            name: name,
+            layer: .domain,
+            dependencies: dependencies,
+            allowedLayers: [.foundation],
+            hasResources: hasResources,
+            hasTesting: hasTesting
+        )
+    }
+
+    public static func shared(
+        _ name: String,
+        dependencies: [Module] = [],
+        testDependencies: [Module] = [],
+        hasResources: Bool = false
+    ) -> Module {
+        Module(
+            name: name,
+            layer: .shared,
+            dependencies: dependencies,
+            testDependencies: testDependencies,
+            allowedLayers: [.foundation, .domain],
+            hasResources: hasResources
+        )
+    }
+
+    public static func data(
+        _ name: String,
+        dependencies: [Module] = [],
+        testDependencies: [Module] = [],
+        hasResources: Bool = false
+    ) -> Module {
+        Module(
+            name: name,
+            layer: .data,
+            dependencies: dependencies,
+            testDependencies: testDependencies,
+            allowedLayers: [.foundation, .domain, .shared],
+            hasResources: hasResources
+        )
+    }
+
+    public static func plainFeature(
+        _ name: String,
+        dependencies: [Module] = [],
+        testDependencies: [Module] = [],
+        hasResources: Bool = false
+    ) -> Module {
+        Module(
+            name: name,
+            layer: .features,
+            dependencies: dependencies,
+            testDependencies: testDependencies,
+            allowedLayers: [.foundation, .domain, .shared],
+            hasResources: hasResources
+        )
+    }
+
+    private init(
+        name: String,
+        layer: Layer,
+        dependencies: [Module],
+        testDependencies: [Module] = [],
+        allowedLayers: Set<Layer>,
+        hasResources: Bool = false,
+        hasTests: Bool = true,
+        hasTesting: Bool = false
+    ) {
+        for dependency in dependencies where !allowedLayers.contains(dependency.layer) {
+            fatalError("\(name) (\(layer.rawValue)) cannot depend on \(dependency.name) (\(dependency.layer.rawValue))")
+        }
+
+        self.name = name
+        self.layer = layer
+        self.dependencies = dependencies.map(\.dependency)
+        self.testDependencies = testDependencies.map(\.dependency)
+        self.hasResources = hasResources
+        self.hasTests = hasTests
+        self.hasTesting = hasTesting
+    }
+
+    private init(testingFor module: Module) {
+        name = "\(module.name)Testing"
+        layer = module.layer
+        dependencies = [module.dependency]
+        testDependencies = []
+        hasResources = false
+        hasTests = false
+        hasTesting = false
+    }
+
     public var dependency: TargetDependency {
         .target(name: name)
+    }
+
+    public var testing: Module {
+        guard hasTesting else {
+            fatalError("\(name) has no testing module")
+        }
+
+        return Module(testingFor: self)
     }
 
     public var testTargetName: String? {
@@ -32,39 +147,76 @@ public struct Module: Sendable {
     }
 
     public var targets: [Target] {
-        hasTests ? [framework, tests] : [framework]
+        [framework]
+            + (hasTesting ? [testingFramework] : [])
+            + (hasTests ? [tests] : [])
+    }
+
+    private var path: String {
+        "Modules/\(layer.rawValue)/\(name)"
     }
 
     private var framework: Target {
+        let sources: BuildableFolder = .folder(.relativeToRoot("\(path)/Sources"))
+        let resources: BuildableFolder = .folder(.relativeToRoot("\(path)/Resources"))
+
+        return .framework(
+            name: name,
+            folders: hasResources ? [sources, resources] : [sources],
+            dependencies: dependencies
+        )
+    }
+
+    private var testingFramework: Target {
+        .framework(
+            name: "\(name)Testing",
+            folders: [.folder(.relativeToRoot("\(path)/Testing"))],
+            dependencies: [dependency]
+        )
+    }
+
+    private var tests: Target {
+        .unitTests(
+            name: "\(name)Tests",
+            folder: .folder(.relativeToRoot("\(path)/Tests")),
+            dependencies: [dependency]
+                + (hasTesting ? [.target(name: "\(name)Testing")] : [])
+                + testDependencies
+        )
+    }
+}
+
+extension Target {
+    static func framework(
+        name: String,
+        folders: [BuildableFolder],
+        dependencies: [TargetDependency]
+    ) -> Target {
         .target(
             name: name,
             destinations: AppConfig.destinations,
             product: .framework,
             bundleId: "\(AppConfig.bundleId).\(name)",
             deploymentTargets: AppConfig.deploymentTargets,
-            buildableFolders: frameworkFolders,
+            buildableFolders: folders,
             dependencies: dependencies,
             settings: .module
         )
     }
 
-    private var frameworkFolders: [BuildableFolder] {
-        let sources: BuildableFolder = .folder(.relativeToRoot("Modules/\(name)/Sources"))
-        let resources: BuildableFolder = .folder(.relativeToRoot("Modules/\(name)/Resources"))
-        return hasResources ? [sources, resources] : [sources]
-    }
-
-    private var tests: Target {
+    static func unitTests(
+        name: String,
+        folder: BuildableFolder,
+        dependencies: [TargetDependency]
+    ) -> Target {
         .target(
-            name: "\(name)Tests",
+            name: name,
             destinations: AppConfig.destinations,
             product: .unitTests,
-            bundleId: "\(AppConfig.bundleId).\(name)Tests",
+            bundleId: "\(AppConfig.bundleId).\(name)",
             deploymentTargets: AppConfig.deploymentTargets,
-            buildableFolders: [
-                .folder(.relativeToRoot("Modules/\(name)/Tests")),
-            ],
-            dependencies: [dependency] + testDependencies,
+            buildableFolders: [folder],
+            dependencies: dependencies,
             settings: .module
         )
     }
