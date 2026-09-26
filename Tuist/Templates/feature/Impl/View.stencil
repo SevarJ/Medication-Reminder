@@ -1,0 +1,32 @@
+//
+//  {{ name }}View.swift
+//  {{ name }}Impl
+//
+//  Created by {{ author }} on {{ date }}.
+//
+
+import SwiftUI
+
+struct {{ name }}View: View {
+    @State private var viewModel: {{ name }}ViewModel
+
+    init(viewModel: {{ name }}ViewModel) {
+        _viewModel = State(initialValue: viewModel)
+    }
+
+    var body: some View {
+        content
+            .task {
+                await viewModel.load()
+            }
+    }
+
+    @ViewBuilder private var content: some View {
+        switch viewModel.state {
+        case .loading:
+            ProgressView()
+        case .loaded:
+            Text(verbatim: "{{ name }}")
+        }
+    }
+}

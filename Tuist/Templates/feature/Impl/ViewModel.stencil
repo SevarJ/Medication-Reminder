@@ -1,0 +1,23 @@
+//
+//  {{ name }}ViewModel.swift
+//  {{ name }}Impl
+//
+//  Created by {{ author }} on {{ date }}.
+//
+
+import Observation
+
+@MainActor
+@Observable
+final class {{ name }}ViewModel {
+    enum State: Equatable {
+        case loading
+        case loaded
+    }
+
+    private(set) var state: State = .loading
+
+    func load() async {
+        state = .loaded
+    }
+}

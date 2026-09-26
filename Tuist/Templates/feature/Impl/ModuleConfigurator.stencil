@@ -1,0 +1,14 @@
+//
+//  {{ name }}ModuleConfigurator.swift
+//  {{ name }}Impl
+//
+//  Created by {{ author }} on {{ date }}.
+//
+
+import {{ name }}
+
+public enum {{ name }}ModuleConfigurator {
+    public static func makeModule() -> some {{ name }}Module {
+        {{ name }}ModuleImpl()
+    }
+}

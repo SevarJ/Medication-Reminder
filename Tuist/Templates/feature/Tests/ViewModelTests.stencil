@@ -1,0 +1,20 @@
+//
+//  {{ name }}ViewModelTests.swift
+//  {{ name }}ImplTests
+//
+//  Created by {{ author }} on {{ date }}.
+//
+
+import Testing
+@testable import {{ name }}Impl
+
+@MainActor
+struct {{ name }}ViewModelTests {
+    @Test func loadFinishesLoading() async {
+        let viewModel = {{ name }}ViewModel()
+
+        await viewModel.load()
+
+        #expect(viewModel.state == .loaded)
+    }
+}

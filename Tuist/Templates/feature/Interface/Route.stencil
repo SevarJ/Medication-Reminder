@@ -1,0 +1,12 @@
+//
+//  {{ name }}Route.swift
+//  {{ name }}
+//
+//  Created by {{ author }} on {{ date }}.
+//
+
+public enum {{ name }}Route: Hashable, Identifiable, Sendable {
+    case main
+
+    public var id: Self { self }
+}

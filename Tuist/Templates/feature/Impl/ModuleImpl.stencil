@@ -1,0 +1,19 @@
+//
+//  {{ name }}ModuleImpl.swift
+//  {{ name }}Impl
+//
+//  Created by {{ author }} on {{ date }}.
+//
+
+import {{ name }}
+import SwiftUI
+
+struct {{ name }}ModuleImpl: {{ name }}Module {
+    @MainActor
+    func makeScreen(_ route: {{ name }}Route) -> some View {
+        switch route {
+        case .main:
+            {{ name }}View(viewModel: {{ name }}ViewModel())
+        }
+    }
+}

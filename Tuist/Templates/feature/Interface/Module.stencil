@@ -1,0 +1,15 @@
+//
+//  {{ name }}Module.swift
+//  {{ name }}
+//
+//  Created by {{ author }} on {{ date }}.
+//
+
+import SwiftUI
+
+public protocol {{ name }}Module {
+    associatedtype Screen: View
+
+    @MainActor
+    func makeScreen(_ route: {{ name }}Route) -> Screen
+}
