@@ -143,11 +143,22 @@ The Xcode project is generated with Tuist, whose version is pinned in `mise.toml
 ```bash
 brew install mise
 mise install
-tuist install
-tuist generate
+make
 ```
 
-`tuist generate` creates `MedReminder.xcworkspace` and opens it. Regenerate only after editing `Project.swift` or the helpers in `Tuist/ProjectDescriptionHelpers`; adding or removing files inside a module does not need it.
+`make` generates `MedReminder.xcworkspace` and opens it. `make generate` does the same without opening Xcode; run it after editing `Project.swift` or the helpers in `Tuist/ProjectDescriptionHelpers`. Adding or removing files inside a module does not need it. `make help` lists the other commands.
+
+## Adding a feature
+
+Declare the feature in `Project.swift`, add it to `features`, and run `make generate`:
+
+```swift
+let profile = Feature.feature("Profile")
+```
+
+For every declared feature that has no folder yet, `make generate` runs the `feature` Tuist template before generating the project. It writes `Modules/Features/Profile` with the `Profile` interface (`ProfileRoute` and the `ProfileModule` protocol), a `ProfileImpl` with the module implementation, its configurator and a starter view and view model, and a test target with a view model test. The template can also be run on its own with `tuist scaffold feature --name Profile`.
+
+The starter code imports only its own interface, so the feature starts with no dependencies. Add a module to `dependencies` or `testDependencies` when the code starts importing it; `make generate` and CI fail on an import that is not declared and on a declared dependency that is not imported.
 
 ## Tests
 
