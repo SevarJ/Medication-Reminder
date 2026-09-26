@@ -3,7 +3,6 @@ import ProjectDescriptionHelpers
 
 let appLocalization = Module.foundation("AppLocalization", hasResources: true)
 let appPreferences = Module.foundation("AppPreferences")
-let diContainer = Module.foundation("DIContainer")
 let designSystem = Module.foundation("DesignSystem", hasTests: false)
 
 let domain = Module.domain("Domain", hasTesting: true)
@@ -34,7 +33,7 @@ let settings = Feature.feature(
     testDependencies: [domain, domain.testing, appLocalization]
 )
 
-let modules = [appLocalization, appPreferences, diContainer, designSystem, domain, appFormatters, persistence, notificationsKit]
+let modules = [appLocalization, appPreferences, designSystem, domain, appFormatters, persistence, notificationsKit]
 let features = [onboarding, dashboard, settings]
 
 let project = Project(

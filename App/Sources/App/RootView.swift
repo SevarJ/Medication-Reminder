@@ -19,6 +19,7 @@ import SettingsImpl
 import SwiftUI
 
 struct RootView: View {
+    let container: AppContainer
     @Bindable var router: ReminderRouter
     
     @AppStorage(AppLanguage.storageKey) private var language: AppLanguage = .system
@@ -26,25 +27,21 @@ struct RootView: View {
     @AppStorage(PreferenceKey.snoozeMinutes) private var snoozeDuration: SnoozeDuration = .default
     @State private var selectedTab: AppTab = .today
     
-    private let dashboard = AppComposition.makeDashboardDependencies()
-    private let settings = AppComposition.makeSettingsDependencies()
-    private let onboarding = AppComposition.makeOnboardingDependencies()
-    
     var body: some View {
         MainTabView(
             selection: $selectedTab,
             revision: router.revision,
-            dashboard: dashboard,
-            settings: settings
+            dashboard: container.dashboard,
+            settings: container.settings
         )
             .id(language)
             .environment(\.locale, language.locale)
             .preferredColorScheme(appearance.colorScheme)
-            .notificationPriming(dependencies: onboarding)
+            .notificationPriming(dependencies: container.onboarding)
             .fullScreenCover(item: $router.doseReminder, onDismiss: router.didClose) { request in
                 DoseReminderScreen(
                     request: request,
-                    dependencies: dashboard,
+                    dependencies: container.dashboard,
                     snoozeDelay: snoozeDuration.interval,
                     onClose: router.close
                 )

@@ -13,22 +13,29 @@ import UserNotifications
 final class ReminderNotificationCoordinator: NSObject, UNUserNotificationCenterDelegate {
     private let recordDose: RecordDoseForMedicationUseCase
     private let snoozeReminder: SnoozeReminderUseCase
+    private let preferences: AppPreferences
     private let router: ReminderRouter
     
     init(
         recordDose: RecordDoseForMedicationUseCase,
         snoozeReminder: SnoozeReminderUseCase,
+        preferences: AppPreferences,
         router: ReminderRouter
     ) {
         self.recordDose = recordDose
         self.snoozeReminder = snoozeReminder
+        self.preferences = preferences
         self.router = router
+    }
+    
+    private var snoozeDuration: SnoozeDuration {
+        SnoozeDuration(minutes: preferences.snoozeMinutes)
     }
     
     func start(on center: UNUserNotificationCenter = .current()) {
         center.delegate = self
         
-        ReminderCategory.register(snoozeMinutes: SnoozeDuration(minutes: AppPreferences().snoozeMinutes).minutes, on: center)
+        ReminderCategory.register(snoozeMinutes: snoozeDuration.minutes, on: center)
     }
     
     func userNotificationCenter(
@@ -52,7 +59,7 @@ final class ReminderNotificationCoordinator: NSObject, UNUserNotificationCenterD
         case .snooze:
             try? await snoozeReminder.execute(
                 medicationId: reminder.medicationId,
-                delay: SnoozeDuration(minutes: AppPreferences().snoozeMinutes).interval
+                delay: snoozeDuration.interval
             )
         case .opened:
             await router.open(medicationId: reminder.medicationId, scheduledDate: reminder.scheduledDate)

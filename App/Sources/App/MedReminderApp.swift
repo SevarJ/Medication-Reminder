@@ -10,20 +10,28 @@ import UserNotifications
 
 @main
 struct MedReminderApp: App {
+    private let container: AppContainer
     private let router: ReminderRouter
     private let notificationCoordinator: ReminderNotificationCoordinator
     
     init() {
+        let container = AppContainer()
         let router = ReminderRouter()
         
+        self.container = container
         self.router = router
-        notificationCoordinator = AppComposition.makeNotificationCoordinator(router: router)
+        notificationCoordinator = ReminderNotificationCoordinator(
+            recordDose: container.recordDoseForMedication,
+            snoozeReminder: container.snoozeReminder,
+            preferences: container.preferences,
+            router: router
+        )
         notificationCoordinator.start()
     }
     
     var body: some Scene {
         WindowGroup {
-            RootView(router: router)
+            RootView(container: container, router: router)
         }
     }
 }
