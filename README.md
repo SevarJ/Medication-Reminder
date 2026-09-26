@@ -6,7 +6,7 @@ A medication reminder and adherence tracker for iOS. Schedule medications, get a
   <a href="https://github.com/SevarJ/Medication-Reminder/actions/workflows/ci.yml"><img src="https://github.com/SevarJ/Medication-Reminder/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/iOS-17%2B-blue" alt="iOS 17+">
   <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
-  <img src="https://img.shields.io/badge/tests-155-brightgreen" alt="155 tests">
+  <img src="https://img.shields.io/badge/tests-163-brightgreen" alt="163 tests">
 </p>
 
 ## Features
@@ -53,18 +53,75 @@ Modular clean architecture generated with [Tuist](https://tuist.dev). Every laye
                            │  Domain   │  entities, use cases, ports    Domain
                            └───────────┘
 
-      AppLocalization · AppPreferences · DesignSystem                   Foundation, usable by every layer
+  AppLocalization · AppPreferences · DependencyInjection · DesignSystem   Foundation, usable by every layer
 ```
 
 - `Domain` depends on nothing: no UI, no localization, no storage.
 - Data modules implement the protocols `Domain` defines. Features never import them and reach data only through use cases.
-- Each feature is an interface target and an `Impl`. The interface holds the feature's contract (the dependencies it needs and its value types), the `Impl` exposes only its entry screens and keeps every view model and view internal. An `Impl` can use other features' interfaces but never another `Impl`.
-- The app target is the only one that knows every `Impl`. `AppContainer` builds the services and use cases once and wires them with plain constructor injection.
+- Every module keeps its code `internal` and makes public only its intended API. Tests use `@testable import`.
+
+### Dependency injection
+
+`DependencyInjection` is a small type-keyed container with no third-party code. Each data module exposes only a configurator that registers its implementations of the `Domain` protocols, and the app runs them at launch:
+
+```swift
+PersistenceConfigurator.setup()
+NotificationsConfigurator.setup()
+```
+
+Features resolve the ports they need from the container and build their own use cases and view models, so the app never wires a feature by hand.
+
+### Feature modules
+
+Each feature is an interface target and an `Impl`. The interface holds a route enum and a module protocol with a single associated screen type:
+
+```swift
+public enum DashboardRoute: Hashable, Identifiable, Sendable {
+    case today(reloadToken: Int)
+    case medications
+    case doseReminder(medicationId: UUID, scheduledDate: Date)
+}
+
+public protocol DashboardModule {
+    associatedtype Screen: View
+
+    @MainActor
+    func makeScreen(_ route: DashboardRoute) -> Screen
+}
+```
+
+Everything in the `Impl` is internal. `DashboardModuleImpl` conforms to the protocol and switches over the route, and the only public symbol is a configurator that returns an opaque module:
+
+```swift
+public enum DashboardModuleConfigurator {
+    public static func makeModule() -> some DashboardModule {
+        DashboardModuleImpl()
+    }
+}
+```
+
+The opaque return type keeps every view and view model hidden without `AnyView`. Adding a screen means adding a route case, so the protocol does not grow. Screens that are presented close themselves with SwiftUI's `dismiss` action. An `Impl` can use other features' interfaces but never another `Impl`.
+
+### Composition root
+
+The app target is the only one that knows every `Impl`. It gets each module from its configurator and passes it to a generic `RootView`, which sees only the interfaces:
+
+```swift
+RootView(
+    router: router,
+    dashboard: DashboardModuleConfigurator.makeModule(),
+    settings: SettingsModuleConfigurator.makeModule(),
+    onboarding: OnboardingModuleConfigurator.makeModule()
+)
+```
+
+Navigation uses route values. Tapping a reminder notification sets `DashboardRoute.doseReminder` on the router, which presents the dose screen, and onboarding reports a pending `OnboardingRoute` that drives the notification priming sheet.
 
 | Layer | Module | Responsibility |
 | --- | --- | --- |
 | Foundation | `AppLocalization` | App language, localized bundle lookup and strings every screen shares |
 | Foundation | `AppPreferences` | UserDefaults keys and typed accessors for app preferences |
+| Foundation | `DependencyInjection` | Type-keyed dependency container |
 | Foundation | `DesignSystem` | Colors, typography, spacing and reusable components |
 | Domain | `Domain` | `Medication`, `MedicationSchedule`, `DoseLog`, use cases, repository and scheduler protocols |
 | Domain | `DomainTesting` | Mocks and factories shared by the test targets |
@@ -91,3 +148,13 @@ tuist generate
 ```
 
 `tuist generate` creates `MedReminder.xcworkspace` and opens it. Regenerate only after editing `Project.swift` or the helpers in `Tuist/ProjectDescriptionHelpers`; adding or removing files inside a module does not need it.
+
+## Tests
+
+Every module has its own test target, and the `MedReminder` scheme runs them all:
+
+```bash
+xcodebuild test -workspace MedReminder.xcworkspace -scheme MedReminder -destination 'platform=iOS Simulator,name=iPhone 17'
+```
+
+CI generates the project, checks the module dependencies, runs the tests and builds the Release app on every push to `main`.
