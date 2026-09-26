@@ -1,0 +1,98 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "priming.action.allow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow Notifications"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildirişlərə icazə ver"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешить уведомления"
+          }
+        }
+      }
+    },
+    "priming.action.notNow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not Now"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İndi yox"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не сейчас"
+          }
+        }
+      }
+    },
+    "priming.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MedReminder uses notifications to remind you when it's time to take your medication. You can mark doses as taken or snooze them right from the notification."
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MedReminder dərman vaxtı çatanda xatırlatmaq üçün bildirişlərdən istifadə edir. Dozanı birbaşa bildirişdən qəbul edildi kimi qeyd edə və ya təxirə sala bilərsiniz."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MedReminder присылает уведомления, когда пора принять лекарство. Отмечайте приём или откладывайте напоминание прямо из уведомления."
+          }
+        }
+      }
+    },
+    "priming.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Never Miss a Dose"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heç bir dozanı buraxmayın"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не пропускайте приём"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

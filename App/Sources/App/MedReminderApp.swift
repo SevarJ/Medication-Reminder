@@ -5,7 +5,6 @@
 //  Created by Sevar Jafarli on 01.08.26.
 //
 
-import MedicationFeature
 import SwiftUI
 import UserNotifications
 

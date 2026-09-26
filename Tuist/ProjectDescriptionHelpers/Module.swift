@@ -5,7 +5,6 @@ public enum Layer: String, Sendable {
     case domain = "Domain"
     case shared = "Shared"
     case data = "Data"
-    case features = "Features"
 }
 
 public struct Module: Sendable {
@@ -68,22 +67,6 @@ public struct Module: Sendable {
         Module(
             name: name,
             layer: .data,
-            dependencies: dependencies,
-            testDependencies: testDependencies,
-            allowedLayers: [.foundation, .domain, .shared],
-            hasResources: hasResources
-        )
-    }
-
-    public static func plainFeature(
-        _ name: String,
-        dependencies: [Module] = [],
-        testDependencies: [Module] = [],
-        hasResources: Bool = false
-    ) -> Module {
-        Module(
-            name: name,
-            layer: .features,
             dependencies: dependencies,
             testDependencies: testDependencies,
             allowedLayers: [.foundation, .domain, .shared],

@@ -13,14 +13,29 @@ let appFormatters = Module.shared("AppFormatters", dependencies: [domain, appLoc
 let persistence = Module.data("Persistence", dependencies: [domain], testDependencies: [domain])
 let notificationsKit = Module.data("NotificationsKit", dependencies: [domain, appLocalization, appFormatters], testDependencies: [domain, domain.testing], hasResources: true)
 
-let medicationFeature = Module.plainFeature(
-    "MedicationFeature",
-    dependencies: [domain, appLocalization, appPreferences, appFormatters, designSystem],
-    testDependencies: [domain, domain.testing, appLocalization, appPreferences],
-    hasResources: true
+let onboarding = Feature.feature(
+    "Onboarding",
+    interfaceDependencies: [domain, appPreferences],
+    dependencies: [domain, appLocalization, appPreferences, designSystem],
+    testDependencies: [domain, domain.testing, appPreferences]
 )
 
-let modules = [appLocalization, appPreferences, diContainer, designSystem, domain, appFormatters, persistence, notificationsKit, medicationFeature]
+let dashboard = Feature.feature(
+    "Dashboard",
+    interfaceDependencies: [domain],
+    dependencies: [domain, appLocalization, appFormatters, designSystem],
+    testDependencies: [domain, domain.testing]
+)
+
+let settings = Feature.feature(
+    "Settings",
+    interfaceDependencies: [domain, appLocalization],
+    dependencies: [domain, appLocalization, appPreferences, appFormatters, designSystem],
+    testDependencies: [domain, domain.testing, appLocalization]
+)
+
+let modules = [appLocalization, appPreferences, diContainer, designSystem, domain, appFormatters, persistence, notificationsKit]
+let features = [onboarding, dashboard, settings]
 
 let project = Project(
     name: AppConfig.name,
@@ -30,6 +45,8 @@ let project = Project(
         disableSynthesizedResourceAccessors: true
     ),
     settings: .project,
-    targets: [.app(dependencies: modules.map(\.dependency))] + modules.flatMap(\.targets),
-    schemes: [.app(testTargets: modules.compactMap(\.testTargetName))]
+    targets: [.app(dependencies: modules.map(\.dependency) + features.flatMap { [$0.interface, $0.implementation] })]
+        + modules.flatMap(\.targets)
+        + features.flatMap(\.targets),
+    schemes: [.app(testTargets: modules.compactMap(\.testTargetName) + features.map(\.testTargetName))]
 )

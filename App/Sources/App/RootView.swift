@@ -7,10 +7,15 @@
 
 import AppLocalization
 import AppPreferences
+import Dashboard
+import DashboardImpl
 import DesignSystem
 import Domain
-import MedicationFeature
 import NotificationsKit
+import Onboarding
+import OnboardingImpl
+import Settings
+import SettingsImpl
 import SwiftUI
 
 struct RootView: View {
@@ -20,29 +25,29 @@ struct RootView: View {
     @AppStorage(PreferenceKey.appearance) private var appearance: AppAppearance = .system
     @AppStorage(PreferenceKey.snoozeMinutes) private var snoozeDuration: SnoozeDuration = .default
     @State private var selectedTab: AppTab = .today
-    @State private var primingModel = AppComposition.makeNotificationPrimingModel()
+    
+    private let dashboard = AppComposition.makeDashboardDependencies()
+    private let settings = AppComposition.makeSettingsDependencies()
+    private let onboarding = AppComposition.makeOnboardingDependencies()
     
     var body: some View {
-        MainTabView(selection: $selectedTab, revision: router.revision)
+        MainTabView(
+            selection: $selectedTab,
+            revision: router.revision,
+            dashboard: dashboard,
+            settings: settings
+        )
             .id(language)
             .environment(\.locale, language.locale)
             .preferredColorScheme(appearance.colorScheme)
-            .sheet(
-                isPresented: Binding(
-                    get: { primingModel.isPresented },
-                    set: { if !$0 { primingModel.dismiss() } }
+            .notificationPriming(dependencies: onboarding)
+            .fullScreenCover(item: $router.doseReminder, onDismiss: router.didClose) { request in
+                DoseReminderScreen(
+                    request: request,
+                    dependencies: dashboard,
+                    snoozeDelay: snoozeDuration.interval,
+                    onClose: router.close
                 )
-            ) {
-                NotificationPrimingView(
-                    onAllow: { Task { await primingModel.allow() } },
-                    onNotNow: { primingModel.dismiss() }
-                )
-            }
-            .fullScreenCover(item: $router.doseReminder, onDismiss: router.didClose) { reminder in
-                DoseReminderView(viewModel: reminder, onClose: router.close)
-            }
-            .task {
-                await primingModel.evaluate()
             }
             .onChange(of: language) {
                 ReminderCategory.register(snoozeMinutes: snoozeDuration.minutes)
@@ -62,34 +67,29 @@ private enum AppTab: Hashable {
 private struct MainTabView: View {
     @Binding var selection: AppTab
     let revision: Int
-    
-    @State private var todayViewModel = AppComposition.makeTodayViewModel()
-    @State private var listViewModel = AppComposition.makeListViewModel()
-    @State private var settingsViewModel = AppComposition.makeSettingsViewModel()
+    let dashboard: DashboardDependencies
+    let settings: SettingsDependencies
     
     var body: some View {
         TabView(selection: $selection) {
-            TodayView(viewModel: todayViewModel)
+            TodayScreen(dependencies: dashboard, reloadToken: revision)
                 .tabItem {
                     Label("Today", systemImage: "checklist")
                 }
                 .tag(AppTab.today)
             
-            MedicationListView(viewModel: listViewModel)
+            MedicationsScreen(dependencies: dashboard)
                 .tabItem {
                     Label("Medications", systemImage: "pills.fill")
                 }
                 .tag(AppTab.medications)
             
-            SettingsView(viewModel: settingsViewModel)
+            SettingsScreen(dependencies: settings)
                 .tabItem {
                     Label("Settings", systemImage: "gearshape.fill")
                 }
                 .tag(AppTab.settings)
         }
         .tint(Color.theme.accent)
-        .onChange(of: revision) {
-            Task { await todayViewModel.start() }
-        }
     }
 }

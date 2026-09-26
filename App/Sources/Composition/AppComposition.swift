@@ -8,25 +8,15 @@
 import AppPreferences
 import DIContainer
 import AppLocalization
+import AppPreferences
+import DIContainer
+import Dashboard
 import Domain
 import Foundation
-import MedicationFeature
+import Onboarding
+import Settings
 
 enum AppComposition {
-    @MainActor
-    static func makeListViewModel(container: DependencyContainer = DependencyContainer()) -> MedicationListViewModel {
-        let services = Services(container: container)
-        
-        return MedicationListViewModel(
-            repository: services.medications,
-            saveMedication: services.saveMedication,
-            deleteMedication: services.deleteMedication,
-            toggleMedicationActive: services.toggleMedicationActive,
-            syncReminder: services.syncReminder,
-            authorizer: services.authorizer
-        )
-    }
-    
     static func makeNotificationCoordinator(
         router: ReminderRouter,
         container: DependencyContainer = DependencyContainer()
@@ -40,56 +30,41 @@ enum AppComposition {
         )
     }
     
-    @MainActor
-    static func makeDoseReminderViewModel(
-        medicationId: UUID,
-        scheduledDate: Date,
-        container: DependencyContainer = DependencyContainer()
-    ) -> DoseReminderViewModel {
+    static func makeDashboardDependencies(container: DependencyContainer = DependencyContainer()) -> DashboardDependencies {
         let services = Services(container: container)
         
-        return DoseReminderViewModel(
-            medicationId: medicationId,
-            scheduledDate: scheduledDate,
-            loadDose: services.loadScheduledDose,
+        return DashboardDependencies(
+            medications: services.medications,
+            saveMedication: services.saveMedication,
+            deleteMedication: services.deleteMedication,
+            toggleMedicationActive: services.toggleMedicationActive,
+            syncReminder: services.syncReminder,
+            loadDoseHistory: services.loadDoseHistory,
             recordDose: services.recordDose,
+            loadScheduledDose: services.loadScheduledDose,
             snoozeReminder: services.snoozeReminder,
-            snoozeDelay: SnoozeDuration(minutes: AppPreferences().snoozeMinutes).interval
+            authorizer: services.authorizer
         )
     }
     
-    @MainActor
-    static func makeNotificationPrimingModel(
-        container: DependencyContainer = DependencyContainer()
-    ) -> NotificationPrimingModel {
+    static func makeSettingsDependencies(container: DependencyContainer = DependencyContainer()) -> SettingsDependencies {
         let services = Services(container: container)
         
-        return NotificationPrimingModel(
-            authorizer: services.authorizer,
-            syncReminder: services.syncReminder
-        )
-    }
-    
-    @MainActor
-    static func makeTodayViewModel(container: DependencyContainer = DependencyContainer()) -> TodayViewModel {
-        let services = Services(container: container)
-        
-        return TodayViewModel(
-            loadHistory: services.loadDoseHistory,
-            recordDose: services.recordDose,
-            saveMedication: services.saveMedication
-        )
-    }
-    
-    @MainActor
-    static func makeSettingsViewModel(container: DependencyContainer = DependencyContainer()) -> SettingsViewModel {
-        let services = Services(container: container)
-        
-        return SettingsViewModel(
+        return SettingsDependencies(
             languageStore: services.languageStore,
             syncReminder: services.syncReminder,
             authorizer: services.authorizer,
             appVersion: appVersion
+        )
+    }
+    
+    static func makeOnboardingDependencies(container: DependencyContainer = DependencyContainer()) -> OnboardingDependencies {
+        let services = Services(container: container)
+        
+        return OnboardingDependencies(
+            authorizer: services.authorizer,
+            syncReminder: services.syncReminder,
+            preferences: AppPreferences()
         )
     }
     
