@@ -16,9 +16,13 @@ public struct Feature: Sendable {
 
         return Feature(
             name: name,
-            dependencies: dependencies.map(\.dependency),
+            dependencies: [.target(name: name)] + dependencies.map(\.dependency),
             testDependencies: testDependencies.map(\.dependency)
         )
+    }
+
+    public var interface: TargetDependency {
+        .target(name: name)
     }
 
     public var implementation: TargetDependency {
@@ -31,6 +35,11 @@ public struct Feature: Sendable {
 
     public var targets: [Target] {
         [
+            .framework(
+                name: name,
+                folders: [.folder(.relativeToRoot("\(path)/Interface/Sources"))],
+                dependencies: []
+            ),
             .framework(
                 name: "\(name)Impl",
                 folders: [

@@ -47,7 +47,7 @@ let project = Project(
         disableSynthesizedResourceAccessors: true
     ),
     settings: .project,
-    targets: [.app(dependencies: modules.map(\.dependency) + features.map(\.implementation))]
+    targets: [.app(dependencies: modules.map(\.dependency) + features.flatMap { [$0.interface, $0.implementation] })]
         + modules.flatMap(\.targets)
         + features.flatMap(\.targets),
     schemes: [.app(testTargets: modules.compactMap(\.testTargetName) + features.map(\.testTargetName))]
