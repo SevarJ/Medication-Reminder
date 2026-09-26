@@ -24,6 +24,9 @@ jobs:
           tuist install
           tuist generate --no-open
 
+      - name: Check module dependencies
+        run: tuist inspect dependencies
+
       - name: Resolve simulator
         id: simulator
         run: |
