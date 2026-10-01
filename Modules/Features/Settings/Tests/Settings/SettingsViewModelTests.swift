@@ -23,6 +23,7 @@ struct SettingsViewModelTests {
     
     private func makeSUT(
         authorizer: MockNotificationAuthorizer = MockNotificationAuthorizer(),
+        authenticator: MockAccountAuthenticator = MockAccountAuthenticator(),
         scheduler: MockReminderScheduler = MockReminderScheduler(),
         medications: [Medication] = []
     ) -> SettingsViewModel {
@@ -35,6 +36,7 @@ struct SettingsViewModelTests {
             languageStore: store,
             syncReminder: syncReminder,
             authorizer: authorizer,
+            authenticator: authenticator,
             appVersion: "1.0 (1)"
         )
     }
@@ -114,5 +116,33 @@ struct SettingsViewModelTests {
         
         #expect(sut.notificationAccess == .denied)
         #expect(await scheduler.scheduledIds.isEmpty)
+    }
+    
+    @Test func startLoadsSignedInAccount() async {
+        let account = makeUserAccount()
+        let sut = makeSUT(authenticator: MockAccountAuthenticator(account: account))
+        
+        await sut.start()
+        
+        #expect(sut.account == account)
+    }
+    
+    @Test func signingOutAsksTheAuthenticator() async {
+        let authenticator = MockAccountAuthenticator(account: makeUserAccount())
+        let sut = makeSUT(authenticator: authenticator)
+        
+        await sut.signOut()
+        
+        #expect(await authenticator.signOutCount == 1)
+        #expect(await authenticator.currentAccount() == nil)
+        #expect(sut.errorMessage == nil)
+    }
+    
+    @Test func failedSignOutShowsAnError() async {
+        let sut = makeSUT(authenticator: MockAccountAuthenticator(account: makeUserAccount(), failsSignOut: true))
+        
+        await sut.signOut()
+        
+        #expect(sut.errorMessage == "Something went wrong. Please try again.")
     }
 }

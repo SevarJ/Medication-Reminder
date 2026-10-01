@@ -51,3 +51,6 @@ iOSInjectionProject/
 # Simulator
 *.dSYM.zip
 *.dSYM
+# Firebase
+GoogleService-Info.plist
+firebase-debug.log

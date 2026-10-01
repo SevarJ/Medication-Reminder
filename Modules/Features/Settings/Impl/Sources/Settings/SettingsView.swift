@@ -29,6 +29,7 @@ struct SettingsView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.xl) {
+                    accountHeader
                     generalSection
                     notificationsSection
                     aboutSection
@@ -194,6 +195,30 @@ struct SettingsView: View {
         guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
         
         openURL(url)
+    }
+    
+    @ViewBuilder
+    private var accountHeader: some View {
+        if let account = viewModel.account {
+            NavigationLink {
+                ProfileView(account: account) {
+                    Task { await viewModel.signOut() }
+                }
+            } label: {
+                VStack(spacing: Spacing.sm) {
+                    AccountAvatar(photoURL: account.photoURL, size: 88)
+                    
+                    if let name = account.displayName ?? account.email {
+                        Text(name)
+                            .font(Font.theme.rowTitle)
+                            .foregroundStyle(Color.theme.textPrimary)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
     }
     
     private var aboutSection: some View {

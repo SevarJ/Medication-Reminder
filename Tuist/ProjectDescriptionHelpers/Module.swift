@@ -12,6 +12,7 @@ public struct Module: Sendable {
     public let layer: Layer
     let dependencies: [TargetDependency]
     let testDependencies: [TargetDependency]
+    let packages: [String]
     let hasResources: Bool
     let hasTests: Bool
     let hasTesting: Bool
@@ -58,9 +59,11 @@ public struct Module: Sendable {
         )
     }
 
+    /// `packages` are products from `Tuist/Package.swift`. Only data modules may link third-party SDKs.
     public static func data(
         _ name: String,
         dependencies: [Module] = [],
+        packages: [String] = [],
         testDependencies: [Module] = [],
         hasResources: Bool = false
     ) -> Module {
@@ -69,6 +72,7 @@ public struct Module: Sendable {
             layer: .data,
             dependencies: dependencies,
             testDependencies: testDependencies,
+            packages: packages,
             allowedLayers: [.foundation, .domain, .shared],
             hasResources: hasResources
         )
@@ -79,6 +83,7 @@ public struct Module: Sendable {
         layer: Layer,
         dependencies: [Module],
         testDependencies: [Module] = [],
+        packages: [String] = [],
         allowedLayers: Set<Layer>,
         hasResources: Bool = false,
         hasTests: Bool = true,
@@ -92,6 +97,7 @@ public struct Module: Sendable {
         self.layer = layer
         self.dependencies = dependencies.map(\.dependency)
         self.testDependencies = testDependencies.map(\.dependency)
+        self.packages = packages
         self.hasResources = hasResources
         self.hasTests = hasTests
         self.hasTesting = hasTesting
@@ -102,6 +108,7 @@ public struct Module: Sendable {
         layer = module.layer
         dependencies = [module.dependency]
         testDependencies = []
+        packages = []
         hasResources = false
         hasTests = false
         hasTesting = false
@@ -140,7 +147,8 @@ public struct Module: Sendable {
         return .framework(
             name: name,
             folders: hasResources ? [sources, resources] : [sources],
-            dependencies: dependencies
+            dependencies: dependencies + packages.map { .external(name: $0) },
+            settings: packages.isEmpty ? .module : .moduleLinkingPackages
         )
     }
 
@@ -167,7 +175,8 @@ extension Target {
     static func framework(
         name: String,
         folders: [BuildableFolder],
-        dependencies: [TargetDependency]
+        dependencies: [TargetDependency],
+        settings: Settings = .module
     ) -> Target {
         .target(
             name: name,
@@ -177,7 +186,7 @@ extension Target {
             deploymentTargets: AppConfig.deploymentTargets,
             buildableFolders: folders,
             dependencies: dependencies,
-            settings: .module
+            settings: settings
         )
     }
 

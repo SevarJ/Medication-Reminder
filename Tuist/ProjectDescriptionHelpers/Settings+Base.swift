@@ -16,6 +16,15 @@ public extension Settings {
         ]
     )
 
+    /// Packages are linked statically into the module, and `-ObjC` keeps the Objective-C
+    /// categories and `+load` methods that Firebase needs from being stripped by the linker.
+    static let moduleLinkingPackages: Settings = .settings(
+        base: [
+            "SWIFT_EMIT_LOC_STRINGS": "YES",
+            "OTHER_LDFLAGS": ["$(inherited)", "-ObjC"],
+        ]
+    )
+
     static let app: Settings = .settings(
         base: [
             "ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",

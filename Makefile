@@ -2,6 +2,9 @@
 
 TUIST ?= mise exec -- tuist
 
+# Google Sign-In's URL scheme lives in the untracked Firebase config, so the manifests get it from the environment
+export TUIST_GOOGLE_SIGN_IN_URL_SCHEME := $(shell /usr/libexec/PlistBuddy -c "Print :REVERSED_CLIENT_ID" App/Resources/GoogleService-Info.plist 2>/dev/null)
+
 help: ## show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
 

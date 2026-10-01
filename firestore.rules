@@ -1,0 +1,93 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: users
+// Document ID: the Firebase Auth uid of the signed-in user
+// Fields:
+//   - displayName: string (optional, 1...100 chars) - name from the Google account
+//   - email: string (optional, must equal the email in the auth token)
+//   - photoURL: string (optional, https URL, up to 2048 chars) - Google avatar
+//   - updatedAt: timestamp (required, server time of the write)
+//
+// The app overwrites this document whenever a session starts and reads only its own.
+// Nothing else is stored in Firestore yet, so every other path is denied.
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidOptionalString(data, field, minLen, maxLen) {
+      return !(field in data) ||
+        (data[field] is string && data[field].size() >= minLen && data[field].size() <= maxLen);
+    }
+
+    // The email is PII and must be the one Firebase Auth verified, not a client-chosen value.
+    function isOwnEmail(data) {
+      return !('email' in data) ||
+        (data.email is string && data.email.size() <= 320 &&
+          'email' in request.auth.token && data.email == request.auth.token.email);
+    }
+
+    function isValidPhotoURL(data) {
+      return !('photoURL' in data) ||
+        (data.photoURL is string && data.photoURL.size() <= 2048 && data.photoURL.matches('^https://.*'));
+    }
+
+    // ===============================================================
+    // Domain Validators (used by both create and update)
+    // ===============================================================
+
+    function isValidUser(data) {
+      return hasOnlyAllowedFields(['displayName', 'email', 'photoURL', 'updatedAt']) &&
+        hasRequiredFields(['updatedAt']) &&
+        isValidOptionalString(data, 'displayName', 1, 100) &&
+        isOwnEmail(data) &&
+        isValidPhotoURL(data) &&
+        data.updatedAt is timestamp &&
+        data.updatedAt == request.time;
+    }
+
+    // ===============================================================
+    // users/{userId}: one private profile per account
+    // ===============================================================
+
+    match /users/{userId} {
+      // Contains PII, so only the owner may read it; no listing across users.
+      allow read: if isOwner(userId);
+
+      allow create, update: if isOwner(userId) && isValidUser(request.resource.data);
+
+      // The app never deletes profiles.
+      allow delete: if false;
+    }
+
+    // Default deny for everything else.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

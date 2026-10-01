@@ -70,6 +70,26 @@ enum L10n {
             String(localized: "settings.snooze.option", defaultValue: "\(minutes) min", bundle: .module.localized())
         }
         
+        static var account: String {
+            String(localized: "settings.section.account", defaultValue: "Account", bundle: .module.localized())
+        }
+        
+        static var profileName: String {
+            String(localized: "settings.account.name", defaultValue: "Name", bundle: .module.localized())
+        }
+        
+        static var profileEmail: String {
+            String(localized: "settings.account.email", defaultValue: "Email", bundle: .module.localized())
+        }
+        
+        static var signOut: String {
+            String(localized: "settings.account.signOut", defaultValue: "Sign Out", bundle: .module.localized())
+        }
+        
+        static var signOutConfirmation: String {
+            String(localized: "settings.account.signOut.confirm", defaultValue: "Sign out of your account?", bundle: .module.localized())
+        }
+        
         static var about: String {
             String(localized: "settings.section.about", defaultValue: "About", bundle: .module.localized())
         }

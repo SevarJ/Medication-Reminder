@@ -18,6 +18,19 @@ let notificationsKit = Module.data(
     hasResources: true
 )
 
+let firebaseKit = Module.data(
+    "FirebaseKit",
+    dependencies: [domain, dependencyInjection],
+    packages: ["FirebaseCore", "FirebaseAuth", "FirebaseFirestore", "GoogleSignIn"],
+    testDependencies: [domain, domain.testing, dependencyInjection]
+)
+
+let account = Feature.feature(
+    "Account",
+    dependencies: [domain, appLocalization, appFormatters, dependencyInjection, designSystem],
+    testDependencies: [domain, domain.testing]
+)
+
 let onboarding = Feature.feature(
     "Onboarding",
     dependencies: [domain, appLocalization, appPreferences, dependencyInjection, designSystem],
@@ -36,8 +49,8 @@ let settings = Feature.feature(
     testDependencies: [domain, domain.testing, appLocalization]
 )
 
-let modules = [appLocalization, appPreferences, dependencyInjection, designSystem, domain, appFormatters, persistence, notificationsKit]
-let features = [onboarding, dashboard, settings]
+let modules = [appLocalization, appPreferences, dependencyInjection, designSystem, domain, appFormatters, persistence, notificationsKit, firebaseKit]
+let features = [account, onboarding, dashboard, settings]
 
 let project = Project(
     name: AppConfig.name,

@@ -16,6 +16,7 @@ import Observation
 final class SettingsViewModel {
     private(set) var language: AppLanguage
     private(set) var notificationAccess: NotificationAccess?
+    private(set) var account: UserAccount?
     var errorMessage: String?
     
     let appVersion: String
@@ -23,22 +24,36 @@ final class SettingsViewModel {
     private let changeLanguage: ChangeLanguageUseCase
     private let syncReminder: SyncReminderUseCase
     private let authorizer: any NotificationAuthorizing
+    private let authenticator: any AccountAuthenticating
     
     init(
         languageStore: any LanguagePreferenceStoring,
         syncReminder: SyncReminderUseCase,
         authorizer: any NotificationAuthorizing,
+        authenticator: any AccountAuthenticating,
         appVersion: String
     ) {
         self.language = languageStore.language
         self.changeLanguage = ChangeLanguageUseCase(store: languageStore, syncReminder: syncReminder)
         self.syncReminder = syncReminder
         self.authorizer = authorizer
+        self.authenticator = authenticator
         self.appVersion = appVersion
     }
     
     func start() async {
+        account = await authenticator.currentAccount()
+        
         await refreshNotificationAccess()
+    }
+    
+    func signOut() async {
+        do {
+            try await authenticator.signOut()
+        }
+        catch {
+            errorMessage = ErrorFormatter.message(for: error)
+        }
     }
     
     func select(_ language: AppLanguage) async {

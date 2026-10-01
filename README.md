@@ -6,11 +6,12 @@ A medication reminder and adherence tracker for iOS. Schedule medications, get a
   <a href="https://github.com/SevarJ/Medication-Reminder/actions/workflows/ci.yml"><img src="https://github.com/SevarJ/Medication-Reminder/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/iOS-17%2B-blue" alt="iOS 17+">
   <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
-  <img src="https://img.shields.io/badge/tests-163-brightgreen" alt="163 tests">
+  <img src="https://img.shields.io/badge/tests-176-brightgreen" alt="176 tests">
 </p>
 
 ## Features
 
+- Sign in with Google through Firebase Authentication, with the account profile saved to Cloud Firestore
 - Add, edit and delete medications with dosage and unit (mg, ml, tablet, drop)
 - Schedule doses every day or on selected weekdays, with an optional start and end date
 - Multiple daily reminder times per medication
@@ -33,25 +34,25 @@ A medication reminder and adherence tracker for iOS. Schedule medications, get a
 Modular clean architecture generated with [Tuist](https://tuist.dev). Every layer is a group of small framework modules, and a module may only depend on the layers below it. The Tuist helpers reject any other dependency when the project is generated, and CI runs `tuist inspect dependencies` to catch implicit or redundant imports.
 
 ```
-                          ┌──────────────┐
-                          │ MedReminder  │  app target, composition root
-                          └──────┬───────┘
-        ┌────────────────────────┼─────────────────────────┐
-┌───────┴────────┐       ┌───────┴────────┐       ┌────────┴───────┐
-│ OnboardingImpl │       │ DashboardImpl  │       │  SettingsImpl  │   Features
-│   Onboarding   │       │   Dashboard    │       │    Settings    │   impl + interface
-└───────┬────────┘       └───────┬────────┘       └────────┬───────┘
-        └────────────────────────┼─────────────────────────┘
-                         ┌───────┴───────┐
-                         │ AppFormatters │                             Shared
-                         └───────┬───────┘
-     ┌─────────────┐             │             ┌──────────────────┐
-     │ Persistence │             │             │ NotificationsKit │    Data
-     └──────┬──────┘             │             └─────────┬────────┘
-            └────────────────────┼───────────────────────┘
-                           ┌─────┴─────┐
-                           │  Domain   │  entities, use cases, ports    Domain
-                           └───────────┘
+                               ┌──────────────┐
+                               │ MedReminder  │  app target, composition root
+                               └──────┬───────┘
+      ┌──────────────────┬────────────┴─────┬──────────────────┐
+┌─────┴───────┐  ┌───────┴────────┐  ┌──────┴────────┐  ┌──────┴───────┐
+│ AccountImpl │  │ OnboardingImpl │  │ DashboardImpl │  │ SettingsImpl │   Features
+│   Account   │  │   Onboarding   │  │   Dashboard   │  │   Settings   │   impl + interface
+└─────┬───────┘  └───────┬────────┘  └──────┬────────┘  └──────┬───────┘
+      └──────────────────┴────────────┬─────┴──────────────────┘
+                              ┌───────┴───────┐
+                              │ AppFormatters │                            Shared
+                              └───────┬───────┘
+┌─────────────┐  ┌──────────────────┐ │  ┌─────────────┐
+│ Persistence │  │ NotificationsKit │ │  │ FirebaseKit │                   Data
+└──────┬──────┘  └─────────┬────────┘ │  └──────┬──────┘
+       └───────────────────┴──────────┼─────────┘
+                                ┌─────┴─────┐
+                                │  Domain   │  entities, use cases, ports    Domain
+                                └───────────┘
 
   AppLocalization · AppPreferences · DependencyInjection · DesignSystem   Foundation, usable by every layer
 ```
@@ -65,9 +66,12 @@ Modular clean architecture generated with [Tuist](https://tuist.dev). Every laye
 `DependencyInjection` is a small type-keyed container with no third-party code. Each data module exposes only a configurator that registers its implementations of the `Domain` protocols, and the app runs them at launch:
 
 ```swift
+FirebaseConfigurator.setup()
 PersistenceConfigurator.setup()
 NotificationsConfigurator.setup()
 ```
+
+Third-party SDKs are linked only by data modules, which list them as `packages` in `Project.swift`. `FirebaseKit` is the only module that imports Firebase or Google Sign-In.
 
 Features resolve the ports they need from the container and build their own use cases and view models, so the app never wires a feature by hand.
 
@@ -109,13 +113,15 @@ The app target is the only one that knows every `Impl`. It gets each module from
 ```swift
 RootView(
     router: router,
+    session: session,
+    account: AccountModuleConfigurator.makeModule(),
     dashboard: DashboardModuleConfigurator.makeModule(),
     settings: SettingsModuleConfigurator.makeModule(),
     onboarding: OnboardingModuleConfigurator.makeModule()
 )
 ```
 
-Navigation uses route values. Tapping a reminder notification sets `DashboardRoute.doseReminder` on the router, which presents the dose screen, and onboarding reports a pending `OnboardingRoute` that drives the notification priming sheet.
+`SessionStore` follows the signed-in account, and `RootView` shows the sign-in screen until there is one. Navigation uses route values. Tapping a reminder notification sets `DashboardRoute.doseReminder` on the router, which presents the dose screen, and onboarding reports a pending `OnboardingRoute` that drives the notification priming sheet.
 
 | Layer | Module | Responsibility |
 | --- | --- | --- |
@@ -123,18 +129,20 @@ Navigation uses route values. Tapping a reminder notification sets `DashboardRou
 | Foundation | `AppPreferences` | UserDefaults keys and typed accessors for app preferences |
 | Foundation | `DependencyInjection` | Type-keyed dependency container |
 | Foundation | `DesignSystem` | Colors, typography, spacing and reusable components |
-| Domain | `Domain` | `Medication`, `MedicationSchedule`, `DoseLog`, use cases, repository and scheduler protocols |
+| Domain | `Domain` | `Medication`, `MedicationSchedule`, `DoseLog`, `UserAccount`, use cases, repository, scheduler and account protocols |
 | Domain | `DomainTesting` | Mocks and factories shared by the test targets |
 | Shared | `AppFormatters` | Dosage text and error messages used by several screens and by notifications |
 | Data | `Persistence` | SwiftData implementations of `MedicationRepository` and `DoseLogRepository` |
 | Data | `NotificationsKit` | `UserNotifications` implementation of reminder scheduling, actions and authorization |
+| Data | `FirebaseKit` | Firebase Authentication with Google Sign-In and the Firestore user profile |
+| Features | `Account` / `AccountImpl` | Sign-in screen |
 | Features | `Onboarding` / `OnboardingImpl` | Notification permission priming |
 | Features | `Dashboard` / `DashboardImpl` | Today, medication list and editor, and the dose reminder screen |
-| Features | `Settings` / `SettingsImpl` | Language, appearance, notification and snooze settings |
+| Features | `Settings` / `SettingsImpl` | Language, appearance, notification and snooze settings, and sign out |
 
 ## Tech stack
 
-Swift 6 with strict concurrency · SwiftUI · SwiftData · UserNotifications · Swift Testing · Tuist
+Swift 6 with strict concurrency · SwiftUI · SwiftData · UserNotifications · Firebase Authentication · Cloud Firestore · Google Sign-In · Swift Testing · Tuist
 
 ## Getting started
 
@@ -147,6 +155,25 @@ make
 ```
 
 `make` generates `MedReminder.xcworkspace` and opens it. `make generate` does the same without opening Xcode; run it after editing `Project.swift` or the helpers in `Tuist/ProjectDescriptionHelpers`. Adding or removing files inside a module does not need it. `make help` lists the other commands.
+
+### Firebase
+
+Sign-in needs the app's Firebase configuration, which is not kept in the repository. Download it once from the Firebase project `medora-af764`, then generate the project again:
+
+```bash
+npx -y firebase-tools@latest apps:sdkconfig IOS --project medora-af764 --out App/Resources/GoogleService-Info.plist
+make generate
+```
+
+`make generate` reads the `REVERSED_CLIENT_ID` from that file and registers it as the app's URL scheme, which Google Sign-In returns through. The project still generates, builds and tests without the file, but the app stops at launch because Firebase has nothing to configure itself with.
+
+`firebase.json` describes the Firestore database, and `firestore.rules` lets each user read and write only their own `users/{uid}` profile. After changing either, deploy with:
+
+```bash
+npx -y firebase-tools@latest deploy --only firestore
+```
+
+Google Sign-In is switched on in the Firebase project itself, so there is nothing to deploy for it.
 
 ## Adding a feature
 

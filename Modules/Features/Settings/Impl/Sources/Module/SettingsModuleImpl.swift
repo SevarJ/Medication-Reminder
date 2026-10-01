@@ -16,6 +16,7 @@ struct SettingsModuleImpl: SettingsModule {
     private let medications: any MedicationRepository
     private let scheduler: any ReminderScheduling
     private let authorizer: any NotificationAuthorizing
+    private let authenticator: any AccountAuthenticating
     private let languageStore: any LanguagePreferenceStoring
     private let bundle: Bundle
 
@@ -23,12 +24,14 @@ struct SettingsModuleImpl: SettingsModule {
         medications: any MedicationRepository = resolve(),
         scheduler: any ReminderScheduling = resolve(),
         authorizer: any NotificationAuthorizing = resolve(),
+        authenticator: any AccountAuthenticating = resolve(),
         languageStore: any LanguagePreferenceStoring = UserDefaultsLanguageStore(),
         bundle: Bundle = .main
     ) {
         self.medications = medications
         self.scheduler = scheduler
         self.authorizer = authorizer
+        self.authenticator = authenticator
         self.languageStore = languageStore
         self.bundle = bundle
     }
@@ -48,6 +51,7 @@ struct SettingsModuleImpl: SettingsModule {
                 languageStore: languageStore,
                 syncReminder: SyncReminderUseCase(repository: medications, scheduler: scheduler),
                 authorizer: authorizer,
+                authenticator: authenticator,
                 appVersion: appVersion
             )
         )

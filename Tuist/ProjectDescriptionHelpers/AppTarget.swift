@@ -8,7 +8,7 @@ public extension Target {
             product: .app,
             bundleId: AppConfig.bundleId,
             deploymentTargets: AppConfig.deploymentTargets,
-            infoPlist: nil,
+            infoPlist: .dictionary(urlTypes),
             buildableFolders: [
                 .folder(.relativeToRoot("App/Sources")),
                 .folder(.relativeToRoot("App/Resources")),
@@ -21,6 +21,15 @@ public extension Target {
         )
     }
 }
+
+private let urlTypes: [String: Plist.Value] = AppConfig.googleSignInURLScheme.isEmpty ? [:] : [
+    "CFBundleURLTypes": [
+        [
+            "CFBundleTypeRole": "Editor",
+            "CFBundleURLSchemes": [.string(AppConfig.googleSignInURLScheme)],
+        ],
+    ],
+]
 
 public extension Scheme {
     static func app(testTargets: [String]) -> Scheme {
