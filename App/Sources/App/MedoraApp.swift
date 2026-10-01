@@ -1,6 +1,6 @@
 //
-//  MedReminderApp.swift
-//  MedReminder
+//  MedoraApp.swift
+//  Medora
 //
 //  Created by Sevar Jafarli on 01.08.26.
 //
@@ -18,7 +18,7 @@ import SettingsImpl
 import SwiftUI
 
 @main
-struct MedReminderApp: App {
+struct MedoraApp: App {
     private let router: ReminderRouter
     private let session: SessionStore
     private let notificationCoordinator: ReminderNotificationCoordinator

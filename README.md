@@ -1,4 +1,4 @@
-# MedReminder
+# Medora
 
 A medication reminder and adherence tracker for iOS. Schedule medications, get a local notification for every dose, mark each one taken or skipped, and review the last seven days.
 
@@ -35,7 +35,7 @@ Modular clean architecture generated with [Tuist](https://tuist.dev). Every laye
 
 ```
                                ┌──────────────┐
-                               │ MedReminder  │  app target, composition root
+                               │    Medora    │  app target, composition root
                                └──────┬───────┘
       ┌──────────────────┬────────────┴─────┬──────────────────┐
 ┌─────┴───────┐  ┌───────┴────────┐  ┌──────┴────────┐  ┌──────┴───────┐
@@ -154,7 +154,7 @@ mise install
 make
 ```
 
-`make` generates `MedReminder.xcworkspace` and opens it. `make generate` does the same without opening Xcode; run it after editing `Project.swift` or the helpers in `Tuist/ProjectDescriptionHelpers`. Adding or removing files inside a module does not need it. `make help` lists the other commands.
+`make` generates `Medora.xcworkspace` and opens it. `make generate` does the same without opening Xcode; run it after editing `Project.swift` or the helpers in `Tuist/ProjectDescriptionHelpers`. Adding or removing files inside a module does not need it. `make help` lists the other commands.
 
 ### Firebase
 
@@ -189,10 +189,10 @@ The starter code imports only its own interface, so the feature starts with no d
 
 ## Tests
 
-Every module has its own test target, and the `MedReminder` scheme runs them all:
+Every module has its own test target, and the `Medora` scheme runs them all:
 
 ```bash
-xcodebuild test -workspace MedReminder.xcworkspace -scheme MedReminder -destination 'platform=iOS Simulator,name=iPhone 17'
+xcodebuild test -workspace Medora.xcworkspace -scheme Medora -destination 'platform=iOS Simulator,name=iPhone 17'
 ```
 
 CI generates the project, checks the module dependencies, runs the tests and builds the Release app on every push to `main`.

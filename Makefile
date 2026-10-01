@@ -15,7 +15,7 @@ generate: ## create features declared in Project.swift that have no files yet, t
 	$(TUIST) inspect dependencies
 
 project: generate ## generate the project and open Xcode
-	open MedReminder.xcworkspace
+	open Medora.xcworkspace
 
 edit: ## edit the Tuist manifests
 	$(TUIST) edit

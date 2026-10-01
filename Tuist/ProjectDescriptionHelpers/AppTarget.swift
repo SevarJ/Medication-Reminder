@@ -13,7 +13,7 @@ public extension Target {
                 .folder(.relativeToRoot("App/Sources")),
                 .folder(.relativeToRoot("App/Resources")),
             ],
-            entitlements: .file(path: .relativeToRoot("App/MedReminder.entitlements")),
+            entitlements: .file(path: .relativeToRoot("App/Medora.entitlements")),
             dependencies: dependencies,
             settings: .app,
             mergedBinaryType: .automatic,

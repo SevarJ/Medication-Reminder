@@ -1,6 +1,6 @@
 //
 //  SessionStore.swift
-//  MedReminder
+//  Medora
 //
 //  Created by Sevar Jafarli on 01.10.26.
 //

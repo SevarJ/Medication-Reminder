@@ -1,6 +1,6 @@
 //
 //  RootView.swift
-//  MedReminder
+//  Medora
 //
 //  Created by Sevar Jafarli on 24.09.26.
 //

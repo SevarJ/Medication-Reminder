@@ -15,7 +15,7 @@ enum L10n {
         }
         
         static var message: String {
-            String(localized: "priming.message", defaultValue: "MedReminder uses notifications to remind you when it's time to take your medication. You can mark doses as taken or snooze them right from the notification.", bundle: .module.localized())
+            String(localized: "priming.message", defaultValue: "Medora uses notifications to remind you when it's time to take your medication. You can mark doses as taken or snooze them right from the notification.", bundle: .module.localized())
         }
         
         static var allow: String {

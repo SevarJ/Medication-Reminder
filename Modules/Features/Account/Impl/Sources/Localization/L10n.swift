@@ -11,7 +11,7 @@ import Foundation
 enum L10n {
     enum SignIn {
         static var title: String {
-            String(localized: "signIn.title", defaultValue: "Welcome to MedReminder", bundle: .module.localized())
+            String(localized: "signIn.title", defaultValue: "Welcome to Medora", bundle: .module.localized())
         }
 
         static var message: String {

@@ -53,19 +53,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "MedReminder uses notifications to remind you when it's time to take your medication. You can mark doses as taken or snooze them right from the notification."
+            "value": "Medora uses notifications to remind you when it's time to take your medication. You can mark doses as taken or snooze them right from the notification."
           }
         },
         "az": {
           "stringUnit": {
             "state": "translated",
-            "value": "MedReminder dərman vaxtı çatanda xatırlatmaq üçün bildirişlərdən istifadə edir. Dozanı birbaşa bildirişdən qəbul edildi kimi qeyd edə və ya təxirə sala bilərsiniz."
+            "value": "Medora dərman vaxtı çatanda xatırlatmaq üçün bildirişlərdən istifadə edir. Dozanı birbaşa bildirişdən qəbul edildi kimi qeyd edə və ya təxirə sala bilərsiniz."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "MedReminder присылает уведомления, когда пора принять лекарство. Отмечайте приём или откладывайте напоминание прямо из уведомления."
+            "value": "Medora присылает уведомления, когда пора принять лекарство. Отмечайте приём или откладывайте напоминание прямо из уведомления."
           }
         }
       }

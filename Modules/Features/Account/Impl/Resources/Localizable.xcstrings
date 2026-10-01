@@ -53,19 +53,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Welcome to MedReminder"
+            "value": "Welcome to Medora"
           }
         },
         "az": {
           "stringUnit": {
             "state": "translated",
-            "value": "MedReminder-ə xoş gəlmisiniz"
+            "value": "Medora-ya xoş gəlmisiniz"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Добро пожаловать в MedReminder"
+            "value": "Добро пожаловать в Medora"
           }
         }
       }
