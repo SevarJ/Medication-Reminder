@@ -70,8 +70,12 @@ final class MedicationEditorViewModel: Identifiable {
         }
     }
     
+    var canAddTime: Bool {
+        times.count < MedicationSchedule.maxTimes
+    }
+    
     func addTime() {
-        guard let time = try? MedTime(hour: 12, minute: 0) else { return }
+        guard canAddTime, let time = try? MedTime(hour: 12, minute: 0) else { return }
         times.append(time)
     }
     

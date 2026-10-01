@@ -50,6 +50,17 @@ struct MedicationEditorViewModelTests {
         #expect(sut.times.count == 1)
     }
     
+    @Test func addingTimesStopsAtTheLimit() async throws {
+        let sut = makeSUT()
+        
+        for _ in 0..<MedicationSchedule.maxTimes + 5 {
+            sut.addTime()
+        }
+        
+        #expect(sut.times.count == MedicationSchedule.maxTimes)
+        #expect(!sut.canAddTime)
+    }
+    
     @Test func savesSelectedWeekdays() async throws {
         let repository = MockMedicationRepository()
         let sut = makeSUT(repository: repository)

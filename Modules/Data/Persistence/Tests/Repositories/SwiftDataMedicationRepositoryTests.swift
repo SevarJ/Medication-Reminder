@@ -11,7 +11,7 @@ import Testing
 @testable import Persistence
 
 struct SwiftDataMedicationRepositoryTests {
-    private func makeSUT() throws -> any MedicationRepository {
+    private func makeSUT() throws -> any MedicationCache {
         try PersistenceFactory.makeStore(inMemory: true).medications
     }
     
@@ -122,5 +122,41 @@ struct SwiftDataMedicationRepositoryTests {
         #expect(throws: PersistenceError.unknownDosageUnit("spoon")) {
             try MedicationMapper.toDomain(entity)
         }
+    }
+    
+    @Test func replaceAllKeepsExactlyTheGivenMedications() async throws {
+        let sut = try makeSUT()
+        let removed = try makeMedication(name: "Removed")
+        let kept = try makeMedication(name: "Kept")
+        let added = try makeMedication(name: "Added")
+        
+        try await sut.save(removed)
+        try await sut.save(kept)
+        try await sut.replaceAll(with: [kept.updating(isActive: false), added])
+        
+        let all = try await sut.fetchAll()
+        
+        #expect(Set(all.map { $0.id }) == [kept.id, added.id])
+        #expect(all.first { $0.id == kept.id }?.isActive == false)
+    }
+    
+    @Test func replaceAllTakesOverTheCreationDate() async throws {
+        let sut = try makeSUT()
+        let medication = try makeMedication()
+        let earlier = Date(timeIntervalSince1970: 1_700_000_000)
+        
+        try await sut.save(medication)
+        try await sut.replaceAll(with: [try makeMedication(id: medication.id, createdDate: earlier)])
+        
+        #expect(try await sut.fetch(id: medication.id).createdDate == earlier)
+    }
+    
+    @Test func replaceAllWithNothingEmptiesTheCache() async throws {
+        let sut = try makeSUT()
+        
+        try await sut.save(try makeMedication())
+        try await sut.replaceAll(with: [])
+        
+        #expect(try await sut.fetchAll().isEmpty)
     }
 }

@@ -9,8 +9,8 @@ import Domain
 internal import SwiftData
 
 struct PersistenceStore: Sendable {
-    let medications: any MedicationRepository
-    let doseLogs: any DoseLogRepository
+    let medications: any MedicationCache
+    let doseLogs: any DoseLogCache
 }
 
 enum PersistenceFactory {

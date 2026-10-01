@@ -8,6 +8,9 @@
 import Foundation
 
 public struct MedicationSchedule: Sendable, Equatable, Hashable {
+    /// One reminder for every hour of the day. The server refuses a medication with more.
+    public static let maxTimes = 24
+    
     public let times: [MedTime]
     public let recurrence: Recurrence
     public let startDate: Date

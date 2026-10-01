@@ -12,6 +12,7 @@ actor MockUserNotificationCenter: UserNotificationCenter {
     private(set) var added: [ReminderRequest] = []
     private(set) var removedIdentifiers: [String] = []
     private(set) var requestedOptions: UNAuthorizationOptions?
+    private(set) var removeAllDeliveredCount = 0
     
     private var status: UNAuthorizationStatus
     private let authorizationResult: Bool
@@ -45,5 +46,9 @@ actor MockUserNotificationCenter: UserNotificationCenter {
     func removePending(identifiers: [String]) async {
         removedIdentifiers.append(contentsOf: identifiers)
         added.removeAll { identifiers.contains($0.identifier) }
+    }
+    
+    func removeAllDelivered() async {
+        removeAllDeliveredCount += 1
     }
 }

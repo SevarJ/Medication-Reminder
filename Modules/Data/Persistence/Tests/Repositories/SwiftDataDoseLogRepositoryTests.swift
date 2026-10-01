@@ -13,7 +13,7 @@ import Testing
 struct SwiftDataDoseLogRepositoryTests {
     private let calendar = Calendar(identifier: .gregorian)
     
-    private func makeSUT() throws -> any DoseLogRepository {
+    private func makeSUT() throws -> any DoseLogCache {
         try PersistenceFactory.makeStore(inMemory: true).doseLogs
     }
     
@@ -115,6 +115,35 @@ struct SwiftDataDoseLogRepositoryTests {
         
         #expect(stored.count == 1)
         #expect(stored.first?.medicationId == second)
+    }
+    
+    @Test func replaceAllKeepsExactlyTheGivenLogs() async throws {
+        let sut = try makeSUT()
+        let removed = makeLog(scheduledDate: try date(day: 16, hour: 8))
+        let kept = makeLog(scheduledDate: try date(day: 16, hour: 9))
+        let added = makeLog(scheduledDate: try date(day: 16, hour: 10))
+        let skipped = DoseLog(
+            id: kept.id,
+            medicationId: kept.medicationId,
+            scheduledDate: kept.scheduledDate,
+            status: .skipped,
+            recordedAt: kept.recordedAt
+        )
+        
+        try await sut.save(removed)
+        try await sut.save(kept)
+        try await sut.replaceAll(with: [skipped, added])
+        
+        #expect(try await sut.fetch(from: try date(day: 16, hour: 0), to: try date(day: 17, hour: 0)) == [skipped, added])
+    }
+    
+    @Test func replaceAllWithNothingEmptiesTheCache() async throws {
+        let sut = try makeSUT()
+        
+        try await sut.save(makeLog(scheduledDate: try date(day: 16)))
+        try await sut.replaceAll(with: [])
+        
+        #expect(try await sut.fetch(from: try date(day: 16, hour: 0), to: try date(day: 17, hour: 0)).isEmpty)
     }
     
     @Test func mapperRejectsUnknownStatus() async throws {

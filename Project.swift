@@ -18,6 +18,8 @@ let notificationsKit = Module.data(
     hasResources: true
 )
 
+let dataSync = Module.data("DataSync", dependencies: [domain, dependencyInjection], testDependencies: [domain, domain.testing, dependencyInjection])
+
 let firebaseKit = Module.data(
     "FirebaseKit",
     dependencies: [domain, dependencyInjection],
@@ -49,7 +51,7 @@ let settings = Feature.feature(
     testDependencies: [domain, domain.testing, appLocalization]
 )
 
-let modules = [appLocalization, appPreferences, dependencyInjection, designSystem, domain, appFormatters, persistence, notificationsKit, firebaseKit]
+let modules = [appLocalization, appPreferences, dependencyInjection, designSystem, domain, appFormatters, persistence, notificationsKit, firebaseKit, dataSync]
 let features = [account, onboarding, dashboard, settings]
 
 let project = Project(

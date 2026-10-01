@@ -10,7 +10,7 @@ import Foundation
 internal import SwiftData
 
 @ModelActor
-actor SwiftDataDoseLogRepository: DoseLogRepository {
+actor SwiftDataDoseLogRepository: DoseLogCache {
     func fetch(from: Date, to: Date) async throws -> [DoseLog] {
         let descriptor = FetchDescriptor<DoseLogEntity>(
             predicate: #Predicate { $0.scheduledDate >= from && $0.scheduledDate < to },
@@ -44,6 +44,26 @@ actor SwiftDataDoseLogRepository: DoseLogRepository {
             model: DoseLogEntity.self,
             where: #Predicate { $0.medicationId == medicationId }
         )
+        
+        try modelContext.save()
+    }
+    
+    func replaceAll(with logs: [DoseLog]) async throws {
+        var stale = Dictionary(
+            try modelContext.fetch(FetchDescriptor<DoseLogEntity>()).map { ($0.id, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        
+        for log in logs {
+            if let existing = stale.removeValue(forKey: log.id) {
+                DoseLogMapper.apply(log, to: existing)
+            }
+            else {
+                modelContext.insert(DoseLogMapper.toEntity(log))
+            }
+        }
+        
+        stale.values.forEach { modelContext.delete($0) }
         
         try modelContext.save()
     }

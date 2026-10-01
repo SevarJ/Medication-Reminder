@@ -250,21 +250,23 @@ struct MedicationEditorView: View {
                     .padding(Spacing.lg)
                 }
                 
-                RowSeparator()
-                
-                Button {
-                    viewModel.addTime()
-                } label: {
-                    HStack(spacing: Spacing.sm) {
-                        Image(systemName: "plus.circle.fill")
-                        Text(L10n.Editor.addTime)
+                if viewModel.canAddTime {
+                    RowSeparator()
+                    
+                    Button {
+                        viewModel.addTime()
+                    } label: {
+                        HStack(spacing: Spacing.sm) {
+                            Image(systemName: "plus.circle.fill")
+                            Text(L10n.Editor.addTime)
+                        }
+                        .font(Font.theme.rowTitle)
+                        .foregroundStyle(Color.theme.accent)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(Spacing.lg)
                     }
-                    .font(Font.theme.rowTitle)
-                    .foregroundStyle(Color.theme.accent)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(Spacing.lg)
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
         }
     }

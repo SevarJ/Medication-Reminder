@@ -10,7 +10,7 @@ internal import SwiftData
 import Foundation
 
 @ModelActor
-actor SwiftDataMedicationRepository: MedicationRepository {
+actor SwiftDataMedicationRepository: MedicationCache {
     func fetchAll() async throws -> [Domain.Medication] {
         let descriptor = FetchDescriptor<MedicationEntity>(sortBy: [SortDescriptor(\.createdDate)])
         let data = try modelContext.fetch(descriptor)
@@ -44,6 +44,27 @@ actor SwiftDataMedicationRepository: MedicationRepository {
     func delete(id: UUID) async throws {
         guard let data = try entity(id: id) else { return }
         modelContext.delete(data)
+        try modelContext.save()
+    }
+    
+    func replaceAll(with medications: [Domain.Medication]) async throws {
+        var stale = Dictionary(
+            try modelContext.fetch(FetchDescriptor<MedicationEntity>()).map { ($0.id, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        
+        for medication in medications {
+            if let existing = stale.removeValue(forKey: medication.id) {
+                MedicationMapper.apply(medication, to: existing)
+                existing.createdDate = medication.createdDate
+            }
+            else {
+                modelContext.insert(MedicationMapper.toEntity(medication))
+            }
+        }
+        
+        stale.values.forEach { modelContext.delete($0) }
+        
         try modelContext.save()
     }
     

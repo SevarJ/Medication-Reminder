@@ -6,12 +6,15 @@ A medication reminder and adherence tracker for iOS. Schedule medications, get a
   <a href="https://github.com/SevarJ/Medication-Reminder/actions/workflows/ci.yml"><img src="https://github.com/SevarJ/Medication-Reminder/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/iOS-17%2B-blue" alt="iOS 17+">
   <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
-  <img src="https://img.shields.io/badge/tests-176-brightgreen" alt="176 tests">
+  <img src="https://img.shields.io/badge/tests-215-brightgreen" alt="215 tests">
 </p>
 
 ## Features
 
 - Sign in with Google through Firebase Authentication, with the account profile saved to Cloud Firestore
+- Medications and dose history are stored in Cloud Firestore under the account and follow it to any device it signs in on
+- An on-device cache keeps every screen and reminder working offline; changes made offline are sent when the connection returns
+- Signing out removes the cache, the pending reminders and Firestore's offline copy from the device, and leaves the account's data on the server
 - Add, edit and delete medications with dosage and unit (mg, ml, tablet, drop)
 - Schedule doses every day or on selected weekdays, with an optional start and end date
 - Multiple daily reminder times per medication
@@ -24,7 +27,6 @@ A medication reminder and adherence tracker for iOS. Schedule medications, get a
 - Animated, haptic dose check-off with swipe to take or skip
 - Per-medication on/off switch that cancels or restores its reminders
 - Warning banner when notification permission is missing, with reminders re-synced as soon as it is granted
-- Local persistence with SwiftData
 - Available in English, Azerbaijani and Russian, including plural-aware dosage text
 - Settings screen with an in-app language switch that applies instantly and re-localizes scheduled reminders
 - Light and dark appearance that follows the system or is chosen in Settings, Dynamic Type support
@@ -46,10 +48,10 @@ Modular clean architecture generated with [Tuist](https://tuist.dev). Every laye
                               ┌───────┴───────┐
                               │ AppFormatters │                            Shared
                               └───────┬───────┘
-┌─────────────┐  ┌──────────────────┐ │  ┌─────────────┐
-│ Persistence │  │ NotificationsKit │ │  │ FirebaseKit │                   Data
-└──────┬──────┘  └─────────┬────────┘ │  └──────┬──────┘
-       └───────────────────┴──────────┼─────────┘
+┌─────────────┐  ┌──────────────────┐ │  ┌─────────────┐  ┌──────────┐
+│ Persistence │  │ NotificationsKit │ │  │ FirebaseKit │  │ DataSync │    Data
+└──────┬──────┘  └─────────┬────────┘ │  └──────┬──────┘  └─────┬────┘
+       └───────────────────┴──────────┼─────────┴───────────────┘
                                 ┌─────┴─────┐
                                 │  Domain   │  entities, use cases, ports    Domain
                                 └───────────┘
@@ -69,11 +71,23 @@ Modular clean architecture generated with [Tuist](https://tuist.dev). Every laye
 FirebaseConfigurator.setup()
 PersistenceConfigurator.setup()
 NotificationsConfigurator.setup()
+DataSyncConfigurator.setup()
 ```
 
 Third-party SDKs are linked only by data modules, which list them as `packages` in `Project.swift`. `FirebaseKit` is the only module that imports Firebase or Google Sign-In.
 
 Features resolve the ports they need from the container and build their own use cases and view models, so the app never wires a feature by hand.
+
+### Data sync
+
+Firestore holds the account's data and SwiftData is a cache of it. Data modules cannot depend on each other, so each side implements a `Domain` port and `DataSync` joins them:
+
+- `Persistence` implements `MedicationCache` and `DoseLogCache`, `FirebaseKit` implements `MedicationRemoteStore` and `DoseLogRemoteStore`.
+- `DataSync` registers the `MedicationRepository` and `DoseLogRepository` the features use. Reads come from the cache. A write goes to the cache and then to Firestore, which queues it while the device is offline.
+- `RefreshAccountDataUseCase` replaces the cache with what the server holds and reschedules the reminders that changed. `SessionStore` runs it when a session starts and when the app returns from the background. Offline it fails and the cache stays as it is. Only the last 14 days of dose logs are cached; older ones stay on the server.
+- `ClearLocalDataUseCase` runs on sign-out and on every launch that finds nobody signed in.
+
+Documents live under the account: `users/{uid}/medications/{medicationId}` and `users/{uid}/doseLogs/{logId}`.
 
 ### Feature modules
 
@@ -82,7 +96,7 @@ Each feature is an interface target and an `Impl`. The interface holds a route e
 ```swift
 public enum DashboardRoute: Hashable, Identifiable, Sendable {
     case today(reloadToken: Int)
-    case medications
+    case medications(reloadToken: Int)
     case doseReminder(medicationId: UUID, scheduledDate: Date)
 }
 
@@ -129,12 +143,13 @@ RootView(
 | Foundation | `AppPreferences` | UserDefaults keys and typed accessors for app preferences |
 | Foundation | `DependencyInjection` | Type-keyed dependency container |
 | Foundation | `DesignSystem` | Colors, typography, spacing and reusable components |
-| Domain | `Domain` | `Medication`, `MedicationSchedule`, `DoseLog`, `UserAccount`, use cases, repository, scheduler and account protocols |
+| Domain | `Domain` | `Medication`, `MedicationSchedule`, `DoseLog`, `UserAccount`, use cases, repository, cache, remote store, scheduler and account protocols |
 | Domain | `DomainTesting` | Mocks and factories shared by the test targets |
 | Shared | `AppFormatters` | Dosage text and error messages used by several screens and by notifications |
-| Data | `Persistence` | SwiftData implementations of `MedicationRepository` and `DoseLogRepository` |
+| Data | `Persistence` | SwiftData cache of medications and dose logs |
 | Data | `NotificationsKit` | `UserNotifications` implementation of reminder scheduling, actions and authorization |
-| Data | `FirebaseKit` | Firebase Authentication with Google Sign-In and the Firestore user profile |
+| Data | `FirebaseKit` | Firebase Authentication with Google Sign-In, the Firestore user profile, and the Firestore medication and dose log stores |
+| Data | `DataSync` | The repositories features use: reads from the cache, writes to the cache and Firestore |
 | Features | `Account` / `AccountImpl` | Sign-in screen |
 | Features | `Onboarding` / `OnboardingImpl` | Notification permission priming |
 | Features | `Dashboard` / `DashboardImpl` | Today, medication list and editor, and the dose reminder screen |
@@ -167,7 +182,7 @@ make generate
 
 `make generate` reads the `REVERSED_CLIENT_ID` from that file and registers it as the app's URL scheme, which Google Sign-In returns through. The project still generates, builds and tests without the file, but the app stops at launch because Firebase has nothing to configure itself with.
 
-`firebase.json` describes the Firestore database, and `firestore.rules` lets each user read and write only their own `users/{uid}` profile. After changing either, deploy with:
+`firebase.json` describes the Firestore database, and `firestore.rules` lets each user read and write only their own `users/{uid}` profile and the medications and dose logs under it, and checks the shape of every document written. After changing either, deploy with:
 
 ```bash
 npx -y firebase-tools@latest deploy --only firestore

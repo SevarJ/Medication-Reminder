@@ -8,17 +8,19 @@
 import Domain
 import Foundation
 
-public actor MockMedicationRepository: MedicationRepository {
+public actor MockMedicationRepository: MedicationCache {
     public private(set) var medications: [Medication]
     public private(set) var savedMedications: [Medication] = []
     public private(set) var deletedIds: [UUID] = []
 
     private let fetchAllFails: Bool
+    private let replaceAllFails: Bool
     private var fetchAllHook: (@Sendable () async -> Void)?
 
-    public init(medications: [Medication] = [], fetchAllFails: Bool = false) {
+    public init(medications: [Medication] = [], fetchAllFails: Bool = false, replaceAllFails: Bool = false) {
         self.medications = medications
         self.fetchAllFails = fetchAllFails
+        self.replaceAllFails = replaceAllFails
     }
 
     public func setFetchAllHook(_ hook: @escaping @Sendable () async -> Void) {
@@ -52,5 +54,13 @@ public actor MockMedicationRepository: MedicationRepository {
     public func delete(id: UUID) async throws {
         deletedIds.append(id)
         medications.removeAll { $0.id == id }
+    }
+
+    public func replaceAll(with medications: [Medication]) async throws {
+        if replaceAllFails {
+            throw PersistenceFailure()
+        }
+
+        self.medications = medications
     }
 }

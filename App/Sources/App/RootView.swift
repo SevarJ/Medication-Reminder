@@ -30,6 +30,9 @@ struct RootView<Account: AccountModule, Dashboard: DashboardModule, Settings: Se
     @AppStorage(PreferenceKey.snoozeMinutes) private var snoozeDuration: SnoozeDuration = .default
     @State private var selectedTab: AppTab = .today
     @State private var onboardingRoute: OnboardingRoute?
+    @State private var wasInBackground = false
+    
+    @Environment(\.scenePhase) private var scenePhase
     
     var body: some View {
         content
@@ -46,6 +49,9 @@ struct RootView<Account: AccountModule, Dashboard: DashboardModule, Settings: Se
                     selectedTab = .today
                 }
             }
+            .onChange(of: scenePhase) {
+                refreshAfterBackground()
+            }
             .onChange(of: language) {
                 ReminderCategory.register(snoozeMinutes: snoozeDuration.minutes)
             }
@@ -58,13 +64,19 @@ struct RootView<Account: AccountModule, Dashboard: DashboardModule, Settings: Se
     private var content: some View {
         switch session.state {
         case .loading:
-            Color.theme.background
-                .ignoresSafeArea()
+            ProgressView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.theme.background)
         case .signedOut:
             account.makeScreen(.signIn)
                 .id(language)
         case .signedIn:
-            MainTabView(dashboard: dashboard, settings: settings, selection: $selectedTab, revision: router.revision)
+            MainTabView(
+                dashboard: dashboard,
+                settings: settings,
+                selection: $selectedTab,
+                revision: router.revision + session.revision
+            )
                 .id(language)
                 .sheet(item: $onboardingRoute) { route in
                     onboarding.makeScreen(route)
@@ -75,6 +87,20 @@ struct RootView<Account: AccountModule, Dashboard: DashboardModule, Settings: Se
                 .task {
                     onboardingRoute = await onboarding.pendingRoute()
                 }
+        }
+    }
+    
+    /// Picks up changes made on another device while this one was in the background.
+    private func refreshAfterBackground() {
+        switch scenePhase {
+        case .background:
+            wasInBackground = true
+        case .active where wasInBackground:
+            wasInBackground = false
+            
+            Task { await session.refresh() }
+        default:
+            break
         }
     }
 }
@@ -99,7 +125,7 @@ private struct MainTabView<Dashboard: DashboardModule, Settings: SettingsModule>
                 }
                 .tag(AppTab.today)
             
-            dashboard.makeScreen(.medications)
+            dashboard.makeScreen(.medications(reloadToken: revision))
                 .tabItem {
                     Label("Medications", systemImage: "pills.fill")
                 }

@@ -19,8 +19,11 @@ struct MedicationListView: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
     
-    init(viewModel: MedicationListViewModel) {
+    private let reloadToken: Int
+    
+    init(viewModel: MedicationListViewModel, reloadToken: Int = 0) {
         _viewModel = State(initialValue: viewModel)
+        self.reloadToken = reloadToken
     }
     
     var body: some View {
@@ -81,6 +84,9 @@ struct MedicationListView: View {
         }
         .task {
             await viewModel.start()
+        }
+        .onChange(of: reloadToken) {
+            Task { await viewModel.load() }
         }
         .onChange(of: scenePhase) { _, newValue in
             if newValue == .active {

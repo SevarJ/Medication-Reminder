@@ -8,4 +8,5 @@
 public enum AccountError: Error, Equatable, Sendable {
     case signInCancelled
     case signInFailed
+    case notSignedIn
 }

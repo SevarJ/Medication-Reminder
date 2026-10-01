@@ -55,6 +55,21 @@ struct LocalNotificationSchedulerTests {
         #expect(remaining.first?.medicationId == second.id)
     }
     
+    @Test func cancelAllRemovesEveryPendingAndDeliveredReminder() async throws {
+        let center = MockUserNotificationCenter()
+        let sut = LocalNotificationScheduler(center: center)
+        let first = try makeMedication(times: [(9, 0)])
+        let second = try makeMedication(times: [(12, 0)])
+        
+        try await sut.schedule(for: first)
+        try await sut.schedule(for: second)
+        try await sut.snooze(first, until: .now.addingTimeInterval(600))
+        try await sut.cancelAll()
+        
+        #expect(await center.added.isEmpty)
+        #expect(await center.removeAllDeliveredCount == 1)
+    }
+    
     @Test func schedulingThrowsWhenAuthorizationDenied() async throws {
         let center = MockUserNotificationCenter(status: .denied)
         let sut = LocalNotificationScheduler(center: center)

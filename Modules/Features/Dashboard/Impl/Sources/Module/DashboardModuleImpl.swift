@@ -39,8 +39,8 @@ struct DashboardModuleImpl: DashboardModule {
         switch route {
         case .today(let reloadToken):
             makeTodayView(reloadToken: reloadToken)
-        case .medications:
-            makeMedicationsView()
+        case .medications(let reloadToken):
+            makeMedicationsView(reloadToken: reloadToken)
         case .doseReminder(let medicationId, let scheduledDate):
             makeDoseReminderView(medicationId: medicationId, scheduledDate: scheduledDate)
         }
@@ -59,7 +59,7 @@ struct DashboardModuleImpl: DashboardModule {
     }
 
     @MainActor
-    private func makeMedicationsView() -> some View {
+    private func makeMedicationsView(reloadToken: Int) -> some View {
         MedicationListView(
             viewModel: MedicationListViewModel(
                 repository: medications,
@@ -72,7 +72,8 @@ struct DashboardModuleImpl: DashboardModule {
                 toggleMedicationActive: ToggleMedicationActiveUseCase(saveMedication: saveMedication),
                 syncReminder: SyncReminderUseCase(repository: medications, scheduler: scheduler),
                 authorizer: authorizer
-            )
+            ),
+            reloadToken: reloadToken
         )
     }
 

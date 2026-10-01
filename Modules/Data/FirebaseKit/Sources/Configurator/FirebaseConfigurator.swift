@@ -12,7 +12,7 @@ import Foundation
 internal import GoogleSignIn
 
 public enum FirebaseConfigurator {
-    /// Must run before anything resolves an account or profile dependency.
+    /// Must run before anything resolves an account, profile or remote store dependency.
     public static func setup(in container: DependencyContainer = .shared) {
         if FirebaseApp.app() == nil {
             FirebaseApp.configure()
@@ -31,5 +31,8 @@ public enum FirebaseConfigurator {
     static func register(in container: DependencyContainer) {
         container.registerSingleton((any AccountAuthenticating).self) { FirebaseFactory.makeAuthenticator() }
         container.registerSingleton((any UserProfileRepository).self) { FirebaseFactory.makeProfileRepository() }
+        container.registerSingleton((any MedicationRemoteStore).self) { FirebaseFactory.makeMedicationStore() }
+        container.registerSingleton((any DoseLogRemoteStore).self) { FirebaseFactory.makeDoseLogStore() }
+        container.registerSingleton((any RemoteOfflineStore).self) { FirebaseFactory.makeOfflineStore() }
     }
 }

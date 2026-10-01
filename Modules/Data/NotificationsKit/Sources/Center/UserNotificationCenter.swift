@@ -17,6 +17,8 @@ protocol UserNotificationCenter: Sendable {
     func pendingIdentifiers() async -> [String]
     
     func removePending(identifiers: [String]) async
+    
+    func removeAllDelivered() async
 }
 
 final class SystemNotificationCenter: UserNotificationCenter, @unchecked Sendable {
@@ -66,6 +68,10 @@ final class SystemNotificationCenter: UserNotificationCenter, @unchecked Sendabl
     
     func removePending(identifiers: [String]) async {
         center.removePendingNotificationRequests(withIdentifiers: identifiers)
+    }
+    
+    func removeAllDelivered() async {
+        center.removeAllDeliveredNotifications()
     }
 }
 

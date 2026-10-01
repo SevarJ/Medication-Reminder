@@ -13,7 +13,46 @@ rules_version = '2';
 //   - updatedAt: timestamp (required, server time of the write)
 //
 // The app overwrites this document whenever a session starts and reads only its own.
-// Nothing else is stored in Firestore yet, so every other path is denied.
+//
+// Collection: users/{userId}/medications
+// Document ID: the medication's UUID, upper case, as Swift's `uuidString` writes it
+// Fields:
+//   - name: string (required, 1...300) - the app cuts names to 100 characters; the limit here leaves
+//       room for characters that take several bytes, so a name the app sends is never refused
+//   - dosageAmount: number (required, above 0)
+//   - dosageUnit: string (required, one of mg, ml, tablet, drop)
+//   - times: list (required, 1...24 items) of maps with exactly
+//       id: string (UUID), hour: int (0...23), minute: int (0...59)
+//   - recurrenceKind: string (required, daily or daysOfWeek)
+//   - recurrenceDays: list (required) - empty for daily, 1...7 weekday numbers from 1...7 for daysOfWeek
+//   - startDate: timestamp (required)
+//   - endDate: timestamp (optional, not before startDate)
+//   - isActive: bool (required)
+//   - createdDate: timestamp (required)
+//   - updatedAt: timestamp (required, server time of the write)
+//
+// Collection: users/{userId}/doseLogs
+// Document ID: the log's UUID, upper case
+// Fields:
+//   - medicationId: string (required, UUID, immutable) - the medication the dose belongs to
+//   - scheduledDate: timestamp (required) - when the dose was due
+//   - status: string (required, taken or skipped)
+//   - recordedAt: timestamp (required) - when the user marked the dose
+//   - updatedAt: timestamp (required, server time of the write)
+//
+// Assumptions:
+//   - Ownership comes from the {userId} path segment alone. No document carries an owner field, so there
+//     is nothing to hijack, and the subcollections do not depend on the profile document existing: the
+//     profile write is best effort and may land after the first medication.
+//   - The app writes offline and syncs later, so createdDate, startDate, scheduledDate and recordedAt
+//     can be hours or days old when they arrive. They are only checked for type. updatedAt is the
+//     trustworthy time.
+//   - Timestamps are not locked against change on update. A date read back from Firestore and written
+//     again can differ by a microsecond, so an equality check would refuse honest edits, and the only
+//     person who can write here is the owner of the data.
+//   - A dose log is not checked against an existing medication. That would cost a read per write, and
+//     a log whose medication is gone is never shown by the app.
+//   - Every path not listed here is denied.
 //
 // ===============================================================
 
@@ -57,6 +96,57 @@ service cloud.firestore {
         (data.photoURL is string && data.photoURL.size() <= 2048 && data.photoURL.matches('^https://.*'));
     }
 
+    // Also bounds the length: only a 36 character string can match.
+    function isUUID(value) {
+      return value is string &&
+        value.matches('^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$');
+    }
+
+    // The write must carry the server's own time, which a client cannot choose.
+    function hasServerUpdateTime(data) {
+      return data.updatedAt is timestamp && data.updatedAt == request.time;
+    }
+
+    function isValidTime(time) {
+      return time is map &&
+        time.keys().hasAll(['id', 'hour', 'minute']) &&
+        time.keys().hasOnly(['id', 'hour', 'minute']) &&
+        isUUID(time.id) &&
+        time.hour is int && time.hour >= 0 && time.hour <= 23 &&
+        time.minute is int && time.minute >= 0 && time.minute <= 59;
+    }
+
+    function isValidTimeAt(times, index) {
+      return times.size() <= index || isValidTime(times[index]);
+    }
+
+    // Rules have no loops, so every position the size limit allows is checked by hand.
+    function isValidTimes(times) {
+      return times is list && times.size() >= 1 && times.size() <= 24 &&
+        isValidTimeAt(times, 0) && isValidTimeAt(times, 1) && isValidTimeAt(times, 2) &&
+        isValidTimeAt(times, 3) && isValidTimeAt(times, 4) && isValidTimeAt(times, 5) &&
+        isValidTimeAt(times, 6) && isValidTimeAt(times, 7) && isValidTimeAt(times, 8) &&
+        isValidTimeAt(times, 9) && isValidTimeAt(times, 10) && isValidTimeAt(times, 11) &&
+        isValidTimeAt(times, 12) && isValidTimeAt(times, 13) && isValidTimeAt(times, 14) &&
+        isValidTimeAt(times, 15) && isValidTimeAt(times, 16) && isValidTimeAt(times, 17) &&
+        isValidTimeAt(times, 18) && isValidTimeAt(times, 19) && isValidTimeAt(times, 20) &&
+        isValidTimeAt(times, 21) && isValidTimeAt(times, 22) && isValidTimeAt(times, 23);
+    }
+
+    // hasOnly checks every element, so the weekday list needs no position by position check.
+    function isValidRecurrence(data) {
+      return data.recurrenceDays is list &&
+        ((data.recurrenceKind == 'daily' && data.recurrenceDays.size() == 0) ||
+          (data.recurrenceKind == 'daysOfWeek' &&
+            data.recurrenceDays.size() >= 1 && data.recurrenceDays.size() <= 7 &&
+            data.recurrenceDays.hasOnly([1, 2, 3, 4, 5, 6, 7])));
+    }
+
+    function isValidOptionalEndDate(data) {
+      return !('endDate' in data) ||
+        (data.endDate is timestamp && data.endDate >= data.startDate);
+    }
+
     // ===============================================================
     // Domain Validators (used by both create and update)
     // ===============================================================
@@ -71,6 +161,33 @@ service cloud.firestore {
         data.updatedAt == request.time;
     }
 
+    function isValidMedication(data) {
+      return hasOnlyAllowedFields(['name', 'dosageAmount', 'dosageUnit', 'times', 'recurrenceKind',
+          'recurrenceDays', 'startDate', 'endDate', 'isActive', 'createdDate', 'updatedAt']) &&
+        hasRequiredFields(['name', 'dosageAmount', 'dosageUnit', 'times', 'recurrenceKind',
+          'recurrenceDays', 'startDate', 'isActive', 'createdDate', 'updatedAt']) &&
+        data.name is string && data.name.size() >= 1 && data.name.size() <= 300 &&
+        data.dosageAmount is number && data.dosageAmount > 0 &&
+        data.dosageUnit in ['mg', 'ml', 'tablet', 'drop'] &&
+        isValidTimes(data.times) &&
+        isValidRecurrence(data) &&
+        data.startDate is timestamp &&
+        isValidOptionalEndDate(data) &&
+        data.isActive is bool &&
+        data.createdDate is timestamp &&
+        hasServerUpdateTime(data);
+    }
+
+    function isValidDoseLog(data) {
+      return hasOnlyAllowedFields(['medicationId', 'scheduledDate', 'status', 'recordedAt', 'updatedAt']) &&
+        hasRequiredFields(['medicationId', 'scheduledDate', 'status', 'recordedAt', 'updatedAt']) &&
+        isUUID(data.medicationId) &&
+        data.scheduledDate is timestamp &&
+        data.status in ['taken', 'skipped'] &&
+        data.recordedAt is timestamp &&
+        hasServerUpdateTime(data);
+    }
+
     // ===============================================================
     // users/{userId}: one private profile per account
     // ===============================================================
@@ -83,6 +200,43 @@ service cloud.firestore {
 
       // The app never deletes profiles.
       allow delete: if false;
+
+      // ===============================================================
+      // users/{userId}/medications/{medicationId}: the account's medications
+      // ===============================================================
+
+      match /medications/{medicationId} {
+        // Health data: only the owner reads it, one document or the whole list.
+        allow read: if isOwner(userId);
+
+        allow create: if isOwner(userId) &&
+          isUUID(medicationId) &&
+          isValidMedication(request.resource.data);
+
+        allow update: if isOwner(userId) && isValidMedication(request.resource.data);
+
+        allow delete: if isOwner(userId);
+      }
+
+      // ===============================================================
+      // users/{userId}/doseLogs/{logId}: doses the account marked taken or skipped
+      // ===============================================================
+
+      match /doseLogs/{logId} {
+        // Health data: only the owner reads it. The app queries by scheduledDate and by medicationId.
+        allow read: if isOwner(userId);
+
+        allow create: if isOwner(userId) &&
+          isUUID(logId) &&
+          isValidDoseLog(request.resource.data);
+
+        // A log stays with the medication it was written for.
+        allow update: if isOwner(userId) &&
+          isValidDoseLog(request.resource.data) &&
+          request.resource.data.medicationId == resource.data.medicationId;
+
+        allow delete: if isOwner(userId);
+      }
     }
 
     // Default deny for everything else.

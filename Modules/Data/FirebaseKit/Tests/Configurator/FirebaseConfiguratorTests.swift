@@ -19,4 +19,14 @@ struct FirebaseConfiguratorTests {
         #expect(container.isRegistered((any AccountAuthenticating).self))
         #expect(container.isRegistered((any UserProfileRepository).self))
     }
+
+    @Test func registersRemoteStores() {
+        let container = DependencyContainer()
+
+        FirebaseConfigurator.register(in: container)
+
+        #expect(container.isRegistered((any MedicationRemoteStore).self))
+        #expect(container.isRegistered((any DoseLogRemoteStore).self))
+        #expect(container.isRegistered((any RemoteOfflineStore).self))
+    }
 }

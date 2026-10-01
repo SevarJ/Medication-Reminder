@@ -92,8 +92,20 @@ struct LocalNotificationScheduler: ReminderScheduling {
         await center.removePending(identifiers: identifiers)
     }
     
+    func cancelAll() async throws {
+        let identifiers = await center.pendingIdentifiers().filter { $0.hasPrefix(Self.reminderPrefix) }
+        
+        if !identifiers.isEmpty {
+            await center.removePending(identifiers: identifiers)
+        }
+        
+        await center.removeAllDelivered()
+    }
+    
+    static let reminderPrefix = "medication."
+    
     static func identifierPrefix(medicationId: UUID) -> String {
-        "medication.\(medicationId.uuidString)."
+        reminderPrefix + "\(medicationId.uuidString)."
     }
     
     static func identifier(medicationId: UUID, timeId: UUID, weekday: Int? = nil) -> String {

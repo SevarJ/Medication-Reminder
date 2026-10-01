@@ -8,6 +8,7 @@
 import AccountImpl
 import AppPreferences
 import DashboardImpl
+import DataSync
 import DependencyInjection
 import Domain
 import FirebaseKit
@@ -27,6 +28,7 @@ struct MedoraApp: App {
         FirebaseConfigurator.setup()
         PersistenceConfigurator.setup()
         NotificationsConfigurator.setup()
+        DataSyncConfigurator.setup()
         
         let router = ReminderRouter()
         let medications: any MedicationRepository = resolve()
@@ -34,7 +36,23 @@ struct MedoraApp: App {
         let scheduler: any ReminderScheduling = resolve()
         
         self.router = router
-        session = SessionStore(authenticator: resolve(), profiles: resolve())
+        session = SessionStore(
+            authenticator: resolve(),
+            profiles: resolve(),
+            refreshData: RefreshAccountDataUseCase(
+                remoteMedications: resolve(),
+                remoteDoseLogs: resolve(),
+                medicationCache: resolve(),
+                doseLogCache: resolve(),
+                scheduler: scheduler
+            ),
+            clearLocalData: ClearLocalDataUseCase(
+                medicationCache: resolve(),
+                doseLogCache: resolve(),
+                remoteOffline: resolve(),
+                scheduler: scheduler
+            )
+        )
         notificationCoordinator = ReminderNotificationCoordinator(
             recordDose: RecordDoseForMedicationUseCase(
                 medicationRepository: medications,

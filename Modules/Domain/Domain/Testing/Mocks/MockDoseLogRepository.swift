@@ -8,7 +8,7 @@
 import Domain
 import Foundation
 
-public actor MockDoseLogRepository: DoseLogRepository {
+public actor MockDoseLogRepository: DoseLogCache {
     public private(set) var logs: [DoseLog]
 
     public init(logs: [DoseLog] = []) {
@@ -30,5 +30,9 @@ public actor MockDoseLogRepository: DoseLogRepository {
 
     public func deleteAll(medicationId: UUID) async throws {
         logs.removeAll { $0.medicationId == medicationId }
+    }
+
+    public func replaceAll(with logs: [DoseLog]) async throws {
+        self.logs = logs
     }
 }

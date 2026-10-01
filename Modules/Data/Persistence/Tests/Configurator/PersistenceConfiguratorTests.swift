@@ -11,12 +11,12 @@ import Domain
 import Testing
 
 struct PersistenceConfiguratorTests {
-    @Test func registersBothRepositories() async throws {
+    @Test func registersBothCaches() async throws {
         let container = DependencyContainer()
 
         PersistenceConfigurator.setup(in: container, inMemory: true)
 
-        #expect(try await container.resolve((any MedicationRepository).self).fetchAll().isEmpty)
-        #expect(container.isRegistered((any DoseLogRepository).self))
+        #expect(try await container.resolve((any MedicationCache).self).fetchAll().isEmpty)
+        #expect(container.isRegistered((any DoseLogCache).self))
     }
 }

@@ -12,6 +12,7 @@ public actor MockReminderScheduler: ReminderScheduling {
     public private(set) var scheduledIds: [UUID] = []
     public private(set) var cancelledIds: [UUID] = []
     public private(set) var snoozedIds: [UUID] = []
+    public private(set) var cancelAllCount = 0
 
     private let failsWithAuthorizationDenied: Bool
 
@@ -29,6 +30,10 @@ public actor MockReminderScheduler: ReminderScheduling {
 
     public func cancel(for medicationId: UUID) async throws {
         cancelledIds.append(medicationId)
+    }
+
+    public func cancelAll() async throws {
+        cancelAllCount += 1
     }
 
     public func snooze(_ medication: Medication, until date: Date) async throws {
