@@ -23,15 +23,13 @@ A medication reminder and adherence tracker for iOS. Schedule medications, get a
 - Mark a dose taken or skipped from the Today screen, or straight from the notification
 - Snooze a reminder without opening the app, for 5, 10, 15 or 30 minutes as chosen in Settings
 - Tapping a reminder opens a full-screen dose card to mark it taken or snooze it
-- Today screen with a deep-green next-dose card, a daily progress ring and a seven-day week strip for reviewing and correcting past days
-- Each dose has a clear Take button and a menu to skip it; swiping still works. Animated, haptic check-off
-- A calm design: one green accent on neutral surfaces, with amber for missed doses and blue for skipped ones
-- Large titles, 44 pt minimum touch targets, and layouts that stack instead of truncating at the largest accessibility text sizes
+- Today screen with a next-dose card, a daily progress ring and a seven-day week strip for reviewing and correcting past days
+- Animated, haptic dose check-off with a Take button, a skip menu and swipe actions
 - Per-medication on/off switch that cancels or restores its reminders
 - Warning banner when notification permission is missing, with reminders re-synced as soon as it is granted
 - Available in English, Azerbaijani and Russian, including plural-aware dosage text
 - Settings screen with an in-app language switch that applies instantly and re-localizes scheduled reminders
-- Light and dark appearance that follows the system or is chosen in Settings, Dynamic Type support up to the largest accessibility size
+- Light and dark appearance that follows the system or is chosen in Settings, Dynamic Type support
 
 ## Architecture
 
@@ -144,7 +142,7 @@ RootView(
 | Foundation | `AppLocalization` | App language, localized bundle lookup and strings every screen shares |
 | Foundation | `AppPreferences` | UserDefaults keys and typed accessors for app preferences |
 | Foundation | `DependencyInjection` | Type-keyed dependency container |
-| Foundation | `DesignSystem` | Colors, typography, spacing, button styles and reusable components, described under Design |
+| Foundation | `DesignSystem` | Colors, typography, spacing and reusable components |
 | Domain | `Domain` | `Medication`, `MedicationSchedule`, `DoseLog`, `UserAccount`, use cases, repository, cache, remote store, scheduler and account protocols |
 | Domain | `DomainTesting` | Mocks and factories shared by the test targets |
 | Shared | `AppFormatters` | Dosage text and error messages used by several screens and by notifications |
@@ -159,13 +157,12 @@ RootView(
 
 ## Design
 
-The look is calm and readable, aimed at people of any age. The `DesignSystem` module holds every token, and screens use it instead of raw colors or sizes.
+`DesignSystem` holds the tokens and shared components. Screens use them instead of raw colors or sizes.
 
-- **Color:** green is the only accent. `accent` fills rings and icons, `accentText` is a darker green that stays readable as text, and `hero` is the deep green behind white content on the one hero card per screen. Supporting colors each mean one thing: `warning` (amber) for a missed dose, `info` (blue) for a skipped one and `danger` (red) only for destructive actions. Everything else is neutral.
-- **Surfaces:** `cardSurface()` gives the standard continuous rounded card on a light grey canvas, and a black canvas with charcoal cards in dark mode.
-- **Actions:** `.primaryAction`, `.heroAction` and `.secondaryAction` button styles are full-width capsules at least 44 pt tall, and `HeroGlyph` is the large icon tile on the sign-in and notification screens.
-- **Type and size:** screens use Dynamic Type text styles with large navigation titles. `AdaptiveStack` stacks a row vertically at accessibility sizes, and fixed-size elements such as the week strip and icon tiles cap their growth.
-- **iOS 26:** the tab bar, navigation bar and toolbar buttons pick up Liquid Glass from the system. The app keeps its own surfaces solid so text and buttons stay legible, and still runs on iOS 17.
+- Colors: `ThemeColors` has one green accent, neutral surfaces, `warning` for missed doses, `info` for skipped ones and `danger` for destructive actions
+- Components: `cardSurface()`, the `.primaryAction`, `.heroAction` and `.secondaryAction` button styles, `HeroGlyph`, `IconTile`, `Badge` and `ProgressRing`
+- Dynamic Type: `AdaptiveStack` stacks a row vertically at accessibility sizes
+- iOS 26 gets Liquid Glass bars from the system, and the minimum stays iOS 17
 
 ## Tech stack
 
