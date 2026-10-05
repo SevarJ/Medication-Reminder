@@ -11,25 +11,12 @@ A medication reminder and adherence tracker for iOS. Schedule medications, get a
 
 ## Features
 
-- Sign in with Google through Firebase Authentication, with the account profile saved to Cloud Firestore
-- Medications and dose history are stored in Cloud Firestore under the account and follow it to any device it signs in on
-- An on-device cache keeps every screen and reminder working offline; changes made offline are sent when the connection returns
-- Signing out removes the cache, the pending reminders and Firestore's offline copy from the device, and leaves the account's data on the server
-- Add, edit and delete medications with dosage and unit (mg, ml, tablet, drop)
-- Schedule doses every day or on selected weekdays, with an optional start and end date
-- Multiple daily reminder times per medication
-- Repeating local notifications, rescheduled automatically whenever a medication changes
-- Reminders are time-sensitive, so they still arrive while a Focus mode is on
-- Mark a dose taken or skipped from the Today screen, or straight from the notification
-- Snooze a reminder without opening the app, for 5, 10, 15 or 30 minutes as chosen in Settings
-- Tapping a reminder opens a full-screen dose card to mark it taken or snooze it
-- Today screen with a next-dose card, a daily progress ring and a seven-day week strip for reviewing and correcting past days
-- Animated, haptic dose check-off with a Take button, a skip menu and swipe actions
-- Per-medication on/off switch that cancels or restores its reminders
-- Warning banner when notification permission is missing, with reminders re-synced as soon as it is granted
-- Available in English, Azerbaijani and Russian, including plural-aware dosage text
-- Settings screen with an in-app language switch that applies instantly and re-localizes scheduled reminders
-- Light and dark appearance that follows the system or is chosen in Settings, Dynamic Type support
+- Google sign-in, with medications and dose history stored in Cloud Firestore and cached offline
+- Medications with dosage, unit, weekdays, date range and several daily reminder times
+- Local notifications with take and snooze actions
+- Today screen with next dose, daily progress and a seven-day week strip
+- English, Azerbaijani and Russian
+- Light and dark appearance, Dynamic Type
 
 ## Architecture
 
@@ -179,25 +166,6 @@ make
 ```
 
 `make` generates `Medora.xcworkspace` and opens it. `make generate` does the same without opening Xcode; run it after editing `Project.swift` or the helpers in `Tuist/ProjectDescriptionHelpers`. Adding or removing files inside a module does not need it. `make help` lists the other commands.
-
-### Firebase
-
-Sign-in needs the app's Firebase configuration, which is not kept in the repository. Download it once from the Firebase project `medora-af764`, then generate the project again:
-
-```bash
-npx -y firebase-tools@latest apps:sdkconfig IOS --project medora-af764 --out App/Resources/GoogleService-Info.plist
-make generate
-```
-
-`make generate` reads the `REVERSED_CLIENT_ID` from that file and registers it as the app's URL scheme, which Google Sign-In returns through. The project still generates, builds and tests without the file, but the app stops at launch because Firebase has nothing to configure itself with.
-
-`firebase.json` describes the Firestore database, and `firestore.rules` lets each user read and write only their own `users/{uid}` profile and the medications and dose logs under it, and checks the shape of every document written. After changing either, deploy with:
-
-```bash
-npx -y firebase-tools@latest deploy --only firestore
-```
-
-Google Sign-In is switched on in the Firebase project itself, so there is nothing to deploy for it.
 
 ## Adding a feature
 
