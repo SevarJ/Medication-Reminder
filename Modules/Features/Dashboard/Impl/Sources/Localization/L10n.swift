@@ -15,6 +15,10 @@ enum L10n {
             String(localized: "list.title", defaultValue: "Medications", bundle: .module.localized())
         }
         
+        static var addMedication: String {
+            String(localized: "list.add", defaultValue: "Add Medication", bundle: .module.localized())
+        }
+        
         static var allMedications: String {
             String(localized: "list.section.all", defaultValue: "All Medications", bundle: .module.localized())
         }

@@ -38,7 +38,7 @@ struct SettingsView: View {
             }
             .background(Color.theme.background)
             .navigationTitle(L10n.Settings.title)
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.large)
         }
         .alert(
             CommonText.errorTitle,
@@ -99,7 +99,7 @@ struct SettingsView: View {
         HStack(spacing: Spacing.md) {
             IconTile(
                 systemName: systemName,
-                foreground: Color.theme.accent,
+                foreground: Color.theme.accentText,
                 background: Color.theme.accentTint
             )
             
@@ -121,6 +121,7 @@ struct SettingsView: View {
         }
         .padding(.horizontal, Spacing.lg)
         .padding(.vertical, Spacing.sm)
+        .frame(minHeight: Size.minTarget + Spacing.md)
     }
     
     private var languageSelection: Binding<AppLanguage> {
@@ -141,7 +142,7 @@ struct SettingsView: View {
                     HStack(spacing: Spacing.md) {
                         IconTile(
                             systemName: "bell.fill",
-                            foreground: Color.theme.accent,
+                            foreground: Color.theme.accentText,
                             background: Color.theme.accentTint
                         )
                         
@@ -200,24 +201,42 @@ struct SettingsView: View {
     @ViewBuilder
     private var accountHeader: some View {
         if let account = viewModel.account {
-            NavigationLink {
-                ProfileView(account: account) {
-                    Task { await viewModel.signOut() }
-                }
-            } label: {
-                VStack(spacing: Spacing.sm) {
-                    AccountAvatar(photoURL: account.photoURL, size: 88)
-                    
-                    if let name = account.displayName ?? account.email {
-                        Text(name)
-                            .font(Font.theme.rowTitle)
-                            .foregroundStyle(Color.theme.textPrimary)
+            CardSection {
+                NavigationLink {
+                    ProfileView(account: account) {
+                        Task { await viewModel.signOut() }
                     }
+                } label: {
+                    HStack(spacing: Spacing.md) {
+                        AccountAvatar(photoURL: account.photoURL, size: 56)
+                        
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            if let name = account.displayName {
+                                Text(name)
+                                    .font(Font.theme.sectionTitle)
+                                    .foregroundStyle(Color.theme.textPrimary)
+                            }
+                            
+                            if let email = account.email {
+                                Text(email)
+                                    .font(Font.theme.rowSubtitle)
+                                    .foregroundStyle(Color.theme.textSecondary)
+                                    .lineLimit(1)
+                                    .truncationMode(.middle)
+                            }
+                        }
+                        
+                        Spacer(minLength: Spacing.sm)
+                        
+                        Image(systemName: "chevron.right")
+                            .font(.system(.footnote, weight: .semibold))
+                            .foregroundStyle(Color.theme.textSecondary.opacity(0.6))
+                    }
+                    .padding(Spacing.lg)
+                    .contentShape(Rectangle())
                 }
-                .frame(maxWidth: .infinity)
-                .contentShape(Rectangle())
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
     }
     
@@ -229,7 +248,7 @@ struct SettingsView: View {
                 HStack(spacing: Spacing.md) {
                     IconTile(
                         systemName: "info.circle.fill",
-                        foreground: Color.theme.accent,
+                        foreground: Color.theme.accentText,
                         background: Color.theme.accentTint
                     )
                     

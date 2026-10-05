@@ -1449,6 +1449,29 @@
           }
         }
       }
+    },
+    "list.add": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Medication"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dərman əlavə et"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить лекарство"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

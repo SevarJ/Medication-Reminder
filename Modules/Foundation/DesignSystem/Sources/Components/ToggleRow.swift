@@ -27,9 +27,11 @@ public struct ToggleRow: View {
             
             Toggle("", isOn: $isOn)
                 .labelsHidden()
-                .tint(Color.theme.accent)
+                .tint(Color.theme.hero)
         }
-        .padding(Spacing.lg)
+        .padding(.horizontal, Spacing.lg)
+        .padding(.vertical, Spacing.sm)
+        .frame(minHeight: Size.minTarget + Spacing.md)
         .contentShape(Rectangle())
         .onTapGesture {
             isOn.toggle()

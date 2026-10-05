@@ -31,7 +31,7 @@ struct AccountAvatar: View {
     private var placeholder: some View {
         Image(systemName: "person.fill")
             .font(.system(size: size * 0.45))
-            .foregroundStyle(Color.theme.accent)
+            .foregroundStyle(Color.theme.accentText)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.theme.accentTint)
     }

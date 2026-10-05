@@ -36,32 +36,34 @@ struct WeekStrip: View {
         VStack(spacing: Spacing.xs) {
             Text(day.date.formatted(.dateTime.weekday(.abbreviated).locale(AppLanguage.current.locale)))
                 .font(Font.theme.caption)
-                .foregroundStyle(isSelected ? Color.theme.accent : Color.theme.textSecondary)
+                .foregroundStyle(isSelected ? Color.theme.accentText : Color.theme.textSecondary)
+                .fontWeight(isSelected ? .semibold : .regular)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
             
             ZStack {
                 Circle()
-                    .fill(isSelected ? Color.theme.accent : Color.clear)
+                    .fill(isSelected ? Color.theme.hero : Color.clear)
                 
                 if day.doses.isEmpty {
                     Circle()
-                        .stroke(Color.theme.separator, lineWidth: 3)
+                        .stroke(isSelected ? Color.white.opacity(0.25) : Color.theme.fill, lineWidth: 3)
                         .padding(1.5)
                 }
                 else {
                     ProgressRing(
                         progress: day.adherence,
                         lineWidth: 3,
-                        tint: isSelected ? Color.theme.surface : Color.theme.accent
+                        tint: isSelected ? Color.white : Color.theme.accent,
+                        track: isSelected ? Color.white.opacity(0.25) : Color.theme.accentTint
                     )
                 }
                 
                 Text(day.date.formatted(.dateTime.day().locale(AppLanguage.current.locale)))
                     .font(.system(.subheadline, weight: .semibold))
-                    .foregroundStyle(isSelected ? Color.theme.surface : Color.theme.textPrimary)
+                    .foregroundStyle(isSelected ? Color.white : Color.theme.textPrimary)
             }
-            .frame(width: 40, height: 40)
+            .frame(width: 44, height: 44)
         }
         .padding(.vertical, Spacing.xs)
         .contentShape(Rectangle())

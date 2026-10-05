@@ -18,25 +18,33 @@ struct DoseRow: View {
     
     var body: some View {
         HStack(spacing: Spacing.md) {
-            checkbox
+            glyph
             
             VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(dose.medication.name)
                     .font(Font.theme.rowTitle)
-                    .foregroundStyle(state == .taken ? Color.theme.textSecondary : Color.theme.textPrimary)
-                    .strikethrough(state == .taken, color: Color.theme.textSecondary)
+                    .foregroundStyle(Color.theme.textPrimary)
                 
-                Text(subtitle)
+                Text("\(dose.scheduledDate.timeText) · \(dose.medication.dosage.displayText)")
                     .font(Font.theme.rowSubtitle)
-                    .foregroundStyle(state == .missed ? Color.theme.danger : Color.theme.textSecondary)
+                    .foregroundStyle(Color.theme.textSecondary)
+                
+                if state == .missed {
+                    Text(L10n.Today.missed)
+                        .font(Font.theme.badge)
+                        .foregroundStyle(Color.theme.warning)
+                }
             }
+            .opacity(state == .skipped ? 0.65 : 1)
             
             Spacer(minLength: Spacing.sm)
             
             trailing
         }
-        .padding(Spacing.lg)
-        .opacity(state == .skipped ? 0.6 : 1)
+        .padding(.vertical, Spacing.md)
+        .padding(.horizontal, Spacing.lg)
+        .frame(minHeight: 72)
+        .contentShape(Rectangle())
         .animation(.spring(duration: 0.35), value: state)
         .sensoryFeedback(trigger: state) { _, newValue in
             newValue == .taken ? .success : nil
@@ -48,7 +56,7 @@ struct DoseRow: View {
                     systemImage: state == .taken ? "arrow.uturn.backward" : "checkmark"
                 )
             }
-            .tint(Color.theme.accent)
+            .tint(Color.theme.hero)
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             if state != .taken {
@@ -58,49 +66,71 @@ struct DoseRow: View {
                         systemImage: state == .skipped ? "arrow.uturn.backward" : "forward.end"
                     )
                 }
-                .tint(Color.theme.textSecondary)
+                .tint(Color.theme.info)
             }
         }
     }
     
-    private var checkbox: some View {
-        Button(action: onTake) {
-            Image(systemName: state == .taken ? "checkmark.circle.fill" : "circle")
-                .font(.system(size: 28))
-                .foregroundStyle(state == .taken ? Color.theme.accent : Color.theme.textSecondary)
-                .contentTransition(.symbolEffect(.replace))
-                .symbolEffect(.bounce, value: state == .taken)
+    @ViewBuilder private var glyph: some View {
+        switch state {
+        case .taken:
+            IconTile(systemName: "checkmark", foreground: Color.theme.onHero, background: Color.theme.accent, size: 40)
+        case .missed:
+            IconTile(systemName: "exclamationmark", foreground: Color.theme.warning, background: Color.theme.warningTint, size: 40)
+        case .skipped:
+            IconTile(systemName: "forward.end.fill", foreground: Color.theme.info, background: Color.theme.infoTint, size: 40)
+        case .pending:
+            IconTile(systemName: "pills.fill", foreground: Color.theme.accentText, background: Color.theme.accentTint, size: 40)
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel(state == .taken ? L10n.Today.markNotTaken : L10n.Today.markTaken)
     }
     
     @ViewBuilder private var trailing: some View {
         switch state {
         case .taken:
-            if let recordedAt = dose.log?.recordedAt {
-                Badge(title: L10n.Today.takenAt(recordedAt.timeText))
-                    .transition(.scale.combined(with: .opacity))
-            }
-        case .skipped, .pending, .missed:
-            Button(action: onSkip) {
-                Text(state == .skipped ? L10n.Today.skipped : L10n.Today.skip)
-                    .font(Font.theme.rowSubtitle)
-                    .foregroundStyle(Color.theme.textSecondary)
-                    .padding(.horizontal, Spacing.md)
-                    .padding(.vertical, Spacing.sm)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: CornerRadius.badge)
-                            .stroke(Color.theme.separator, lineWidth: 1)
-                    )
+            Button(action: onTake) {
+                Text(dose.log.map { L10n.Today.takenAt($0.recordedAt.timeText) } ?? "")
+                    .font(Font.theme.badge)
+                    .foregroundStyle(Color.theme.accentText)
+                    .frame(minHeight: Size.minTarget)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(L10n.Today.markNotTaken)
+        case .skipped:
+            Button(action: onSkip) {
+                Text(L10n.Today.skipped)
+                    .font(Font.theme.badge)
+                    .foregroundStyle(Color.theme.info)
+                    .frame(minHeight: Size.minTarget)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(L10n.Today.markNotTaken)
+        case .pending, .missed:
+            HStack(spacing: 0) {
+                Button(action: onTake) {
+                    Text(L10n.Today.take)
+                        .font(.system(.subheadline, weight: .semibold))
+                        .lineLimit(1)
+                        .fixedSize()
+                        .foregroundStyle(Color.theme.accentText)
+                        .padding(.horizontal, Spacing.lg)
+                        .frame(minHeight: Size.minTarget - 4)
+                        .background(Color.theme.accentTint, in: Capsule())
+                        .contentShape(Capsule())
+                }
+                .buttonStyle(.plain)
+                
+                Menu {
+                    Button(action: onSkip) {
+                        Label(L10n.Today.skip, systemImage: "forward.end")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.system(.body, weight: .semibold))
+                        .foregroundStyle(Color.theme.textSecondary)
+                        .frame(width: Size.minTarget - 8, height: Size.minTarget)
+                        .contentShape(Rectangle())
+                }
+            }
         }
-    }
-    
-    private var subtitle: String {
-        let details = "\(dose.scheduledDate.timeText) · \(dose.medication.dosage.displayText)"
-        
-        return state == .missed ? "\(details) · \(L10n.Today.missed)" : details
     }
 }

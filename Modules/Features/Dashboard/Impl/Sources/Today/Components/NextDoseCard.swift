@@ -10,55 +10,67 @@ import DesignSystem
 import Domain
 import SwiftUI
 
+/// The one strong moment on the Today screen: the dose that is due next, in deep brand green.
 struct NextDoseCard: View {
     let dose: ScheduledDose
     let countdown: String
     let onTake: () -> Void
     
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.md) {
-            HStack {
-                Label(L10n.Today.nextDose, systemImage: "bell.badge.fill")
-                    .font(.system(.caption, weight: .semibold))
-                    .foregroundStyle(Color.theme.accent)
+        VStack(alignment: .leading, spacing: Spacing.xl) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(L10n.Today.nextDose)
+                    .font(.system(.subheadline, weight: .semibold))
+                    .foregroundStyle(Color.theme.onHero.opacity(0.85))
                 
                 Spacer(minLength: Spacing.sm)
                 
                 Text(countdown)
-                    .font(Font.theme.caption)
-                    .foregroundStyle(Color.theme.textSecondary)
+                    .font(Font.theme.badge)
+                    .foregroundStyle(Color.theme.onHero)
+                    .padding(.horizontal, Spacing.md)
+                    .padding(.vertical, Spacing.xs + 1)
+                    .background(Color.theme.onHero.opacity(0.18), in: Capsule())
             }
             
-            HStack(spacing: Spacing.md) {
-                IconTile(
-                    systemName: "pills.fill",
-                    foreground: Color.theme.surface,
-                    background: Color.theme.accent
-                )
+            VStack(alignment: .leading, spacing: Spacing.xs) {
+                Text(dose.scheduledDate.timeText)
+                    .font(Font.theme.display)
+                    .foregroundStyle(Color.theme.onHero)
                 
-                VStack(alignment: .leading, spacing: Spacing.xs) {
-                    Text(dose.medication.name)
-                        .font(.system(.title3, weight: .bold))
-                        .foregroundStyle(Color.theme.textPrimary)
-                    
-                    Text("\(dose.scheduledDate.timeText) · \(dose.medication.dosage.displayText)")
-                        .font(Font.theme.rowSubtitle)
-                        .foregroundStyle(Color.theme.textSecondary)
-                }
+                Text(dose.medication.name)
+                    .font(.system(.title3, weight: .semibold))
+                    .foregroundStyle(Color.theme.onHero)
+                
+                Text(dose.medication.dosage.displayText)
+                    .font(Font.theme.rowSubtitle)
+                    .foregroundStyle(Color.theme.onHero.opacity(0.85))
             }
+            .accessibilityElement(children: .combine)
             
             Button(action: onTake) {
                 Label(L10n.Today.takeNow, systemImage: "checkmark")
-                    .font(Font.theme.rowTitle)
-                    .foregroundStyle(Color.theme.surface)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, Spacing.md)
-                    .background(Color.theme.accent, in: RoundedRectangle(cornerRadius: CornerRadius.card))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.heroAction)
         }
-        .padding(Spacing.lg)
-        .background(Color.theme.accentTint, in: RoundedRectangle(cornerRadius: CornerRadius.card))
+        .padding(Spacing.xl)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background {
+            ZStack(alignment: .topTrailing) {
+                LinearGradient(
+                    colors: [Color.theme.hero, Color.theme.heroDeep],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                
+                Image(systemName: "pills.fill")
+                    .font(.system(size: 150))
+                    .foregroundStyle(Color.theme.onHero.opacity(0.07))
+                    .rotationEffect(.degrees(-18))
+                    .offset(x: 30, y: 54)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: CornerRadius.card + 6, style: .continuous))
+        }
     }
 }
 
@@ -68,7 +80,7 @@ struct DayCompleteCard: View {
     var body: some View {
         HStack(spacing: Spacing.md) {
             Image(systemName: "checkmark.seal.fill")
-                .font(.system(size: 32))
+                .font(.system(size: 34))
                 .foregroundStyle(Color.theme.accent)
                 .symbolEffect(.bounce, value: appeared)
             
@@ -78,8 +90,9 @@ struct DayCompleteCard: View {
             
             Spacer(minLength: 0)
         }
-        .padding(Spacing.lg)
-        .background(Color.theme.accentTint, in: RoundedRectangle(cornerRadius: CornerRadius.card))
+        .padding(Spacing.xl)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .cardSurface(Color.theme.accentTint)
         .onAppear { appeared = true }
     }
 }

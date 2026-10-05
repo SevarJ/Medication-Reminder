@@ -64,9 +64,9 @@ struct DoseReminderView: View {
             } label: {
                 Image(systemName: "xmark")
                     .font(.system(.body, weight: .semibold))
-                    .foregroundStyle(Color.theme.textSecondary)
-                    .frame(width: 36, height: 36)
-                    .background(Color.theme.surface, in: Circle())
+                    .foregroundStyle(Color.theme.textPrimary)
+                    .frame(width: Size.minTarget, height: Size.minTarget)
+                    .background(Color.theme.fill, in: Circle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel(L10n.Reminder.close)
@@ -97,24 +97,28 @@ struct DoseReminderView: View {
             Spacer()
             
             Image(systemName: isTaken ? "checkmark" : "pills.fill")
-                .font(.system(size: 52, weight: .semibold))
-                .foregroundStyle(isTaken ? Color.theme.surface : Color.theme.accent)
+                .font(.system(size: 48, weight: .semibold))
+                .foregroundStyle(isTaken ? Color.theme.onHero : Color.theme.accentText)
                 .contentTransition(.symbolEffect(.replace))
-                .frame(width: 128, height: 128)
-                .background(isTaken ? Color.theme.accent : Color.theme.accentTint, in: Circle())
+                .frame(width: 112, height: 112)
+                .background(
+                    isTaken ? Color.theme.hero : Color.theme.accentTint,
+                    in: RoundedRectangle(cornerRadius: 32, style: .continuous)
+                )
                 .animation(.spring(duration: 0.4), value: isTaken)
+                .accessibilityHidden(true)
             
             VStack(spacing: Spacing.sm) {
                 Text(L10n.Reminder.eyebrow)
-                    .font(Font.theme.rowSubtitle)
-                    .foregroundStyle(Color.theme.textSecondary)
+                    .font(.system(.subheadline, weight: .semibold))
+                    .foregroundStyle(Color.theme.accentText)
                 
                 Text(dose.scheduledDate.timeText)
-                    .font(.system(size: 56, weight: .bold, design: .rounded))
+                    .font(.system(size: 64, weight: .bold, design: .rounded).monospacedDigit())
                     .foregroundStyle(Color.theme.textPrimary)
                 
                 Text(dose.medication.name)
-                    .font(.system(.title2, weight: .bold))
+                    .font(.system(.title2, weight: .semibold))
                     .foregroundStyle(Color.theme.textPrimary)
                     .multilineTextAlignment(.center)
                 
@@ -125,6 +129,7 @@ struct DoseReminderView: View {
                 status(of: dose)
                     .padding(.top, Spacing.sm)
             }
+            .accessibilityElement(children: .combine)
             
             Spacer()
             
@@ -136,13 +141,14 @@ struct DoseReminderView: View {
         switch dose.log?.status {
         case .taken:
             if let recordedAt = dose.log?.recordedAt {
-                Badge(title: L10n.Today.takenAt(recordedAt.timeText))
+                Badge(title: L10n.Today.takenAt(recordedAt.timeText), systemName: "checkmark")
             }
         case .skipped:
             Badge(
                 title: L10n.Today.skipped,
-                foreground: Color.theme.textSecondary,
-                background: Color.theme.separator
+                systemName: "forward.end.fill",
+                foreground: Color.theme.info,
+                background: Color.theme.infoTint
             )
         case nil:
             EmptyView()
@@ -156,23 +162,15 @@ struct DoseReminderView: View {
                     Task { await viewModel.take() }
                 } label: {
                     Label(L10n.Reminder.take, systemImage: "checkmark")
-                        .font(.system(.title3, weight: .semibold))
-                        .foregroundStyle(Color.theme.surface)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, Spacing.lg)
-                        .background(Color.theme.accent, in: RoundedRectangle(cornerRadius: CornerRadius.card))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.primaryAction)
                 
                 Button {
                     Task { await viewModel.snooze() }
                 } label: {
-                    Text(L10n.Reminder.snooze(minutes: viewModel.snoozeMinutes))
-                        .font(Font.theme.rowTitle)
-                        .foregroundStyle(Color.theme.accent)
-                        .padding(.vertical, Spacing.sm)
+                    Label(L10n.Reminder.snooze(minutes: viewModel.snoozeMinutes), systemImage: "clock.arrow.circlepath")
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.secondaryAction)
             }
             .disabled(viewModel.isFinished)
         }
@@ -182,8 +180,9 @@ struct DoseReminderView: View {
         VStack(spacing: Spacing.md) {
             IconTile(
                 systemName: "exclamationmark.triangle.fill",
-                foreground: Color.theme.danger,
-                background: Color.theme.surface
+                foreground: Color.theme.warning,
+                background: Color.theme.warningTint,
+                size: 56
             )
             
             Text(L10n.Reminder.loadFailedTitle)

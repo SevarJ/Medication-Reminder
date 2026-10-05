@@ -39,20 +39,20 @@ struct MedicationListView: View {
             }
             .background(Color.theme.background)
             .navigationTitle(L10n.List.title)
-            .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            editorViewModel = viewModel.makeEditorViewModel(for: nil)
-                        } label: {
-                            Image(systemName: "plus")
-                                .font(.system(.body, weight: .semibold))
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        editorViewModel = viewModel.makeEditorViewModel(for: nil)
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.system(.body, weight: .semibold))
                     }
-                    .tint(Color.theme.accent)
+                    .tint(Color.theme.accentText)
+                    .accessibilityLabel(L10n.List.addMedication)
                 }
             }
         }
-       
         .sheet(item: $editorViewModel) { editor in
             MedicationEditorView(
                 viewModel: editor,
@@ -153,21 +153,23 @@ struct MedicationListView: View {
                     .listRowBackground(Color.theme.surface)
                     .listRowSeparatorTint(Color.theme.separator)
                 }
-            } header: {
-                Text(L10n.List.allMedications)
-                    .font(Font.theme.rowSubtitle)
-                    .foregroundStyle(Color.theme.textSecondary)
-                    .textCase(nil)
             }
         }
         .listStyle(.insetGrouped)
+        .listSectionSpacing(Spacing.xl)
         .scrollContentBackground(.hidden)
         .animation(.default, value: medications)
     }
     
     private var notificationBanner: some View {
-        CardSection {
-            VStack(alignment: .leading, spacing: Spacing.sm) {
+        HStack(alignment: .top, spacing: Spacing.md) {
+            IconTile(
+                systemName: "bell.slash.fill",
+                foreground: Color.theme.warning,
+                background: Color.theme.surface.opacity(0.7)
+            )
+            
+            VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(L10n.Banner.title)
                     .font(Font.theme.rowTitle)
                     .foregroundStyle(Color.theme.textPrimary)
@@ -177,12 +179,15 @@ struct MedicationListView: View {
                     .foregroundStyle(Color.theme.textSecondary)
                 
                 Button(bannerActionTitle, action: performBannerAction)
-                    .font(Font.theme.rowSubtitle)
-                    .tint(Color.theme.accent)
+                    .font(.system(.subheadline, weight: .semibold))
+                    .tint(Color.theme.warning)
+                    .frame(minHeight: Size.minTarget, alignment: .leading)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(Spacing.lg)
         }
+        .padding(Spacing.lg)
+        .cardSurface(Color.theme.warningTint)
+        .padding(.horizontal, Spacing.lg)
     }
     
     private var canRequestNotifications: Bool {
@@ -214,8 +219,9 @@ struct MedicationListView: View {
         VStack(spacing: Spacing.md) {
             IconTile(
                 systemName: "exclamationmark.triangle.fill",
-                foreground: Color.theme.danger,
-                background: Color.theme.surface
+                foreground: Color.theme.warning,
+                background: Color.theme.warningTint,
+                size: 56
             )
             
             Text(L10n.List.loadFailedTitle)
@@ -230,8 +236,8 @@ struct MedicationListView: View {
             Button(CommonText.tryAgain) {
                 Task { await viewModel.load() }
             }
-            .font(Font.theme.rowTitle)
-            .tint(Color.theme.accent)
+            .buttonStyle(.secondaryAction)
+            .fixedSize()
             .padding(.top, Spacing.sm)
         }
         .padding(Spacing.xxl)
@@ -241,8 +247,9 @@ struct MedicationListView: View {
         VStack(spacing: Spacing.md) {
             IconTile(
                 systemName: "pills.fill",
-                foreground: Color.theme.accent,
-                background: Color.theme.accentTint
+                foreground: Color.theme.accentText,
+                background: Color.theme.accentTint,
+                size: 56
             )
             
             Text(L10n.List.emptyTitle)

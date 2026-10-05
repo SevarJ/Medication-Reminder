@@ -18,10 +18,14 @@ public struct CardSection<Content: View>: View {
         VStack(spacing: 0) {
             content
         }
-        .background(
-            Color.theme.surface,
-            in: RoundedRectangle(cornerRadius: CornerRadius.card)
-        )
+        .cardSurface()
         .padding(.horizontal, Spacing.lg)
+    }
+}
+
+public extension View {
+    /// The standard grouped surface: a continuous rounded rectangle on the card colour.
+    func cardSurface(_ fill: Color = Color.theme.surface) -> some View {
+        background(fill, in: RoundedRectangle(cornerRadius: CornerRadius.card, style: .continuous))
     }
 }

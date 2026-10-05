@@ -17,8 +17,10 @@ struct DesignSystemCatalog: View {
         ("textSecondary", Color.theme.textSecondary),
         ("danger", Color.theme.danger),
         ("separator", Color.theme.separator),
-        ("morning", Color.theme.morning),
-        ("evening", Color.theme.evening)
+        ("accentText", Color.theme.accentText),
+        ("hero", Color.theme.hero),
+        ("warning", Color.theme.warning),
+        ("info", Color.theme.info)
     ]
 
     var body: some View {
@@ -116,12 +118,8 @@ struct DesignSystemCatalog: View {
                 RowSeparator()
 
                 HStack(spacing: Spacing.lg) {
-                    Label("08:00", systemImage: "sun.max")
-                        .font(Font.theme.rowSubtitle)
-                        .foregroundStyle(Color.theme.morning)
-                    Label("20:00", systemImage: "moon")
-                        .font(Font.theme.rowSubtitle)
-                        .foregroundStyle(Color.theme.evening)
+                    Badge(title: "Missed", systemName: "exclamationmark.circle.fill", foreground: Color.theme.warning, background: Color.theme.warningTint)
+                    Badge(title: "Skipped", systemName: "forward.end.fill", foreground: Color.theme.info, background: Color.theme.infoTint)
                     Spacer()
                 }
                 .padding(Spacing.md)
@@ -134,6 +132,16 @@ struct DesignSystemCatalog: View {
                     ProgressRing(progress: 1, lineWidth: 4)
                         .frame(width: 32, height: 32)
                     Spacer()
+                }
+                .padding(Spacing.md)
+
+                RowSeparator()
+
+                VStack(spacing: Spacing.md) {
+                    Button("Take now") {}
+                        .buttonStyle(.primaryAction)
+                    Button("Snooze 10 minutes") {}
+                        .buttonStyle(.secondaryAction)
                 }
                 .padding(Spacing.md)
 

@@ -17,7 +17,14 @@ public enum Spacing {
 }
 
 public enum CornerRadius {
-    public static let card: CGFloat = 12
-    public static let tile: CGFloat = 8
+    public static let card: CGFloat = 22
+    public static let control: CGFloat = 16
+    public static let tile: CGFloat = 12
     public static let badge: CGFloat = 8
+}
+
+public enum Size {
+    /// Apple's minimum comfortable touch target.
+    public static let minTarget: CGFloat = 44
+    public static let primaryButton: CGFloat = 56
 }

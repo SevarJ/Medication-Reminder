@@ -11,22 +11,25 @@ public struct ProgressRing: View {
     private let progress: Double
     private let lineWidth: CGFloat
     private let tint: Color
-    
+    private let track: Color
+
     public init(
         progress: Double,
         lineWidth: CGFloat = 8,
-        tint: Color = Color.theme.accent
+        tint: Color = Color.theme.accent,
+        track: Color = Color.theme.fill
     ) {
         self.progress = progress
         self.lineWidth = lineWidth
         self.tint = tint
+        self.track = track
     }
-    
+
     public var body: some View {
         ZStack {
             Circle()
-                .stroke(Color.theme.accentTint, lineWidth: lineWidth)
-            
+                .stroke(track, lineWidth: lineWidth)
+
             Circle()
                 .trim(from: 0, to: min(max(progress, 0), 1))
                 .stroke(tint, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))

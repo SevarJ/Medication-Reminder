@@ -16,7 +16,7 @@ public struct SectionHeader: View {
 
     public var body: some View {
         Text(title)
-            .font(Font.theme.rowSubtitle)
+            .font(.system(.subheadline, weight: .semibold))
             .foregroundStyle(Color.theme.textSecondary)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, Spacing.lg)

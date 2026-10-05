@@ -21,11 +21,7 @@ struct NotificationPrimingView: View {
         VStack(spacing: Spacing.xl) {
             Spacer()
             
-            Image(systemName: "bell.badge.fill")
-                .font(.system(size: 64))
-                .foregroundStyle(Color.theme.accent)
-                .padding(Spacing.xxl)
-                .background(Color.theme.accentTint, in: Circle())
+            HeroGlyph(systemName: "bell.badge.fill")
             
             VStack(spacing: Spacing.md) {
                 Text(L10n.Priming.title)
@@ -34,7 +30,7 @@ struct NotificationPrimingView: View {
                     .multilineTextAlignment(.center)
                 
                 Text(L10n.Priming.message)
-                    .font(Font.theme.rowSubtitle)
+                    .font(.system(.body))
                     .foregroundStyle(Color.theme.textSecondary)
                     .multilineTextAlignment(.center)
             }
@@ -42,18 +38,11 @@ struct NotificationPrimingView: View {
             Spacer()
             
             VStack(spacing: Spacing.md) {
-                Button(action: onAllow) {
-                    Text(L10n.Priming.allow)
-                        .font(Font.theme.rowTitle)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, Spacing.md)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(Color.theme.accent)
+                Button(L10n.Priming.allow, action: onAllow)
+                    .buttonStyle(.primaryAction)
                 
                 Button(L10n.Priming.notNow, action: onNotNow)
-                    .font(Font.theme.rowSubtitle)
-                    .tint(Color.theme.textSecondary)
+                    .buttonStyle(.secondaryAction)
             }
         }
         .padding(Spacing.xxl)

@@ -46,7 +46,7 @@ struct MedicationEditorView: View {
                         onFinish(false)
                     }
                     .labelStyle(.iconOnly)
-                    .tint(Color.theme.accent)
+                    .tint(Color.theme.accentText)
                 }
                 
                 ToolbarItem(placement: .confirmationAction) {
@@ -57,7 +57,7 @@ struct MedicationEditorView: View {
                             }
                         }
                     }
-                    .tint(Color.theme.accent)
+                    .tint(Color.theme.accentText)
                     .disabled(viewModel.isSaving)
                 }
             }
@@ -132,13 +132,14 @@ struct MedicationEditorView: View {
                 if viewModel.repeatMode == .specificDays {
                     RowSeparator()
                     
-                    HStack(spacing: Spacing.sm) {
+                    HStack(spacing: 0) {
                         ForEach(Weekday.allCases, id: \.self) { weekday in
                             weekdayButton(weekday)
                         }
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(Spacing.lg)
+                    .padding(.horizontal, Spacing.sm)
+                    .padding(.vertical, Spacing.md)
                 }
             }
         }
@@ -154,14 +155,18 @@ struct MedicationEditorView: View {
                 .font(Font.theme.rowSubtitle)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
-                .foregroundStyle(isSelected ? Color.theme.surface : Color.theme.textSecondary)
-                .frame(width: 36, height: 36)
+                .fontWeight(isSelected ? .semibold : .regular)
+                .foregroundStyle(isSelected ? Color.theme.onHero : Color.theme.textPrimary)
+                .frame(width: 40, height: 40)
                 .background(
-                    isSelected ? Color.theme.accent : Color.theme.accentTint,
+                    isSelected ? Color.theme.hero : Color.theme.fill,
                     in: Circle()
                 )
+                .frame(maxWidth: .infinity, minHeight: Size.minTarget)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
     
     private var durationSection: some View {
@@ -242,7 +247,10 @@ struct MedicationEditorView: View {
                                 viewModel.removeTime(id: time.id)
                             } label: {
                                 Image(systemName: "minus.circle.fill")
+                                    .font(.system(.title3))
                                     .foregroundStyle(Color.theme.danger)
+                                    .frame(width: Size.minTarget, height: Size.minTarget)
+                                    .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
                         }
@@ -261,9 +269,10 @@ struct MedicationEditorView: View {
                             Text(L10n.Editor.addTime)
                         }
                         .font(Font.theme.rowTitle)
-                        .foregroundStyle(Color.theme.accent)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(Spacing.lg)
+                        .foregroundStyle(Color.theme.accentText)
+                        .frame(maxWidth: .infinity, minHeight: Size.minTarget, alignment: .leading)
+                        .padding(.horizontal, Spacing.lg)
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                 }

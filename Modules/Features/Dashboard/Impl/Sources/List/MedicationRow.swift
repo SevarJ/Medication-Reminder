@@ -17,11 +17,12 @@ struct MedicationRow: View {
         HStack(spacing: Spacing.md) {
             IconTile(
                 systemName: "pills.fill",
-                foreground: medication.isActive ? Color.theme.accent : Color.theme.textSecondary,
-                background: medication.isActive ? Color.theme.accentTint : Color.theme.separator
+                foreground: medication.isActive ? Color.theme.accentText : Color.theme.textSecondary,
+                background: medication.isActive ? Color.theme.accentTint : Color.theme.fill,
+                size: 44
             )
             
-            VStack(alignment: .leading, spacing: Spacing.sm) {
+            VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(medication.name)
                     .font(Font.theme.rowTitle)
                     .foregroundStyle(Color.theme.textPrimary)
@@ -30,37 +31,31 @@ struct MedicationRow: View {
                     .font(Font.theme.rowSubtitle)
                     .foregroundStyle(Color.theme.textSecondary)
                 
-                HStack(spacing: Spacing.xs) {
-                    ForEach(medication.schedule.times) { time in
-                        Badge(
-                            title: time.displayText,
-                            foreground: color(for: time),
-                            background: Color.theme.accentTint
-                        )
-                    }
-                }
+                Text(medication.schedule.times.map(\.displayText).joined(separator: "  ·  "))
+                    .font(.system(.footnote, design: .rounded, weight: .semibold).monospacedDigit())
+                    .foregroundStyle(medication.isActive ? Color.theme.accentText : Color.theme.textSecondary)
+                    .padding(.top, 2)
             }
-            .opacity(medication.isActive ? 1 : 0.6)
+            .opacity(medication.isActive ? 1 : 0.65)
             
             Spacer(minLength: Spacing.sm)
             
             if !medication.isActive {
                 Badge(
                     title: L10n.List.paused,
+                    systemName: "pause.fill",
                     foreground: Color.theme.textSecondary,
-                    background: Color.theme.separator
+                    background: Color.theme.fill
                 )
             }
             
             Image(systemName: "chevron.right")
-                .font(Font.theme.caption)
-                .foregroundStyle(Color.theme.textSecondary)
+                .font(.system(.footnote, weight: .semibold))
+                .foregroundStyle(Color.theme.textSecondary.opacity(0.6))
         }
-        .padding(Spacing.lg)
+        .padding(.vertical, Spacing.md)
+        .padding(.horizontal, Spacing.lg)
+        .frame(minHeight: 76)
         .contentShape(Rectangle())
-    }
-    
-    private func color(for time: MedTime) -> Color {
-        time.hour < 12 ? Color.theme.morning : Color.theme.evening
     }
 }

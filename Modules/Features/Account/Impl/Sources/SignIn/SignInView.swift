@@ -20,11 +20,7 @@ struct SignInView: View {
         VStack(spacing: Spacing.xl) {
             Spacer()
 
-            Image(systemName: "pills.fill")
-                .font(.system(size: 64))
-                .foregroundStyle(Color.theme.accent)
-                .padding(Spacing.xxl)
-                .background(Color.theme.accentTint, in: Circle())
+            HeroGlyph(systemName: "pills.fill")
 
             VStack(spacing: Spacing.md) {
                 Text(L10n.SignIn.title)
@@ -33,7 +29,7 @@ struct SignInView: View {
                     .multilineTextAlignment(.center)
 
                 Text(L10n.SignIn.message)
-                    .font(Font.theme.rowSubtitle)
+                    .font(.system(.body))
                     .foregroundStyle(Color.theme.textSecondary)
                     .multilineTextAlignment(.center)
             }
@@ -45,18 +41,15 @@ struct SignInView: View {
             } label: {
                 ZStack {
                     Text(L10n.SignIn.continueWithGoogle)
-                        .font(Font.theme.rowTitle)
                         .opacity(viewModel.isSigningIn ? 0 : 1)
 
                     if viewModel.isSigningIn {
                         ProgressView()
+                            .tint(Color.theme.onHero)
                     }
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, Spacing.md)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(Color.theme.accent)
+            .buttonStyle(.primaryAction)
             .disabled(viewModel.isSigningIn)
         }
         .padding(Spacing.xxl)

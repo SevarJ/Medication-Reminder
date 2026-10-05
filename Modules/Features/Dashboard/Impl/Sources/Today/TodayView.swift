@@ -29,7 +29,7 @@ struct TodayView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color.theme.background)
                 .navigationTitle(L10n.Today.title)
-                .navigationBarTitleDisplayMode(.inline)
+                .navigationBarTitleDisplayMode(.large)
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
@@ -38,7 +38,8 @@ struct TodayView: View {
                             Image(systemName: "plus")
                                 .font(.system(.body, weight: .semibold))
                         }
-                        .tint(Color.theme.accent)
+                        .tint(Color.theme.accentText)
+                        .accessibilityLabel(L10n.List.addMedication)
                     }
                 }
         }
@@ -93,15 +94,13 @@ struct TodayView: View {
     private var schedule: some View {
         List {
             Section {
-                header
-                
                 WeekStrip(
                     days: viewModel.week,
                     isSelected: viewModel.isSelected,
                     onSelect: viewModel.select
                 )
             }
-            .listRowInsets(EdgeInsets(top: Spacing.sm, leading: 0, bottom: Spacing.sm, trailing: 0))
+            .listRowInsets(EdgeInsets(top: 0, leading: Spacing.xs, bottom: 0, trailing: Spacing.xs))
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
             
@@ -114,6 +113,13 @@ struct TodayView: View {
                 }
                 .listRowBackground(Color.clear)
             }
+            else {
+                Section {
+                    summary
+                }
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+            }
             
             ForEach(DosePeriod.allCases) { period in
                 let doses = viewModel.doses(in: period)
@@ -124,8 +130,7 @@ struct TodayView: View {
             }
         }
         .listStyle(.insetGrouped)
-        .listSectionSpacing(Spacing.lg)
-        .contentMargins(.top, Spacing.sm, for: .scrollContent)
+        .listSectionSpacing(Spacing.xl)
         .scrollContentBackground(.hidden)
         .animation(.spring(duration: 0.35), value: viewModel.week)
         .animation(.spring(duration: 0.35), value: viewModel.selectedDay)
@@ -134,37 +139,38 @@ struct TodayView: View {
         }
     }
     
-    private var header: some View {
+    private var summary: some View {
         HStack(spacing: Spacing.lg) {
-            ProgressRing(progress: viewModel.progress, lineWidth: 10)
-                .frame(width: 96, height: 96)
+            ProgressRing(progress: viewModel.progress, lineWidth: 8)
+                .frame(width: 60, height: 60)
                 .overlay {
-                    VStack(spacing: 0) {
-                        Text(viewModel.selectedDoses.isEmpty ? "–" : "\(viewModel.takenCount)/\(viewModel.selectedDoses.count)")
-                            .font(.system(.title2, design: .rounded, weight: .bold))
-                            .foregroundStyle(Color.theme.textPrimary)
-                            .contentTransition(.numericText())
-                        
-                        Text(L10n.Today.taken)
-                            .font(Font.theme.caption)
-                            .foregroundStyle(Color.theme.textSecondary)
-                    }
-                    .animation(.spring, value: viewModel.takenCount)
+                    Text("\(Int((viewModel.progress * 100).rounded()))%")
+                        .font(.system(.footnote, design: .rounded, weight: .bold))
+                        .foregroundStyle(Color.theme.textPrimary)
+                        .contentTransition(.numericText())
                 }
             
             VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(viewModel.title)
-                    .font(.system(.title3, weight: .bold))
-                    .foregroundStyle(Color.theme.textPrimary)
-                
-                Text(L10n.Today.weekAdherence(viewModel.weekAdherence.formatted(.percent.precision(.fractionLength(0)).locale(AppLanguage.current.locale))))
                     .font(Font.theme.rowSubtitle)
                     .foregroundStyle(Color.theme.textSecondary)
+                
+                Text("\(viewModel.takenCount)/\(viewModel.selectedDoses.count) \(L10n.Today.taken)")
+                    .font(Font.theme.sectionTitle)
+                    .foregroundStyle(Color.theme.textPrimary)
+                    .contentTransition(.numericText())
+                
+                Text(L10n.Today.weekAdherence(viewModel.weekAdherence.formatted(.percent.precision(.fractionLength(0)).locale(AppLanguage.current.locale))))
+                    .font(Font.theme.caption)
+                    .foregroundStyle(Color.theme.textSecondary)
             }
+            .animation(.spring, value: viewModel.takenCount)
             
             Spacer(minLength: 0)
         }
-        .padding(.bottom, Spacing.sm)
+        .padding(Spacing.lg)
+        .cardSurface()
+        .accessibilityElement(children: .combine)
     }
     
     @ViewBuilder private var highlight: some View {
@@ -204,14 +210,29 @@ struct TodayView: View {
                     onSkip: { record(dose, as: .skipped) }
                 )
                 .listRowInsets(EdgeInsets())
-                .listRowBackground(state == .taken ? Color.theme.accentTint : Color.theme.surface)
+                .listRowBackground(Color.theme.surface)
                 .listRowSeparatorTint(Color.theme.separator)
             }
         } header: {
-            Label(period.title, systemImage: period.iconName)
-                .font(Font.theme.rowSubtitle)
-                .foregroundStyle(Color.theme.textSecondary)
-                .textCase(nil)
+            HStack(spacing: Spacing.sm) {
+                Image(systemName: period.iconName)
+                    .foregroundStyle(Color.theme.textSecondary)
+                    .frame(width: 28)
+                
+                Text(period.title)
+                    .foregroundStyle(Color.theme.textPrimary)
+                
+                Spacer()
+                
+                Text("\(doses.count { viewModel.state(of: $0) == .taken })/\(doses.count)")
+                    .font(Font.theme.rowSubtitle)
+                    .foregroundStyle(Color.theme.textSecondary)
+                    .monospacedDigit()
+            }
+            .font(Font.theme.sectionTitle)
+            .textCase(nil)
+            .padding(.top, Spacing.xs)
+            .accessibilityElement(children: .combine)
         }
     }
     
@@ -219,8 +240,9 @@ struct TodayView: View {
         VStack(spacing: Spacing.md) {
             IconTile(
                 systemName: "checkmark.circle.fill",
-                foreground: Color.theme.accent,
-                background: Color.theme.accentTint
+                foreground: Color.theme.accentText,
+                background: Color.theme.accentTint,
+                size: 56
             )
             
             Text(viewModel.isTodaySelected ? L10n.Today.emptyTitle : L10n.Today.emptyDayTitle)
@@ -241,8 +263,9 @@ struct TodayView: View {
         VStack(spacing: Spacing.md) {
             IconTile(
                 systemName: "exclamationmark.triangle.fill",
-                foreground: Color.theme.danger,
-                background: Color.theme.surface
+                foreground: Color.theme.warning,
+                background: Color.theme.warningTint,
+                size: 56
             )
             
             Text(L10n.Today.loadFailedTitle)
@@ -257,8 +280,8 @@ struct TodayView: View {
             Button(CommonText.tryAgain) {
                 Task { await viewModel.load() }
             }
-            .font(Font.theme.rowTitle)
-            .tint(Color.theme.accent)
+            .buttonStyle(.secondaryAction)
+            .fixedSize()
             .padding(.top, Spacing.sm)
         }
         .padding(Spacing.xxl)
