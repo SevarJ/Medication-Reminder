@@ -72,7 +72,7 @@ struct MonthGrid: View {
         .overlay {
             if selected {
                 Circle()
-                    .stroke(Color.theme.hero, lineWidth: 2)
+                    .stroke(Color.theme.info, lineWidth: 2.5)
             }
         }
         .frame(maxWidth: .infinity)

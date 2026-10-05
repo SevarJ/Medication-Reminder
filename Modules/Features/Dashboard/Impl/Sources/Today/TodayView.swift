@@ -129,6 +129,7 @@ struct TodayView: View {
                 .listRowInsets(EdgeInsets(top: 0, leading: Spacing.sm, bottom: 0, trailing: Spacing.sm))
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
+                .listSectionSpacing(Spacing.xs)
             }
             else {
                 Section {
@@ -148,9 +149,13 @@ struct TodayView: View {
         }
         .listStyle(.insetGrouped)
         .listSectionSpacing(Spacing.xl)
+        .environment(\.defaultMinListRowHeight, 1)
         .scrollContentBackground(.hidden)
         .animation(.spring(duration: 0.35), value: viewModel.week)
         .animation(.spring(duration: 0.35), value: viewModel.selectedDay)
+        .animation(.smooth(duration: 0.45), value: viewModel.isExpanded)
+        .animation(.smooth(duration: 0.3), value: viewModel.monthCalendar.month)
+        .animation(.smooth(duration: 0.3), value: viewModel.monthCalendar.state)
         .refreshable {
             await viewModel.load()
         }
@@ -341,6 +346,7 @@ struct TodayView: View {
                     isSelected: viewModel.isSelected,
                     onSelect: viewModel.select
                 )
+                .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .top)))
                 .listRowInsets(EdgeInsets(top: 0, leading: Spacing.xs, bottom: 0, trailing: Spacing.xs))
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
@@ -410,36 +416,34 @@ struct TodayView: View {
         .accessibilityLabel(label)
     }
     
+    /// The grid stays on screen while a month loads, so only its markers fill in.
     @ViewBuilder private var month: some View {
         let model = viewModel.monthCalendar
         
+        Section {
+            MonthGrid(
+                weekdayHeaders: model.weekdayHeaders,
+                days: model.gridDays,
+                summary: model.summary(on:),
+                outcome: model.outcome(on:),
+                isSelected: viewModel.isSelected,
+                isEnabled: model.isSelectable,
+                onSelect: viewModel.select
+            )
+            .padding(.vertical, Spacing.sm)
+            .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .top)))
+        }
+        .listRowBackground(Color.theme.surface)
+        
         switch model.state {
         case .loading:
-            Section {
-                ProgressView()
-                    .frame(maxWidth: .infinity, minHeight: 160)
-            }
-            .listRowBackground(Color.clear)
+            EmptyView()
         case .failure:
             Section {
                 monthFailure
             }
             .listRowBackground(Color.clear)
         case .loaded:
-            Section {
-                MonthGrid(
-                    weekdayHeaders: model.weekdayHeaders,
-                    days: model.gridDays,
-                    summary: model.summary(on:),
-                    outcome: model.outcome(on:),
-                    isSelected: viewModel.isSelected,
-                    isEnabled: model.isSelectable,
-                    onSelect: viewModel.select
-                )
-                .padding(.vertical, Spacing.sm)
-            }
-            .listRowBackground(Color.theme.surface)
-            
             if !model.days.isEmpty {
                 Section {
                     MonthTotalsCard(
@@ -448,6 +452,7 @@ struct TodayView: View {
                         skipped: model.skippedCount,
                         missed: model.missedCount
                     )
+                    .transition(.opacity.combined(with: .move(edge: .top)))
                 }
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
