@@ -1,5 +1,5 @@
 //
-//  HistoryViewModel.swift
+//  MonthCalendarViewModel.swift
 //  DashboardImpl
 //
 //  Created by Sevar Jafarli on 05.10.26.
@@ -10,12 +10,12 @@ import Domain
 import Foundation
 import Observation
 
+/// The month the expanded calendar on the Today screen shows, and the doses of its days.
 @MainActor
 @Observable
-final class HistoryViewModel {
+final class MonthCalendarViewModel {
     private(set) var state: HistoryState = .loading
     private(set) var month: Date
-    private(set) var selectedDay: Date?
     private(set) var earliestMonth: Date?
     
     private let loadMonth: LoadMonthHistoryUseCase
@@ -28,8 +28,8 @@ final class HistoryViewModel {
     
     init(
         loadMonth: LoadMonthHistoryUseCase,
-        calendar: Calendar = .current,
-        currentDate: @escaping @Sendable () -> Date = { .now }
+        calendar: Calendar,
+        currentDate: @escaping @Sendable () -> Date
     ) {
         self.loadMonth = loadMonth
         self.calendar = calendar
@@ -74,9 +74,19 @@ final class HistoryViewModel {
     
     /// Starts over, for when the medications or the account's data changed.
     func reload() async {
-        memo = [:]
+        invalidate()
         
         await load()
+    }
+    
+    /// Forgets what was loaded, so the next `load()` reads it again.
+    func invalidate() {
+        memo = [:]
+        shownMonth = nil
+    }
+    
+    func showMonth(containing day: Date) async {
+        await show(month: Self.startOfMonth(containing: day, calendar: calendar))
     }
     
     func showPreviousMonth() async {
@@ -91,15 +101,20 @@ final class HistoryViewModel {
         await show(month: shifted(month, by: 1))
     }
     
-    func select(_ day: Date) {
-        guard isSelectable(day) else { return }
+    /// Keeps a dose that was just recorded in step with the month on screen.
+    func replace(_ dose: ScheduledDose) {
+        guard case .loaded(let days) = state else { return }
         
-        selectedDay = calendar.startOfDay(for: day)
-    }
-    
-    /// The history ends today.
-    func isSelectable(_ day: Date) -> Bool {
-        calendar.startOfDay(for: day) <= calendar.startOfDay(for: currentDate())
+        state = .loaded(
+            days.map { summary in
+                guard summary.doses.contains(where: { $0.id == dose.id }) else { return summary }
+                
+                return DoseDaySummary(
+                    date: summary.date,
+                    doses: summary.doses.map { $0.id == dose.id ? dose : $0 }
+                )
+            }
+        )
     }
     
     // MARK: Month
@@ -136,6 +151,10 @@ final class HistoryViewModel {
     
     // MARK: Days
     
+    var isLoaded: Bool {
+        if case .loaded = state { true } else { false }
+    }
+    
     var days: [DoseDaySummary] {
         guard case .loaded(let days) = state else { return [] }
         
@@ -150,20 +169,9 @@ final class HistoryViewModel {
         summary(on: day)?.outcome(at: currentDate()) ?? .none
     }
     
-    func isSelected(_ day: Date) -> Bool {
-        selectedDay.map { calendar.isDate($0, inSameDayAs: day) } ?? false
-    }
-    
-    var selectedDoses: [ScheduledDose] {
-        selectedDay.flatMap(summary(on:))?.doses ?? []
-    }
-    
-    var selectedTitle: String? {
-        selectedDay?.formatted(.dateTime.weekday(.wide).day().month(.wide).locale(AppLanguage.current.locale))
-    }
-    
-    func state(of dose: ScheduledDose) -> DoseState {
-        dose.state(at: currentDate())
+    /// The history ends today.
+    func isSelectable(_ day: Date) -> Bool {
+        calendar.startOfDay(for: day) <= calendar.startOfDay(for: currentDate())
     }
     
     // MARK: Totals
@@ -200,25 +208,6 @@ final class HistoryViewModel {
     private func show(_ days: [DoseDaySummary], for month: Date) {
         shownMonth = month
         state = .loaded(days)
-        
-        if !isSelectionValid(in: month) {
-            selectedDay = defaultSelection(in: days)
-        }
-    }
-    
-    private func isSelectionValid(in month: Date) -> Bool {
-        selectedDay.map { calendar.isDate($0, equalTo: month, toGranularity: .month) } ?? false
-    }
-    
-    /// Today when the month holds it, otherwise the latest day that has doses.
-    private func defaultSelection(in days: [DoseDaySummary]) -> Date? {
-        let today = currentDate()
-        
-        if calendar.isDate(today, equalTo: month, toGranularity: .month) {
-            return calendar.startOfDay(for: today)
-        }
-        
-        return days.last?.date
     }
     
     private func isOlderThanCache(_ month: Date) -> Bool {
@@ -234,7 +223,9 @@ final class HistoryViewModel {
     }
     
     private func count(of state: DoseState) -> Int {
-        days.flatMap(\.doses).count { self.state(of: $0) == state }
+        let now = currentDate()
+        
+        return days.flatMap(\.doses).count { $0.state(at: now) == state }
     }
     
     private func shifted(_ month: Date, by value: Int) -> Date {

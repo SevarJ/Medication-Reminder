@@ -45,10 +45,15 @@ struct TodayViewModelTests {
         logs: [DoseLog] = [],
         repository: MockMedicationRepository? = nil,
         logRepository: MockDoseLogRepository? = nil,
+        remote: MockDoseLogRemoteStore = MockDoseLogRemoteStore(),
         now: Date
     ) -> TodayViewModel {
         let medicationRepository = repository ?? MockMedicationRepository(medications: medications)
         let doseLogRepository = logRepository ?? MockDoseLogRepository(logs: logs)
+        let saveMedication = SaveMedicationUseCase(
+            repository: medicationRepository,
+            scheduler: MockReminderScheduler()
+        )
         
         return TodayViewModel(
             loadHistory: LoadDoseHistoryUseCase(
@@ -56,15 +61,32 @@ struct TodayViewModelTests {
                 doseLogRepository: doseLogRepository,
                 calendar: calendar
             ),
+            loadMonth: LoadMonthHistoryUseCase(
+                medicationRepository: medicationRepository,
+                doseLogRepository: doseLogRepository,
+                remoteDoseLogs: remote,
+                calendar: calendar
+            ),
             recordDose: RecordDoseUseCase(
                 doseLogRepository: doseLogRepository,
                 medicationRepository: medicationRepository,
                 calendar: calendar
             ),
-            saveMedication: SaveMedicationUseCase(
-                repository: medicationRepository,
-                scheduler: MockReminderScheduler()
-            ),
+            saveMedication: saveMedication,
+            makeDetail: { medication in
+                MedicationDetailViewModel(
+                    medication: medication,
+                    repository: medicationRepository,
+                    loadHistory: LoadMedicationHistoryUseCase(doseLogRepository: doseLogRepository),
+                    saveMedication: saveMedication,
+                    deleteMedication: DeleteMedicationUseCase(
+                        repository: medicationRepository,
+                        scheduler: MockReminderScheduler(),
+                        doseLogRepository: doseLogRepository
+                    ),
+                    toggleMedicationActive: ToggleMedicationActiveUseCase(saveMedication: saveMedication)
+                )
+            },
             calendar: calendar,
             currentDate: { now }
         )
@@ -298,5 +320,124 @@ struct TodayViewModelTests {
         #expect(sut.doses(in: .morning).count == 1)
         #expect(sut.doses(in: .afternoon).count == 1)
         #expect(sut.doses(in: .evening).count == 1)
+    }
+    
+    // MARK: Calendar
+    
+    private func olderMedication() throws -> Medication {
+        try DomainTesting.makeMedication(startDate: try #require(calendar.date(from: DateComponents(year: 2026, month: 8, day: 1))))
+    }
+    
+    @Test func expandingShowsTheMonthOfTheSelectedDay() async throws {
+        let sut = makeSUT(medications: [try olderMedication()], now: try date(day: 17, hour: 12))
+        
+        await sut.load()
+        await sut.toggleCalendar()
+        
+        #expect(sut.isExpanded)
+        #expect(sut.monthCalendar.month == (try date(day: 1)))
+        #expect(sut.monthCalendar.days.count == 17)
+    }
+    
+    @Test func showsAnOlderDayReadOnly() async throws {
+        let sut = makeSUT(medications: [try olderMedication()], now: try date(day: 17, hour: 12))
+        
+        await sut.load()
+        await sut.toggleCalendar()
+        sut.select(try date(day: 5))
+        
+        let dose = try #require(sut.selectedDoses.first)
+        
+        #expect(sut.selectedDay == (try date(day: 5)))
+        #expect(sut.isSelectedDayLoaded)
+        #expect(!sut.isEditable(dose))
+    }
+    
+    @Test func reachesBackToAnOlderMonthFromTheServer() async throws {
+        let remote = MockDoseLogRemoteStore()
+        let sut = makeSUT(medications: [try olderMedication()], remote: remote, now: try date(day: 17, hour: 12))
+        
+        await sut.load()
+        await sut.toggleCalendar()
+        await sut.monthCalendar.showPreviousMonth()
+        sut.select(try #require(calendar.date(from: DateComponents(year: 2026, month: 8, day: 10))))
+        
+        #expect(sut.selectedDoses.count == 1)
+        #expect(await remote.fetchCount > 0)
+    }
+    
+    @Test func recentDaysCanStillBeChanged() async throws {
+        let sut = makeSUT(medications: [try olderMedication()], now: try date(day: 17, hour: 12))
+        
+        await sut.load()
+        await sut.toggleCalendar()
+        sut.select(try date(day: 12))
+        
+        #expect(try #require(sut.selectedDoses.first).scheduledDate == (try date(day: 12, hour: 9)))
+        #expect(sut.isEditable(try #require(sut.selectedDoses.first)))
+    }
+    
+    @Test func ignoresDaysAfterToday() async throws {
+        let sut = makeSUT(medications: [try olderMedication()], now: try date(day: 17, hour: 12))
+        
+        await sut.load()
+        await sut.toggleCalendar()
+        sut.select(try date(day: 25))
+        
+        #expect(sut.selectedDay == (try date(day: 17)))
+    }
+    
+    @Test func closingTheCalendarGoesBackToTodayFromAnOlderDay() async throws {
+        let sut = makeSUT(medications: [try olderMedication()], now: try date(day: 17, hour: 12))
+        
+        await sut.load()
+        await sut.toggleCalendar()
+        sut.select(try date(day: 5))
+        await sut.toggleCalendar()
+        
+        #expect(!sut.isExpanded)
+        #expect(sut.selectedDay == (try date(day: 17)))
+    }
+    
+    @Test func closingTheCalendarKeepsARecentDay() async throws {
+        let sut = makeSUT(medications: [try olderMedication()], now: try date(day: 17, hour: 12))
+        
+        await sut.load()
+        await sut.toggleCalendar()
+        sut.select(try date(day: 13))
+        await sut.toggleCalendar()
+        
+        #expect(sut.selectedDay == (try date(day: 13)))
+    }
+    
+    @Test func reloadingKeepsAnOlderDayWhileTheCalendarIsOpen() async throws {
+        let sut = makeSUT(medications: [try olderMedication()], now: try date(day: 17, hour: 12))
+        
+        await sut.load()
+        await sut.toggleCalendar()
+        sut.select(try date(day: 5))
+        await sut.refresh()
+        
+        #expect(sut.selectedDay == (try date(day: 5)))
+    }
+    
+    @Test func recordingADoseUpdatesTheCalendar() async throws {
+        let sut = makeSUT(medications: [try olderMedication()], now: try date(day: 17, hour: 12))
+        
+        await sut.load()
+        await sut.toggleCalendar()
+        
+        let dose = try #require(sut.selectedDoses.first)
+        
+        await sut.record(dose, as: .taken)
+        
+        #expect(sut.monthCalendar.summary(on: try date(day: 17))?.takenCount == 1)
+    }
+    
+    @Test func buildsTheDetailOfADose() async throws {
+        let medication = try olderMedication()
+        let sut = makeSUT(medications: [medication], now: try date(day: 17, hour: 12))
+        
+        #expect(sut.makeDetailViewModel(for: medication).medication.id == medication.id)
     }
 }

@@ -175,10 +175,6 @@ enum L10n {
     }
     
     enum History {
-        static var title: String {
-            String(localized: "history.title", defaultValue: "History", bundle: .module.localized())
-        }
-        
         static var previousMonth: String {
             String(localized: "history.month.previous", defaultValue: "Previous month", bundle: .module.localized())
         }
@@ -285,6 +281,14 @@ enum L10n {
         
         static func weekAdherence(_ percent: String) -> String {
             String(localized: "today.progress.week", defaultValue: "Last 7 days: \(percent)", bundle: .module.localized())
+        }
+        
+        static var showCalendar: String {
+            String(localized: "today.calendar.show", defaultValue: "Show calendar", bundle: .module.localized())
+        }
+        
+        static var hideCalendar: String {
+            String(localized: "today.calendar.hide", defaultValue: "Hide calendar", bundle: .module.localized())
         }
         
         static var nextDose: String {

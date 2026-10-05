@@ -16,31 +16,61 @@ import Observation
 final class TodayViewModel {
     private(set) var state: TodayState = .loading
     private(set) var selectedDay: Date
+    /// Whether the week strip is opened up into the month calendar.
+    private(set) var isExpanded = false
     var errorMessage: String?
+    
+    let monthCalendar: MonthCalendarViewModel
     
     private let loadHistory: LoadDoseHistoryUseCase
     private let recordDose: RecordDoseUseCase
     private let saveMedication: SaveMedicationUseCase
+    private let makeDetail: @MainActor (Medication) -> MedicationDetailViewModel
     private let calendar: Calendar
     private let currentDate: @Sendable () -> Date
     
     init(
         loadHistory: LoadDoseHistoryUseCase,
+        loadMonth: LoadMonthHistoryUseCase,
         recordDose: RecordDoseUseCase,
         saveMedication: SaveMedicationUseCase,
+        makeDetail: @escaping @MainActor (Medication) -> MedicationDetailViewModel,
         calendar: Calendar = .current,
         currentDate: @escaping @Sendable () -> Date = { .now }
     ) {
         self.loadHistory = loadHistory
         self.recordDose = recordDose
         self.saveMedication = saveMedication
+        self.makeDetail = makeDetail
         self.calendar = calendar
         self.currentDate = currentDate
         self.selectedDay = calendar.startOfDay(for: currentDate())
+        self.monthCalendar = MonthCalendarViewModel(
+            loadMonth: loadMonth,
+            calendar: calendar,
+            currentDate: currentDate
+        )
     }
     
     func start() async {
+        // Whatever the calendar loaded may be out of date now. It is read again when it opens, or right away if it already is.
+        if isExpanded {
+            await monthCalendar.reload()
+        }
+        else {
+            monthCalendar.invalidate()
+        }
+        
         await load()
+    }
+    
+    /// Picks up changes made elsewhere, such as when the app returns from the background.
+    func refresh() async {
+        await load()
+        
+        if isExpanded {
+            await monthCalendar.load()
+        }
     }
     
     func load() async {
@@ -56,7 +86,7 @@ final class TodayViewModel {
             
             state = .loaded(week)
             
-            if !week.contains(where: { calendar.isDate($0.date, inSameDayAs: selectedDay) }) {
+            if !isExpanded && !week.contains(where: { calendar.isDate($0.date, inSameDayAs: selectedDay) }) {
                 selectedDay = today
             }
         }
@@ -66,16 +96,41 @@ final class TodayViewModel {
     }
     
     func select(_ day: Date) {
+        guard monthCalendar.isSelectable(day) else { return }
+        
         selectedDay = calendar.startOfDay(for: day)
+    }
+    
+    func toggleCalendar() async {
+        if isExpanded {
+            isExpanded = false
+            
+            // The strip only reaches back a week.
+            if !isRecent(selectedDay) {
+                selectedDay = calendar.startOfDay(for: currentDate())
+            }
+        }
+        else {
+            isExpanded = true
+            
+            await monthCalendar.showMonth(containing: selectedDay)
+        }
     }
     
     func record(_ dose: ScheduledDose, as status: DoseStatus) async {
         do {
-            replace(try await recordDose.execute(dose, status: status, now: currentDate()))
+            let recorded = try await recordDose.execute(dose, status: status, now: currentDate())
+            
+            replace(recorded)
+            monthCalendar.replace(recorded)
         }
         catch {
             errorMessage = ErrorFormatter.message(for: error)
         }
+    }
+    
+    func makeDetailViewModel(for medication: Medication) -> MedicationDetailViewModel {
+        makeDetail(medication)
     }
     
     func makeNewMedicationEditor() -> MedicationEditorViewModel {
@@ -89,11 +144,31 @@ final class TodayViewModel {
     }
     
     var selectedDoses: [ScheduledDose] {
-        week.first { calendar.isDate($0.date, inSameDayAs: selectedDay) }?.doses ?? []
+        selectedSummary?.doses ?? []
+    }
+    
+    /// Whether the doses of the selected day are known. An older day waits for the calendar.
+    var isSelectedDayLoaded: Bool {
+        isRecent(selectedDay) || monthCalendar.isLoaded
+    }
+    
+    /// Only the last week can be changed.
+    func isEditable(_ dose: ScheduledDose) -> Bool {
+        isRecent(dose.scheduledDate)
+    }
+    
+    /// What the calendar header says: the month on screen, or the current one while it is closed.
+    var calendarTitle: String {
+        isExpanded ? monthCalendar.title : currentDate().formatted(.dateTime.month(.wide).year().locale(AppLanguage.current.locale))
     }
     
     var isTodaySelected: Bool {
         calendar.isDate(selectedDay, inSameDayAs: currentDate())
+    }
+    
+    /// The selected day in full, as the heading above its doses.
+    var fullTitle: String {
+        selectedDay.formatted(.dateTime.weekday(.wide).day().month(.wide).locale(AppLanguage.current.locale))
     }
     
     var title: String {
@@ -146,6 +221,23 @@ final class TodayViewModel {
     
     func doses(in period: DosePeriod) -> [ScheduledDose] {
         selectedDoses.filter { DosePeriod.of($0.scheduledDate) == period }
+    }
+    
+    private var selectedSummary: DoseDaySummary? {
+        week.first { calendar.isDate($0.date, inSameDayAs: selectedDay) }
+            ?? monthCalendar.summary(on: selectedDay)
+    }
+    
+    /// Whether the day is one of the last seven, which the week strip shows and the Today screen can change.
+    private func isRecent(_ day: Date) -> Bool {
+        let today = calendar.startOfDay(for: currentDate())
+        let day = calendar.startOfDay(for: day)
+        
+        guard let first = calendar.date(byAdding: .day, value: -(LoadDoseHistoryUseCase.defaultDayCount - 1), to: today) else {
+            return false
+        }
+        
+        return day >= first && day <= today
     }
     
     private func week(endingOn today: Date, from summaries: [DoseDaySummary]) -> [DoseDaySummary] {

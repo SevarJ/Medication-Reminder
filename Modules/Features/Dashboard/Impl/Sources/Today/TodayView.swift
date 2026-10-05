@@ -13,6 +13,7 @@ import SwiftUI
 struct TodayView: View {
     @State private var viewModel: TodayViewModel
     @State private var editorViewModel: MedicationEditorViewModel?
+    @State private var detailViewModel: MedicationDetailViewModel?
     
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -44,6 +45,16 @@ struct TodayView: View {
                         .accessibilityLabel(L10n.List.addMedication)
                     }
                 }
+                .navigationDestination(isPresented: Binding(
+                    get: { detailViewModel != nil },
+                    set: { if !$0 { detailViewModel = nil } }
+                )) {
+                    if let detailViewModel {
+                        MedicationDetailView(viewModel: detailViewModel) {
+                            Task { await viewModel.start() }
+                        }
+                    }
+                }
         }
         .sheet(item: $editorViewModel) { editor in
             MedicationEditorView(
@@ -52,7 +63,7 @@ struct TodayView: View {
                     editorViewModel = nil
                     
                     if saved {
-                        Task { await viewModel.load() }
+                        Task { await viewModel.start() }
                     }
                 }
             )
@@ -76,7 +87,7 @@ struct TodayView: View {
         }
         .onChange(of: scenePhase) { _, newValue in
             if newValue == .active {
-                Task { await viewModel.load() }
+                Task { await viewModel.refresh() }
             }
         }
     }
@@ -94,25 +105,30 @@ struct TodayView: View {
     
     private var schedule: some View {
         List {
-            Section {
-                WeekStrip(
-                    days: viewModel.week,
-                    isSelected: viewModel.isSelected,
-                    onSelect: viewModel.select
-                )
-            }
-            .listRowInsets(EdgeInsets(top: 0, leading: Spacing.xs, bottom: 0, trailing: Spacing.xs))
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
+            calendar
             
             highlight
             
-            if viewModel.selectedDoses.isEmpty {
+            if !viewModel.isSelectedDayLoaded {
+                EmptyView()
+            }
+            else if viewModel.selectedDoses.isEmpty {
                 Section {
                     emptyState
                         .frame(maxWidth: .infinity)
                 }
                 .listRowBackground(Color.clear)
+            }
+            else if viewModel.isExpanded {
+                Section {
+                    Text(viewModel.fullTitle)
+                        .font(Font.theme.sectionTitle)
+                        .foregroundStyle(Color.theme.textPrimary)
+                        .accessibilityAddTraits(.isHeader)
+                }
+                .listRowInsets(EdgeInsets(top: 0, leading: Spacing.sm, bottom: 0, trailing: Spacing.sm))
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
             }
             else {
                 Section {
@@ -215,12 +231,20 @@ struct TodayView: View {
             ForEach(doses) { dose in
                 let state = viewModel.state(of: dose)
                 
-                DoseRow(
-                    dose: dose,
-                    state: state,
-                    onTake: { record(dose, as: .taken) },
-                    onSkip: { record(dose, as: .skipped) }
-                )
+                Group {
+                    if viewModel.isEditable(dose) {
+                        DoseRow(
+                            dose: dose,
+                            state: state,
+                            onTake: { record(dose, as: .taken) },
+                            onSkip: { record(dose, as: .skipped) },
+                            onOpen: { open(dose) }
+                        )
+                    }
+                    else {
+                        HistoryDoseRow(dose: dose, state: state, onOpen: { open(dose) })
+                    }
+                }
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.theme.surface)
                 .listRowSeparatorTint(Color.theme.separator)
@@ -300,6 +324,160 @@ struct TodayView: View {
             .padding(.top, Spacing.sm)
         }
         .padding(Spacing.xxl)
+    }
+    
+    // MARK: Calendar
+    
+    @ViewBuilder private var calendar: some View {
+        Section {
+            calendarHeader
+                .listRowInsets(EdgeInsets(top: 0, leading: Spacing.xs, bottom: 0, trailing: Spacing.xs))
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+            
+            if !viewModel.isExpanded {
+                WeekStrip(
+                    days: viewModel.week,
+                    isSelected: viewModel.isSelected,
+                    onSelect: viewModel.select
+                )
+                .listRowInsets(EdgeInsets(top: 0, leading: Spacing.xs, bottom: 0, trailing: Spacing.xs))
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+            }
+        }
+        
+        if viewModel.isExpanded {
+            month
+        }
+    }
+    
+    private var calendarHeader: some View {
+        let model = viewModel.monthCalendar
+        
+        return HStack(spacing: Spacing.sm) {
+            if viewModel.isExpanded {
+                headerButton("chevron.left", label: L10n.History.previousMonth, isEnabled: model.canShowPreviousMonth) {
+                    await model.showPreviousMonth()
+                }
+            }
+            
+            Text(viewModel.calendarTitle)
+                .font(Font.theme.sectionTitle)
+                .foregroundStyle(Color.theme.textPrimary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .frame(maxWidth: .infinity, alignment: viewModel.isExpanded ? .center : .leading)
+                .padding(.leading, viewModel.isExpanded ? 0 : Spacing.sm)
+                .accessibilityAddTraits(.isHeader)
+            
+            if viewModel.isExpanded {
+                headerButton("chevron.right", label: L10n.History.nextMonth, isEnabled: model.canShowNextMonth) {
+                    await model.showNextMonth()
+                }
+            }
+            
+            Button {
+                Task { await viewModel.toggleCalendar() }
+            } label: {
+                Image(systemName: "chevron.down")
+                    .rotationEffect(.degrees(viewModel.isExpanded ? 180 : 0))
+                    .frame(width: Size.minTarget, height: Size.minTarget)
+                    .contentShape(Rectangle())
+            }
+            .accessibilityLabel(viewModel.isExpanded ? L10n.Today.hideCalendar : L10n.Today.showCalendar)
+        }
+        .font(.system(.body, weight: .semibold))
+        .buttonStyle(.plain)
+        .foregroundStyle(Color.theme.accentText)
+        .sensoryFeedback(.selection, trigger: viewModel.monthCalendar.month)
+    }
+    
+    private func headerButton(
+        _ systemName: String,
+        label: String,
+        isEnabled: Bool,
+        action: @escaping () async -> Void
+    ) -> some View {
+        Button {
+            Task { await action() }
+        } label: {
+            Image(systemName: systemName)
+                .frame(width: Size.minTarget, height: Size.minTarget)
+                .contentShape(Rectangle())
+        }
+        .disabled(!isEnabled)
+        .accessibilityLabel(label)
+    }
+    
+    @ViewBuilder private var month: some View {
+        let model = viewModel.monthCalendar
+        
+        switch model.state {
+        case .loading:
+            Section {
+                ProgressView()
+                    .frame(maxWidth: .infinity, minHeight: 160)
+            }
+            .listRowBackground(Color.clear)
+        case .failure:
+            Section {
+                monthFailure
+            }
+            .listRowBackground(Color.clear)
+        case .loaded:
+            Section {
+                MonthGrid(
+                    weekdayHeaders: model.weekdayHeaders,
+                    days: model.gridDays,
+                    summary: model.summary(on:),
+                    outcome: model.outcome(on:),
+                    isSelected: viewModel.isSelected,
+                    isEnabled: model.isSelectable,
+                    onSelect: viewModel.select
+                )
+                .padding(.vertical, Spacing.sm)
+            }
+            .listRowBackground(Color.theme.surface)
+            
+            if !model.days.isEmpty {
+                Section {
+                    MonthTotalsCard(
+                        adherence: model.adherence,
+                        taken: model.takenCount,
+                        skipped: model.skippedCount,
+                        missed: model.missedCount
+                    )
+                }
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+            }
+        }
+    }
+    
+    private var monthFailure: some View {
+        VStack(spacing: Spacing.md) {
+            Text(L10n.History.loadFailedTitle)
+                .font(Font.theme.rowTitle)
+                .foregroundStyle(Color.theme.textPrimary)
+            
+            Text(L10n.History.loadFailedMessage)
+                .font(Font.theme.rowSubtitle)
+                .foregroundStyle(Color.theme.textSecondary)
+                .multilineTextAlignment(.center)
+            
+            Button(CommonText.tryAgain) {
+                Task { await viewModel.monthCalendar.reload() }
+            }
+            .buttonStyle(.secondaryAction)
+            .fixedSize()
+        }
+        .frame(maxWidth: .infinity)
+        .padding(Spacing.lg)
+    }
+    
+    private func open(_ dose: ScheduledDose) {
+        detailViewModel = viewModel.makeDetailViewModel(for: dose.medication)
     }
     
     private func record(_ dose: ScheduledDose, as status: DoseStatus) {

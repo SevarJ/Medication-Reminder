@@ -15,6 +15,7 @@ struct DoseRow: View {
     let state: DoseState
     let onTake: () -> Void
     let onSkip: () -> Void
+    let onOpen: () -> Void
     
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     
@@ -24,24 +25,31 @@ struct DoseRow: View {
             : AnyLayout(HStackLayout(spacing: Spacing.md))
         
         return layout {
-            glyph
-            
-            VStack(alignment: .leading, spacing: Spacing.xs) {
-                Text(dose.medication.name)
-                    .font(Font.theme.rowTitle)
-                    .foregroundStyle(Color.theme.textPrimary)
-                
-                Text("\(dose.scheduledDate.timeText) · \(dose.medication.dosage.displayText)")
-                    .font(Font.theme.rowSubtitle)
-                    .foregroundStyle(Color.theme.textSecondary)
-                
-                if state == .missed {
-                    Text(L10n.Today.missed)
-                        .font(Font.theme.badge)
-                        .foregroundStyle(Color.theme.warning)
+            Button(action: onOpen) {
+                layout {
+                    glyph
+                    
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        Text(dose.medication.name)
+                            .font(Font.theme.rowTitle)
+                            .foregroundStyle(Color.theme.textPrimary)
+                        
+                        Text("\(dose.scheduledDate.timeText) · \(dose.medication.dosage.displayText)")
+                            .font(Font.theme.rowSubtitle)
+                            .foregroundStyle(Color.theme.textSecondary)
+                        
+                        if state == .missed {
+                            Text(L10n.Today.missed)
+                                .font(Font.theme.badge)
+                                .foregroundStyle(Color.theme.warning)
+                        }
+                    }
+                    .opacity(state == .skipped ? 0.65 : 1)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
             }
-            .opacity(state == .skipped ? 0.65 : 1)
+            .buttonStyle(.plain)
             
             if !dynamicTypeSize.isAccessibilitySize {
                 Spacer(minLength: Spacing.sm)

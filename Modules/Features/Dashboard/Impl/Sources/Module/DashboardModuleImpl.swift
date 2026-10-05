@@ -44,8 +44,6 @@ struct DashboardModuleImpl: DashboardModule {
             makeTodayView(reloadToken: reloadToken)
         case .medications(let reloadToken):
             makeMedicationsView(reloadToken: reloadToken)
-        case .history(let reloadToken):
-            makeHistoryView(reloadToken: reloadToken)
         case .doseReminder(let medicationId, let scheduledDate):
             makeDoseReminderView(medicationId: medicationId, scheduledDate: scheduledDate)
         }
@@ -56,8 +54,14 @@ struct DashboardModuleImpl: DashboardModule {
         TodayView(
             viewModel: TodayViewModel(
                 loadHistory: LoadDoseHistoryUseCase(medicationRepository: medications, doseLogRepository: doseLogs),
+                loadMonth: LoadMonthHistoryUseCase(
+                    medicationRepository: medications,
+                    doseLogRepository: doseLogs,
+                    remoteDoseLogs: remoteDoseLogs
+                ),
                 recordDose: recordDose,
-                saveMedication: saveMedication
+                saveMedication: saveMedication,
+                makeDetail: { makeDetailViewModel(for: $0) }
             ),
             reloadToken: reloadToken
         )
@@ -84,20 +88,6 @@ struct DashboardModuleImpl: DashboardModule {
     }
 
     @MainActor
-    private func makeHistoryView(reloadToken: Int) -> some View {
-        HistoryView(
-            viewModel: HistoryViewModel(
-                loadMonth: LoadMonthHistoryUseCase(
-                    medicationRepository: medications,
-                    doseLogRepository: doseLogs,
-                    remoteDoseLogs: remoteDoseLogs
-                )
-            ),
-            reloadToken: reloadToken
-        )
-    }
-
-    @MainActor
     private func makeDoseReminderView(medicationId: UUID, scheduledDate: Date) -> some View {
         DoseReminderView(
             viewModel: DoseReminderViewModel(
@@ -108,6 +98,22 @@ struct DashboardModuleImpl: DashboardModule {
                 snoozeReminder: SnoozeReminderUseCase(repository: medications, scheduler: scheduler),
                 snoozeDelay: SnoozeDuration(minutes: preferences.snoozeMinutes).interval
             )
+        )
+    }
+
+    @MainActor
+    private func makeDetailViewModel(for medication: Medication) -> MedicationDetailViewModel {
+        MedicationDetailViewModel(
+            medication: medication,
+            repository: medications,
+            loadHistory: LoadMedicationHistoryUseCase(doseLogRepository: doseLogs),
+            saveMedication: saveMedication,
+            deleteMedication: DeleteMedicationUseCase(
+                repository: medications,
+                scheduler: scheduler,
+                doseLogRepository: doseLogs
+            ),
+            toggleMedicationActive: ToggleMedicationActiveUseCase(saveMedication: saveMedication)
         )
     }
 

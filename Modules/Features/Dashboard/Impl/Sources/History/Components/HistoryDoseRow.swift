@@ -14,6 +14,7 @@ import SwiftUI
 struct HistoryDoseRow: View {
     let dose: ScheduledDose
     let state: DoseState
+    let onOpen: () -> Void
     
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     
@@ -23,21 +24,24 @@ struct HistoryDoseRow: View {
             : AnyLayout(HStackLayout(spacing: Spacing.md))
         
         return layout {
-            glyph
-            
-            VStack(alignment: .leading, spacing: Spacing.xs) {
-                Text(dose.medication.name)
-                    .font(Font.theme.rowTitle)
-                    .foregroundStyle(Color.theme.textPrimary)
-                
-                Text("\(dose.scheduledDate.timeText) · \(dose.medication.dosage.displayText)")
-                    .font(Font.theme.rowSubtitle)
-                    .foregroundStyle(Color.theme.textSecondary)
+            Button(action: onOpen) {
+                layout {
+                    glyph
+                    
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        Text(dose.medication.name)
+                            .font(Font.theme.rowTitle)
+                            .foregroundStyle(Color.theme.textPrimary)
+                        
+                        Text("\(dose.scheduledDate.timeText) · \(dose.medication.dosage.displayText)")
+                            .font(Font.theme.rowSubtitle)
+                            .foregroundStyle(Color.theme.textSecondary)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
             }
-            
-            if !dynamicTypeSize.isAccessibilitySize {
-                Spacer(minLength: Spacing.sm)
-            }
+            .buttonStyle(.plain)
             
             status
         }
@@ -45,7 +49,6 @@ struct HistoryDoseRow: View {
         .padding(.vertical, Spacing.md)
         .padding(.horizontal, Spacing.lg)
         .frame(minHeight: 72)
-        .accessibilityElement(children: .combine)
     }
     
     @ViewBuilder private var glyph: some View {

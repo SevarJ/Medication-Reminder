@@ -1,5 +1,5 @@
 //
-//  HistoryViewModelTests.swift
+//  MonthCalendarViewModelTests.swift
 //  DashboardImplTests
 //
 //  Created by Sevar Jafarli on 05.10.26.
@@ -12,7 +12,7 @@ import Testing
 @testable import DashboardImpl
 
 @MainActor
-struct HistoryViewModelTests {
+struct MonthCalendarViewModelTests {
     private let calendar = Calendar(identifier: .gregorian)
     
     /// Mid-September, so the cached window starts on September 3.
@@ -41,11 +41,11 @@ struct HistoryViewModelTests {
         medication: Medication? = nil,
         cachedLogs: [DoseLog] = [],
         remote: MockDoseLogRemoteStore = MockDoseLogRemoteStore()
-    ) throws -> HistoryViewModel {
+    ) throws -> MonthCalendarViewModel {
         let medications = try medication ?? makeMedication(startDate: try date(month: 8, day: 1))
         let now = try now
         
-        return HistoryViewModel(
+        return MonthCalendarViewModel(
             loadMonth: LoadMonthHistoryUseCase(
                 medicationRepository: MockMedicationRepository(medications: [medications]),
                 doseLogRepository: MockDoseLogRepository(logs: cachedLogs),
@@ -57,17 +57,16 @@ struct HistoryViewModelTests {
         )
     }
     
-    @Test func startsOnTheCurrentMonthWithTodaySelected() async throws {
+    @Test func startsOnTheCurrentMonth() async throws {
         let sut = try makeSUT()
         
         await sut.load()
         
         #expect(sut.month == (try date(month: 9, day: 1)))
-        #expect(sut.selectedDay == (try date(month: 9, day: 17)))
         #expect(sut.days.count == 17)
     }
     
-    @Test func showsAnOlderMonthWithItsLatestDaySelected() async throws {
+    @Test func showsAnOlderMonth() async throws {
         let sut = try makeSUT()
         
         await sut.load()
@@ -75,7 +74,6 @@ struct HistoryViewModelTests {
         
         #expect(sut.month == (try date(month: 8, day: 1)))
         #expect(sut.days.count == 31)
-        #expect(sut.selectedDay == (try date(month: 8, day: 31)))
     }
     
     @Test func keepsAnOlderMonthForTheRestOfTheSession() async throws {
@@ -156,7 +154,7 @@ struct HistoryViewModelTests {
     
     @Test func cannotLookBackWithoutMedications() async throws {
         let now = try now
-        let sut = HistoryViewModel(
+        let sut = MonthCalendarViewModel(
             loadMonth: LoadMonthHistoryUseCase(
                 medicationRepository: MockMedicationRepository(),
                 doseLogRepository: MockDoseLogRepository(),
@@ -206,28 +204,12 @@ struct HistoryViewModelTests {
         #expect(sut.adherence == nil)
     }
     
-    @Test func listsTheSelectedDaysDoses() async throws {
-        let medication = try makeMedication(times: [(9, 0), (21, 0)], startDate: try date(month: 9, day: 1))
-        let sut = try makeSUT(medication: medication)
-        
-        await sut.load()
-        sut.select(try date(month: 9, day: 5, hour: 15))
-        
-        #expect(sut.selectedDay == (try date(month: 9, day: 5)))
-        #expect(sut.selectedDoses.count == 2)
-        #expect(sut.isSelected(try date(month: 9, day: 5)))
-        #expect(!sut.isSelected(try date(month: 9, day: 6)))
-    }
-    
-    @Test func ignoresDaysAfterToday() async throws {
+    @Test func endsToday() async throws {
         let sut = try makeSUT()
-        
-        await sut.load()
-        sut.select(try date(month: 9, day: 25))
         
         #expect(!sut.isSelectable(try date(month: 9, day: 25)))
         #expect(sut.isSelectable(try date(month: 9, day: 17, hour: 23)))
-        #expect(sut.selectedDay == (try date(month: 9, day: 17)))
+        #expect(sut.isSelectable(try date(month: 9, day: 3)))
     }
     
     @Test func selectsNothingInAMonthWithoutDoses() async throws {
@@ -241,8 +223,6 @@ struct HistoryViewModelTests {
         await sut.showPreviousMonth()
         
         #expect(sut.days.isEmpty)
-        #expect(sut.selectedDay == nil)
-        #expect(sut.selectedDoses.isEmpty)
     }
     
     @Test func reportsTheOutcomeOfEachDay() async throws {
@@ -266,5 +246,30 @@ struct HistoryViewModelTests {
         #expect(sut.gridDays.prefix(3).map { $0 == nil } == [true, true, false])
         #expect(sut.gridDays.compactMap { $0 }.count == 30)
         #expect(sut.weekdayHeaders.count == 7)
+    }
+    
+    @Test func showsTheMonthOfAGivenDay() async throws {
+        let sut = try makeSUT()
+        
+        await sut.load()
+        await sut.showMonth(containing: try date(month: 8, day: 14, hour: 15))
+        
+        #expect(sut.month == (try date(month: 8, day: 1)))
+        #expect(sut.days.count == 31)
+    }
+    
+    @Test func replacesARecordedDose() async throws {
+        let medication = try makeMedication(startDate: try date(month: 9, day: 1))
+        let sut = try makeSUT(medication: medication)
+        
+        await sut.load()
+        
+        let dose = try #require(sut.summary(on: try date(month: 9, day: 10))?.doses.first)
+        let log = try makeLog(for: medication, month: 9, day: 10)
+        
+        sut.replace(ScheduledDose(medication: dose.medication, scheduledDate: dose.scheduledDate, log: log))
+        
+        #expect(sut.summary(on: try date(month: 9, day: 10))?.takenCount == 1)
+        #expect(sut.takenCount == 1)
     }
 }
