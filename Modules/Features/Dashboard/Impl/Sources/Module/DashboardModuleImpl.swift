@@ -116,6 +116,6 @@ struct DashboardModuleImpl: DashboardModule {
     }
 
     private var recordDose: RecordDoseUseCase {
-        RecordDoseUseCase(doseLogRepository: doseLogs)
+        RecordDoseUseCase(doseLogRepository: doseLogs, medicationRepository: medications)
     }
 }

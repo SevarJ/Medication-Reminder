@@ -67,6 +67,36 @@ struct MedicationDocumentTests {
         #expect(MedicationDocument(medication).name.count == MedicationDocument.nameLimit)
     }
 
+    @Test func roundTripsPhotoNotesAndStock() throws {
+        let medication = try makeMedication(
+            startDate: startDate,
+            createdDate: startDate,
+            photo: Data([1, 2, 3]),
+            notes: "With food",
+            stock: 12.5
+        )
+
+        let document = MedicationDocument(medication)
+
+        #expect(document.photo == Data([1, 2, 3]))
+        #expect(document.notes == "With food")
+        #expect(document.stock == 12.5)
+        #expect(try document.medication(id: medication.id.uuidString) == medication)
+    }
+
+    @Test func dropsAPhotoLargerThanTheRulesAllow() throws {
+        let photo = Data(count: MedicationDocument.photoLimit + 1)
+        let medication = try makeMedication(photo: photo)
+
+        #expect(MedicationDocument(medication).photo == nil)
+    }
+
+    @Test func shortensTheNotesToTheLimit() throws {
+        let medication = try makeMedication(notes: String(repeating: "a", count: 500))
+
+        #expect(MedicationDocument(medication).notes?.count == MedicationDocument.notesLimit)
+    }
+
     @Test func rejectsDocumentIdThatIsNotAnIdentifier() throws {
         let document = MedicationDocument(try makeMedication())
 
@@ -110,7 +140,10 @@ struct MedicationDocumentTests {
             startDate: startDate,
             endDate: nil,
             isActive: true,
-            createdDate: startDate
+            createdDate: startDate,
+            photo: nil,
+            notes: nil,
+            stock: nil
         )
     }
 }

@@ -20,7 +20,10 @@ enum MedicationMapper {
             startDate: medication.schedule.startDate,
             endDate: medication.schedule.endDate,
             isActive: medication.isActive,
-            createdDate: medication.createdDate
+            createdDate: medication.createdDate,
+            photo: medication.photo,
+            notes: medication.notes,
+            stock: medication.stock
         )
     }
 
@@ -37,6 +40,9 @@ enum MedicationMapper {
         entity.startDate = medication.schedule.startDate
         entity.endDate = medication.schedule.endDate
         entity.isActive = medication.isActive
+        entity.photo = medication.photo
+        entity.notes = medication.notes
+        entity.stock = medication.stock
     }
 
     static func toDomain(_ entity: MedicationEntity) throws -> Medication {
@@ -56,7 +62,10 @@ enum MedicationMapper {
                 endDate: entity.endDate
             ),
             isActive: entity.isActive,
-            createdDate: entity.createdDate
+            createdDate: entity.createdDate,
+            photo: entity.photo,
+            notes: entity.notes,
+            stock: entity.stock
         )
     }
 

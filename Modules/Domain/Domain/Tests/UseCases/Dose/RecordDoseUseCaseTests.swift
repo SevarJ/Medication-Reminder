@@ -19,9 +19,13 @@ struct RecordDoseUseCaseTests {
         )
     }
     
-    private func makeSUT(repository: MockDoseLogRepository) -> RecordDoseUseCase {
+    private func makeSUT(
+        repository: MockDoseLogRepository,
+        medications: MockMedicationRepository = MockMedicationRepository()
+    ) -> RecordDoseUseCase {
         RecordDoseUseCase(
             doseLogRepository: repository,
+            medicationRepository: medications,
             calendar: calendar
         )
     }
@@ -150,5 +154,72 @@ struct RecordDoseUseCaseTests {
         }
         
         #expect(await repository.logs.isEmpty)
+    }
+    
+    @Test func takingADoseUsesUpTheStock() async throws {
+        let medication = try makeMedication(dosage: Dosage(amount: 2, unit: .tablet), stock: 10)
+        let medications = MockMedicationRepository(medications: [medication])
+        let dose = makeDose(medication: medication, scheduledDate: try date(day: 17, hour: 9, minute: 0))
+        
+        let result = try await makeSUT(repository: MockDoseLogRepository(), medications: medications)
+            .execute(dose, status: .taken, now: try date(day: 17, hour: 14, minute: 30))
+        
+        #expect(result.medication.stock == 8)
+        #expect(try await medications.fetch(id: medication.id).stock == 8)
+    }
+    
+    @Test func undoingATakenDoseGivesTheStockBack() async throws {
+        let medication = try makeMedication(dosage: Dosage(amount: 1, unit: .tablet), stock: 9)
+        let medications = MockMedicationRepository(medications: [medication])
+        let dose = makeDose(medication: medication, scheduledDate: try date(day: 17, hour: 9, minute: 0), status: .taken)
+        
+        let result = try await makeSUT(repository: MockDoseLogRepository(), medications: medications)
+            .execute(dose, status: .taken, now: try date(day: 17, hour: 14, minute: 30))
+        
+        #expect(result.log == nil)
+        #expect(result.medication.stock == 10)
+    }
+    
+    @Test func skippingADoseLeavesTheStockAlone() async throws {
+        let medication = try makeMedication(dosage: Dosage(amount: 1, unit: .tablet), stock: 9)
+        let medications = MockMedicationRepository(medications: [medication])
+        let dose = makeDose(medication: medication, scheduledDate: try date(day: 17, hour: 9, minute: 0))
+        
+        let result = try await makeSUT(repository: MockDoseLogRepository(), medications: medications)
+            .execute(dose, status: .skipped, now: try date(day: 17, hour: 14, minute: 30))
+        
+        #expect(result.medication.stock == 9)
+    }
+    
+    @Test func switchingFromTakenToSkippedGivesTheStockBack() async throws {
+        let medication = try makeMedication(dosage: Dosage(amount: 1, unit: .tablet), stock: 9)
+        let medications = MockMedicationRepository(medications: [medication])
+        let dose = makeDose(medication: medication, scheduledDate: try date(day: 17, hour: 9, minute: 0), status: .taken)
+        
+        let result = try await makeSUT(repository: MockDoseLogRepository(), medications: medications)
+            .execute(dose, status: .skipped, now: try date(day: 17, hour: 14, minute: 30))
+        
+        #expect(result.medication.stock == 10)
+    }
+    
+    @Test func stockNeverGoesBelowZero() async throws {
+        let medication = try makeMedication(dosage: Dosage(amount: 2, unit: .tablet), stock: 1)
+        let medications = MockMedicationRepository(medications: [medication])
+        let dose = makeDose(medication: medication, scheduledDate: try date(day: 17, hour: 9, minute: 0))
+        
+        let result = try await makeSUT(repository: MockDoseLogRepository(), medications: medications)
+            .execute(dose, status: .taken, now: try date(day: 17, hour: 14, minute: 30))
+        
+        #expect(result.medication.stock == 0)
+    }
+    
+    @Test func medicationWithoutStockIsNotTouched() async throws {
+        let medication = try makeMedication()
+        let dose = makeDose(medication: medication, scheduledDate: try date(day: 17, hour: 9, minute: 0))
+        
+        let result = try await makeSUT(repository: MockDoseLogRepository())
+            .execute(dose, status: .taken, now: try date(day: 17, hour: 14, minute: 30))
+        
+        #expect(result.medication.stock == nil)
     }
 }

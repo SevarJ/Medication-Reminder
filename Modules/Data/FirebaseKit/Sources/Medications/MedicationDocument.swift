@@ -15,6 +15,9 @@ struct MedicationDocument: Codable {
     static let collection = "medications"
     /// The rules allow three times as much, which covers characters that take several bytes.
     static let nameLimit = 100
+    static let notesLimit = Medication.notesLimit
+    /// The rules refuse a larger photo, and the app shrinks photos far below this.
+    static let photoLimit = 100_000
 
     struct Time: Codable, Equatable {
         let id: String
@@ -32,6 +35,9 @@ struct MedicationDocument: Codable {
     let endDate: Date?
     let isActive: Bool
     let createdDate: Date
+    let photo: Data?
+    let notes: String?
+    let stock: Double?
     /// Left empty on every write, which makes the server fill in its own time.
     @ServerTimestamp private(set) var updatedAt: Date? = nil
 }
@@ -50,7 +56,10 @@ extension MedicationDocument {
             startDate: schedule.startDate,
             endDate: schedule.endDate,
             isActive: medication.isActive,
-            createdDate: medication.createdDate
+            createdDate: medication.createdDate,
+            photo: medication.photo.flatMap { $0.count <= Self.photoLimit ? $0 : nil },
+            notes: medication.notes.map { String($0.prefix(Self.notesLimit)) },
+            stock: medication.stock
         )
     }
 
@@ -70,7 +79,10 @@ extension MedicationDocument {
                 endDate: endDate
             ),
             isActive: isActive,
-            createdDate: createdDate
+            createdDate: createdDate,
+            photo: photo,
+            notes: notes,
+            stock: stock
         )
     }
 

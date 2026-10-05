@@ -76,12 +76,6 @@ struct MedicationListView: View {
                     if saved {
                         Task { await viewModel.load() }
                     }
-                },
-                onDelete: editor.medication.map { medication in
-                    {
-                        editorViewModel = nil
-                        Task { await viewModel.delete(medication) }
-                    }
                 }
             )
         }

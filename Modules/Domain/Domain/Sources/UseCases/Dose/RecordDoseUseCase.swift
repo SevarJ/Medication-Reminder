@@ -9,13 +9,16 @@ import Foundation
 
 public struct RecordDoseUseCase: Sendable {
     private let doseLogRepository: any DoseLogRepository
+    private let medicationRepository: any MedicationRepository
     private let calendar: Calendar
     
     public init(
         doseLogRepository: any DoseLogRepository,
+        medicationRepository: any MedicationRepository,
         calendar: Calendar = .current
     ) {
         self.doseLogRepository = doseLogRepository
+        self.medicationRepository = medicationRepository
         self.calendar = calendar
     }
     
@@ -36,31 +39,55 @@ public struct RecordDoseUseCase: Sendable {
             throw DomainError.doseOutsideEditableRange
         }
         
+        let newLog: DoseLog?
+        
         if let log = dose.log {
             try await doseLogRepository.delete(id: log.id)
-            if log.status == status {
-                return ScheduledDose(
-                    medication: dose.medication,
-                    scheduledDate: dose.scheduledDate,
-                    log: nil
-                )
-            }
+            
+            newLog = log.status == status ? nil : makeLog(for: dose, status: status, now: now)
+        }
+        else {
+            newLog = makeLog(for: dose, status: status, now: now)
         }
         
-        let newLog: DoseLog = .init(
+        if let newLog {
+            try await doseLogRepository.save(newLog)
+        }
+        
+        let medication = try await adjustStock(of: dose.medication, from: dose.log, to: newLog)
+        
+        return ScheduledDose(
+            medication: medication,
+            scheduledDate: dose.scheduledDate,
+            log: newLog
+        )
+    }
+    
+    private func makeLog(for dose: ScheduledDose, status: DoseStatus, now: Date) -> DoseLog {
+        DoseLog(
             medicationId: dose.medication.id,
             scheduledDate: dose.scheduledDate,
             status: status,
             recordedAt: now
         )
+    }
+    
+    /// A taken dose uses up one dosage of the stock, and un-taking it puts the dosage back.
+    private func adjustStock(of medication: Medication, from old: DoseLog?, to new: DoseLog?) async throws -> Medication {
+        let wasTaken = old?.status == .taken
+        let isTaken = new?.status == .taken
         
-        try await doseLogRepository.save(newLog)
+        guard medication.stock != nil, wasTaken != isTaken else { return medication }
         
-        return ScheduledDose(
-            medication: dose.medication,
-            scheduledDate: dose.scheduledDate,
-            log: newLog
-        )
+        let current = try await medicationRepository.fetch(id: medication.id)
+        
+        guard let stock = current.stock else { return current }
+        
+        let change = isTaken ? -current.dosage.amount : current.dosage.amount
+        let updated = current.updating(stock: max(0, stock + change))
+        
+        try await medicationRepository.save(updated)
+        
+        return updated
     }
 }
-

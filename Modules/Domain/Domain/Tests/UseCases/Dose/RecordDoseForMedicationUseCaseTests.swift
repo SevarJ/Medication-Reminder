@@ -23,10 +23,16 @@ struct RecordDoseForMedicationUseCaseTests {
         medications: [Medication],
         logRepository: MockDoseLogRepository
     ) -> RecordDoseForMedicationUseCase {
-        RecordDoseForMedicationUseCase(
-            medicationRepository: MockMedicationRepository(medications: medications),
+        let medicationRepository = MockMedicationRepository(medications: medications)
+        
+        return RecordDoseForMedicationUseCase(
+            medicationRepository: medicationRepository,
             doseLogRepository: logRepository,
-            recordDose: RecordDoseUseCase(doseLogRepository: logRepository, calendar: calendar)
+            recordDose: RecordDoseUseCase(
+                doseLogRepository: logRepository,
+                medicationRepository: medicationRepository,
+                calendar: calendar
+            )
         )
     }
     

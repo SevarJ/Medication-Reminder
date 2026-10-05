@@ -58,6 +58,7 @@ struct TodayViewModelTests {
             ),
             recordDose: RecordDoseUseCase(
                 doseLogRepository: doseLogRepository,
+                medicationRepository: medicationRepository,
                 calendar: calendar
             ),
             saveMedication: SaveMedicationUseCase(

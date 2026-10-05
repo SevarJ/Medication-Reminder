@@ -89,7 +89,7 @@ struct DoseRow: View {
         case .skipped:
             IconTile(systemName: "forward.end.fill", foreground: Color.theme.info, background: Color.theme.infoTint, size: 40)
         case .pending:
-            IconTile(systemName: "pills.fill", foreground: Color.theme.accentText, background: Color.theme.accentTint, size: 40)
+            MedicationAvatar(photo: dose.medication.photo, size: 40)
         }
     }
     

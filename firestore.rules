@@ -29,6 +29,9 @@ rules_version = '2';
 //   - endDate: timestamp (optional, not before startDate)
 //   - isActive: bool (required)
 //   - createdDate: timestamp (required)
+//   - photo: bytes (optional, up to 100000 bytes) - a small JPEG of the pack
+//   - notes: string (optional, 1...900 chars) - the app cuts notes to 300 characters
+//   - stock: number (optional, not below 0) - what is left, in the unit of the dosage
 //   - updatedAt: timestamp (required, server time of the write)
 //
 // Collection: users/{userId}/doseLogs
@@ -142,6 +145,12 @@ service cloud.firestore {
             data.recurrenceDays.hasOnly([1, 2, 3, 4, 5, 6, 7])));
     }
 
+    function isValidOptionalExtras(data) {
+      return (!('photo' in data) || (data.photo is bytes && data.photo.size() <= 100000)) &&
+        isValidOptionalString(data, 'notes', 1, 900) &&
+        (!('stock' in data) || (data.stock is number && data.stock >= 0));
+    }
+
     function isValidOptionalEndDate(data) {
       return !('endDate' in data) ||
         (data.endDate is timestamp && data.endDate >= data.startDate);
@@ -163,7 +172,8 @@ service cloud.firestore {
 
     function isValidMedication(data) {
       return hasOnlyAllowedFields(['name', 'dosageAmount', 'dosageUnit', 'times', 'recurrenceKind',
-          'recurrenceDays', 'startDate', 'endDate', 'isActive', 'createdDate', 'updatedAt']) &&
+          'recurrenceDays', 'startDate', 'endDate', 'isActive', 'createdDate', 'photo', 'notes', 'stock',
+          'updatedAt']) &&
         hasRequiredFields(['name', 'dosageAmount', 'dosageUnit', 'times', 'recurrenceKind',
           'recurrenceDays', 'startDate', 'isActive', 'createdDate', 'updatedAt']) &&
         data.name is string && data.name.size() >= 1 && data.name.size() <= 300 &&
@@ -175,6 +185,7 @@ service cloud.firestore {
         isValidOptionalEndDate(data) &&
         data.isActive is bool &&
         data.createdDate is timestamp &&
+        isValidOptionalExtras(data) &&
         hasServerUpdateTime(data);
     }
 

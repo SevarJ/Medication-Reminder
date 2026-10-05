@@ -151,6 +151,149 @@ struct MedicationEditorViewModelTests {
         #expect(saved.createdDate == existing.createdDate)
     }
     
+    @Test func startsOnTheFirstStep() async throws {
+        let sut = makeSUT()
+        
+        #expect(sut.step == .details)
+        #expect(sut.isFirstStep)
+        #expect(!sut.isLastStep)
+    }
+    
+    @Test func nextWalksThroughEveryStepAndBackReturns() async throws {
+        let sut = makeSUT()
+        sut.name = "Magnesium"
+        
+        sut.next()
+        #expect(sut.step == .schedule)
+        sut.next()
+        #expect(sut.step == .duration)
+        sut.next()
+        #expect(sut.step == .extras)
+        #expect(sut.isLastStep)
+        
+        sut.next()
+        #expect(sut.step == .extras)
+        
+        sut.back()
+        #expect(sut.step == .duration)
+    }
+    
+    @Test func staysOnTheFirstStepWithoutAName() async throws {
+        let sut = makeSUT()
+        
+        sut.next()
+        
+        #expect(sut.step == .details)
+        #expect(sut.errorMessage == "Enter a medication name.")
+    }
+    
+    @Test func staysOnTheFirstStepWithAnInvalidAmount() async throws {
+        let sut = makeSUT()
+        sut.name = "Magnesium"
+        sut.amountText = "0"
+        
+        sut.next()
+        
+        #expect(sut.step == .details)
+        #expect(sut.errorMessage != nil)
+    }
+    
+    @Test func staysOnTheScheduleWithoutWeekdays() async throws {
+        let sut = makeSUT()
+        sut.name = "Magnesium"
+        sut.repeatMode = .specificDays
+        
+        sut.next()
+        sut.next()
+        
+        #expect(sut.step == .schedule)
+        #expect(sut.errorMessage != nil)
+    }
+    
+    @Test func amountButtonsStepBySizeOfTheUnit() async throws {
+        let sut = makeSUT()
+        sut.unit = .tablet
+        sut.amountText = "1"
+        
+        sut.stepAmount(by: 1)
+        #expect(sut.amountText == "1.5")
+        
+        sut.stepAmount(by: -1)
+        sut.stepAmount(by: -1)
+        #expect(sut.amountText == "0.5")
+        
+        sut.stepAmount(by: -1)
+        #expect(sut.amountText == "0.5")
+    }
+    
+    @Test func addingATimeOpensItsWheel() async throws {
+        let sut = makeSUT()
+        
+        sut.addTime()
+        
+        #expect(sut.selectedTimeId == sut.times.last?.id)
+    }
+    
+    @Test func removingTheOpenTimeOpensTheFirst() async throws {
+        let sut = makeSUT()
+        sut.addTime()
+        
+        sut.removeTime(id: try #require(sut.selectedTimeId))
+        
+        #expect(sut.selectedTimeId == sut.times.first?.id)
+    }
+    
+    @Test func savesPhotoNotesAndStock() async throws {
+        let repository = MockMedicationRepository()
+        let sut = makeSUT(repository: repository)
+        sut.name = "Magnesium"
+        sut.photo = Data([1, 2, 3])
+        sut.notes = "  With food  "
+        sut.stockText = "30,5"
+        
+        #expect(await sut.save())
+        
+        let saved = try #require(await repository.medications.first)
+        
+        #expect(saved.photo == Data([1, 2, 3]))
+        #expect(saved.notes == "With food")
+        #expect(saved.stock == 30.5)
+    }
+    
+    @Test func leavesTheOptionalFieldsOutWhenEmpty() async throws {
+        let repository = MockMedicationRepository()
+        let sut = makeSUT(repository: repository)
+        sut.name = "Magnesium"
+        sut.notes = "   "
+        
+        #expect(await sut.save())
+        
+        let saved = try #require(await repository.medications.first)
+        
+        #expect(saved.photo == nil)
+        #expect(saved.notes == nil)
+        #expect(saved.stock == nil)
+    }
+    
+    @Test func rejectsAStockThatIsNotANumber() async throws {
+        let repository = MockMedicationRepository()
+        let sut = makeSUT(repository: repository)
+        sut.name = "Magnesium"
+        sut.stockText = "lots"
+        
+        #expect(await sut.save() == false)
+        #expect(sut.errorMessage != nil)
+        #expect(await repository.medications.isEmpty)
+    }
+    
+    @Test func editingKeepsTheStockAndNotesTheMedicationHad() async throws {
+        let existing = try makeMedication(notes: "With food", stock: 12)
+        let sut = makeSUT(medication: existing)
+        
+        #expect(sut.notes == "With food")
+        #expect(sut.stockText == "12")
+    }
+    
     private func makeSUT(
         repository: MockMedicationRepository = MockMedicationRepository(),
         scheduler: MockReminderScheduler = MockReminderScheduler(),

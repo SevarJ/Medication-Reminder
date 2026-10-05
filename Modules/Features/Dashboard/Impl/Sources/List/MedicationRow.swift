@@ -22,12 +22,7 @@ struct MedicationRow: View {
             : AnyLayout(HStackLayout(spacing: Spacing.md))
         
         return layout {
-            IconTile(
-                systemName: "pills.fill",
-                foreground: medication.isActive ? Color.theme.accentText : Color.theme.textSecondary,
-                background: medication.isActive ? Color.theme.accentTint : Color.theme.fill,
-                size: 44
-            )
+            MedicationAvatar(photo: medication.photo, isActive: medication.isActive, size: 44)
             
             VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(medication.name)

@@ -21,7 +21,10 @@ struct SwiftDataMedicationRepositoryTests {
         times: [(Int, Int)] = [(9, 0), (21, 30)],
         recurrence: Recurrence = .daily,
         isActive: Bool = true,
-        createdDate: Date = .now
+        createdDate: Date = .now,
+        photo: Data? = nil,
+        notes: String? = nil,
+        stock: Double? = nil
     ) throws -> Medication {
         Medication(
             id: id,
@@ -33,7 +36,10 @@ struct SwiftDataMedicationRepositoryTests {
                 startDate: createdDate
             ),
             isActive: isActive,
-            createdDate: createdDate
+            createdDate: createdDate,
+            photo: photo,
+            notes: notes,
+            stock: stock
         )
     }
     
@@ -102,6 +108,42 @@ struct SwiftDataMedicationRepositoryTests {
         let stored = try await sut.fetch(id: medication.id)
         
         #expect(stored.schedule.recurrence == .daysOfWeek([.monday, .friday]))
+    }
+    
+    @Test func storesPhotoNotesAndStock() async throws {
+        let sut = try makeSUT()
+        let medication = try makeMedication(photo: Data([1, 2, 3]), notes: "With food", stock: 12)
+        
+        try await sut.save(medication)
+        
+        let stored = try await sut.fetch(id: medication.id)
+        
+        #expect(stored.photo == Data([1, 2, 3]))
+        #expect(stored.notes == "With food")
+        #expect(stored.stock == 12)
+    }
+    
+    @Test func clearingTheExtrasRemovesThem() async throws {
+        let sut = try makeSUT()
+        let medication = try makeMedication(photo: Data([1]), notes: "Note", stock: 3)
+        
+        try await sut.save(medication)
+        try await sut.save(
+            Medication(
+                id: medication.id,
+                name: medication.name,
+                dosage: medication.dosage,
+                schedule: medication.schedule,
+                isActive: true,
+                createdDate: medication.createdDate
+            )
+        )
+        
+        let stored = try await sut.fetch(id: medication.id)
+        
+        #expect(stored.photo == nil)
+        #expect(stored.notes == nil)
+        #expect(stored.stock == nil)
     }
     
     @Test func mapperRejectsUnknownDosageUnit() async throws {

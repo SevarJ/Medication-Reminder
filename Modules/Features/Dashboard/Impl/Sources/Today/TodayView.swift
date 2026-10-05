@@ -54,8 +54,7 @@ struct TodayView: View {
                     if saved {
                         Task { await viewModel.load() }
                     }
-                },
-                onDelete: nil
+                }
             )
         }
         .alert(

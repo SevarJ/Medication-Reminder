@@ -34,7 +34,7 @@ struct DoseReminderViewModelTests {
             medicationId: medicationId,
             scheduledDate: try date(day: 17, hour: 9),
             loadDose: LoadScheduledDoseUseCase(medicationRepository: repository, doseLogRepository: logRepository),
-            recordDose: RecordDoseUseCase(doseLogRepository: logRepository, calendar: calendar),
+            recordDose: RecordDoseUseCase(doseLogRepository: logRepository, medicationRepository: repository, calendar: calendar),
             snoozeReminder: SnoozeReminderUseCase(repository: repository, scheduler: scheduler),
             snoozeDelay: 5 * 60,
             currentDate: { now }

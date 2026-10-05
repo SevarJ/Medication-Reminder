@@ -17,7 +17,10 @@ public func makeMedication(
     startDate: Date = .now,
     endDate: Date? = nil,
     isActive: Bool = true,
-    createdDate: Date = .now
+    createdDate: Date = .now,
+    photo: Data? = nil,
+    notes: String? = nil,
+    stock: Double? = nil
 ) throws -> Medication {
     Medication(
         id: id,
@@ -30,6 +33,9 @@ public func makeMedication(
             endDate: endDate
         ),
         isActive: isActive,
-        createdDate: createdDate
+        createdDate: createdDate,
+        photo: photo,
+        notes: notes,
+        stock: stock
     )
 }

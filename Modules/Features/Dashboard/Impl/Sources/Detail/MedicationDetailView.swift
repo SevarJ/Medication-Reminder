@@ -30,6 +30,7 @@ struct MedicationDetailView: View {
             VStack(alignment: .leading, spacing: Spacing.xl) {
                 summaryCard
                 historyCard
+                notesCard
                 actions
             }
             .padding(.vertical, Spacing.lg)
@@ -56,8 +57,7 @@ struct MedicationDetailView: View {
                             onChange()
                         }
                     }
-                },
-                onDelete: nil
+                }
             )
         }
         .confirmationDialog(
@@ -98,33 +98,16 @@ struct MedicationDetailView: View {
         let medication = viewModel.medication
         
         return VStack(alignment: .leading, spacing: Spacing.xl) {
-            VStack(alignment: .leading, spacing: Spacing.xs) {
-                HStack(alignment: .firstTextBaseline, spacing: Spacing.md) {
-                    Text(medication.name)
-                        .font(.system(.title2, weight: .bold))
-                        .foregroundStyle(Color.theme.onHero)
-                        .accessibilityAddTraits(.isHeader)
-                    
-                    Spacer(minLength: 0)
-                    
-                    if !medication.isActive {
-                        Text(L10n.List.paused)
-                            .font(Font.theme.badge)
-                            .foregroundStyle(Color.theme.onHero)
-                            .padding(.horizontal, Spacing.md)
-                            .padding(.vertical, Spacing.xs + 1)
-                            .background(Color.theme.onHero.opacity(0.18), in: Capsule())
-                    }
+            HStack(alignment: .top, spacing: Spacing.lg) {
+                if medication.photo != nil {
+                    MedicationAvatar(photo: medication.photo, size: 64)
                 }
                 
-                Text("\(medication.dosage.displayText) · \(medication.schedule.recurrence.displayText)")
-                    .font(Font.theme.rowSubtitle)
-                    .foregroundStyle(Color.theme.onHero.opacity(0.85))
-                
-                Text(medication.schedule.times.sorted().map(\.displayText).joined(separator: "  ·  "))
-                    .font(Font.theme.time)
-                    .foregroundStyle(Color.theme.onHero)
-                    .padding(.top, Spacing.sm)
+                heroTitle(medication)
+            }
+            
+            if medication.stock != nil {
+                stockLine(medication)
             }
             
             AdaptiveStack(spacing: Spacing.lg) {
@@ -135,23 +118,62 @@ struct MedicationDetailView: View {
         }
         .padding(Spacing.xl)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background {
-            ZStack(alignment: .topTrailing) {
-                LinearGradient(
-                    colors: [Color.theme.hero, Color.theme.heroDeep],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                
-                Image(systemName: "pills.fill")
-                    .font(.system(size: 150))
-                    .foregroundStyle(Color.theme.onHero.opacity(0.07))
-                    .rotationEffect(.degrees(-18))
-                    .offset(x: 30, y: 54)
-            }
-            .clipShape(RoundedRectangle(cornerRadius: CornerRadius.card + 6, style: .continuous))
-        }
+        .heroCardBackground()
         .padding(.horizontal, Spacing.lg)
+    }
+    
+    private func heroTitle(_ medication: Medication) -> some View {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            HStack(alignment: .firstTextBaseline, spacing: Spacing.md) {
+                Text(medication.name)
+                    .font(.system(.title2, weight: .bold))
+                    .foregroundStyle(Color.theme.onHero)
+                    .accessibilityAddTraits(.isHeader)
+                
+                Spacer(minLength: 0)
+                
+                if !medication.isActive {
+                    Text(L10n.List.paused)
+                        .font(Font.theme.badge)
+                        .foregroundStyle(Color.theme.onHero)
+                        .padding(.horizontal, Spacing.md)
+                        .padding(.vertical, Spacing.xs + 1)
+                        .background(Color.theme.onHero.opacity(0.18), in: Capsule())
+                }
+            }
+            
+            Text("\(medication.dosage.displayText) · \(medication.schedule.recurrence.displayText)")
+                .font(Font.theme.rowSubtitle)
+                .foregroundStyle(Color.theme.onHero.opacity(0.85))
+            
+            Text(medication.schedule.times.sorted().map(\.displayText).joined(separator: "  ·  "))
+                .font(Font.theme.time)
+                .foregroundStyle(Color.theme.onHero)
+                .padding(.top, Spacing.sm)
+        }
+    }
+    
+    /// What is left of the pack. Turns into a warning with a week or less to go.
+    private func stockLine(_ medication: Medication) -> some View {
+        let stock = medication.stock ?? 0
+        let days = medication.daysOfStockLeft
+        let isLow = stock <= 0 || (days ?? .max) <= 7
+        let text: String
+        
+        if stock <= 0 {
+            text = L10n.Form.stockOut
+        }
+        else {
+            let left = L10n.Form.stockLeft(Dosage(amount: stock, unit: medication.dosage.unit).displayText)
+            text = days.map { "\(left) · \(L10n.Form.daysLeft($0))" } ?? left
+        }
+        
+        return Label(text, systemImage: isLow ? "exclamationmark.triangle.fill" : "shippingbox.fill")
+            .font(.system(.subheadline, weight: .semibold))
+            .foregroundStyle(Color.theme.onHero)
+            .padding(.horizontal, Spacing.md)
+            .padding(.vertical, Spacing.sm)
+            .background(Color.theme.onHero.opacity(isLow ? 0.28 : 0.18), in: Capsule())
     }
     
     private func stat(title: String, count: Int) -> some View {
@@ -242,6 +264,24 @@ struct MedicationDetailView: View {
         .accessibilityLabel(
             "\(day.date.formatted(.dateTime.weekday(.wide).day().month(.wide).locale(locale)))\(day.doses.isEmpty ? "" : ", \(day.takenCount)/\(day.doses.count)")"
         )
+    }
+    
+    @ViewBuilder private var notesCard: some View {
+        if let notes = viewModel.medication.notes {
+            VStack(alignment: .leading, spacing: Spacing.sm) {
+                Text(L10n.Form.notesTitle)
+                    .font(Font.theme.sectionTitle)
+                    .foregroundStyle(Color.theme.textPrimary)
+                
+                Text(notes)
+                    .font(Font.theme.rowSubtitle)
+                    .foregroundStyle(Color.theme.textSecondary)
+            }
+            .padding(Spacing.lg)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .cardSurface()
+            .padding(.horizontal, Spacing.lg)
+        }
     }
     
     private var actions: some View {

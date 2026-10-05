@@ -57,7 +57,7 @@ struct MedoraApp: App {
             recordDose: RecordDoseForMedicationUseCase(
                 medicationRepository: medications,
                 doseLogRepository: doseLogs,
-                recordDose: RecordDoseUseCase(doseLogRepository: doseLogs)
+                recordDose: RecordDoseUseCase(doseLogRepository: doseLogs, medicationRepository: medications)
             ),
             snoozeReminder: SnoozeReminderUseCase(repository: medications, scheduler: scheduler),
             preferences: AppPreferences(),

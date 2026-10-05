@@ -11,34 +11,59 @@ import DesignSystem
 import Domain
 import SwiftUI
 
+/// Adding walks through the steps one by one. Editing shows a summary and opens only the step to change.
 struct MedicationEditorView: View {
     @Bindable var viewModel: MedicationEditorViewModel
     
     let onFinish: (Bool) -> Void
-    let onDelete: (() -> Void)?
+    
+    var body: some View {
+        if viewModel.isEditing {
+            MedicationEditPage(viewModel: viewModel, onFinish: onFinish)
+        }
+        else {
+            MedicationWizardView(viewModel: viewModel, onFinish: onFinish)
+        }
+    }
+}
+
+extension View {
+    func editorErrorAlert(_ viewModel: MedicationEditorViewModel) -> some View {
+        alert(
+            L10n.Editor.invalidInputTitle,
+            isPresented: Binding(
+                get: { viewModel.errorMessage != nil },
+                set: { if !$0 { viewModel.errorMessage = nil } }
+            )
+        ) {
+            Button(CommonText.ok, role: .cancel) {}
+        } message: {
+            Text(viewModel.errorMessage ?? "")
+        }
+    }
+}
+
+// MARK: - Adding
+
+private struct MedicationWizardView: View {
+    @Bindable var viewModel: MedicationEditorViewModel
+    
+    let onFinish: (Bool) -> Void
     
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.xl) {
-                    detailsSection
-                    repeatSection
-                    durationSection
-                    remindersSection
-                    statusSection
+                    header
                     
-                    if onDelete != nil {
-                        CardSection {
-                            DestructiveRow(title: L10n.Editor.deleteMedication) {
-                                onDelete?()
-                            }
-                        }
-                    }
+                    EditorStepContent(step: viewModel.step, viewModel: viewModel)
+                        .id(viewModel.step)
+                        .transition(.opacity)
                 }
                 .padding(.vertical, Spacing.lg)
             }
+            .scrollDismissesKeyboard(.interactively)
             .background(Color.theme.background)
-            .navigationTitle(viewModel.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -48,245 +73,207 @@ struct MedicationEditorView: View {
                     .labelStyle(.iconOnly)
                     .tint(Color.theme.accentText)
                 }
-                
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(CommonText.save) {
-                        Task {
-                            if await viewModel.save() {
-                                onFinish(true)
-                            }
-                        }
-                    }
-                    .tint(Color.theme.accentText)
-                    .disabled(viewModel.isSaving)
-                }
             }
-            .alert(
-                L10n.Editor.invalidInputTitle,
-                isPresented: Binding(
-                    get: { viewModel.errorMessage != nil },
-                    set: { if !$0 { viewModel.errorMessage = nil } }
-                )
-            ) {
-                Button(CommonText.ok, role: .cancel) {}
-            } message: {
-                Text(viewModel.errorMessage ?? "")
+            .safeAreaInset(edge: .bottom) {
+                bottomBar
             }
+            .editorErrorAlert(viewModel)
         }
+        .animation(.snappy, value: viewModel.step)
     }
     
-    private var detailsSection: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            SectionHeader(title: L10n.Editor.details)
-            
-            CardSection {
-                TextField(L10n.Editor.namePlaceholder, text: $viewModel.name)
-                    .font(Font.theme.rowTitle)
-                    .foregroundStyle(Color.theme.textPrimary)
-                    .padding(Spacing.lg)
-                
-                RowSeparator()
-                
-                AdaptiveStack {
-                    Text(L10n.Editor.dosage)
-                        .font(Font.theme.rowTitle)
-                        .foregroundStyle(Color.theme.textPrimary)
-                    
-                    Spacer(minLength: 0)
-                    
-                    TextField(L10n.Editor.amount, text: $viewModel.amountText)
-                        .keyboardType(.decimalPad)
-                        .multilineTextAlignment(.trailing)
-                        .font(Font.theme.rowSubtitle)
-                        .foregroundStyle(Color.theme.textSecondary)
-                        .frame(maxWidth: 80)
-                }
-                .padding(Spacing.lg)
-                
-                RowSeparator()
-                
-                Picker(L10n.Editor.unit, selection: $viewModel.unit) {
-                    ForEach(DosageUnit.allCases, id: \.self) { unit in
-                        Text(unit.displayText).tag(unit)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .padding(Spacing.lg)
-            }
-        }
-    }
-    
-    private var repeatSection: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            SectionHeader(title: L10n.Editor.repeatSection)
-            
-            CardSection {
-                Picker(L10n.Editor.repeatSection, selection: $viewModel.repeatMode) {
-                    ForEach(RepeatMode.allCases) { mode in
-                        Text(mode.title).tag(mode)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .padding(Spacing.lg)
-                
-                if viewModel.repeatMode == .specificDays {
-                    RowSeparator()
-                    
-                    HStack(spacing: 0) {
-                        ForEach(Weekday.allCases, id: \.self) { weekday in
-                            weekdayButton(weekday)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal, Spacing.sm)
-                    .padding(.vertical, Spacing.md)
-                }
-            }
-        }
-    }
-    
-    private func weekdayButton(_ weekday: Weekday) -> some View {
-        let isSelected = viewModel.weekdays.contains(weekday)
+    private var header: some View {
+        let total = EditorStep.allCases.count
+        let current = viewModel.step.rawValue + 1
         
-        return Button {
-            viewModel.toggleWeekday(weekday)
-        } label: {
-            Text(weekday.shortSymbol)
-                .font(Font.theme.rowSubtitle)
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-                .fontWeight(isSelected ? .semibold : .regular)
-                .foregroundStyle(isSelected ? Color.theme.onHero : Color.theme.textPrimary)
-                .frame(width: 40, height: 40)
-                .background(
-                    isSelected ? Color.theme.hero : Color.theme.fill,
-                    in: Circle()
-                )
-                .frame(maxWidth: .infinity, minHeight: Size.minTarget)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
-    }
-    
-    private var durationSection: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            SectionHeader(title: L10n.Editor.duration)
-            
-            CardSection {
-                datePickerRow(title: L10n.Editor.starts, selection: $viewModel.startDate)
-                
-                RowSeparator()
-                
-                ToggleRow(title: L10n.Editor.endDate, isOn: $viewModel.hasEndDate)
-                
-                if viewModel.hasEndDate {
-                    RowSeparator()
-                    
-                    datePickerRow(
-                        title: L10n.Editor.ends,
-                        selection: $viewModel.endDate,
-                        in: viewModel.startDate...
-                    )
+        return VStack(alignment: .leading, spacing: Spacing.md) {
+            HStack(spacing: Spacing.xs + 2) {
+                ForEach(EditorStep.allCases) { step in
+                    Capsule()
+                        .fill(step.rawValue < current ? Color.theme.hero : Color.theme.fill)
+                        .frame(height: 5)
                 }
             }
+            .accessibilityHidden(true)
+            
+            Text(L10n.Form.stepOf(current, total))
+                .font(Font.theme.rowSubtitle)
+                .foregroundStyle(Color.theme.textSecondary)
+            
+            Text(viewModel.step.question)
+                .font(Font.theme.screenTitle)
+                .foregroundStyle(Color.theme.textPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityAddTraits(.isHeader)
         }
+        .padding(.horizontal, Spacing.xl)
     }
     
-    private func datePickerRow(
-        title: String,
-        selection: Binding<Date>,
-        in range: PartialRangeFrom<Date>? = nil
-    ) -> some View {
-        AdaptiveStack {
-            Text(title)
-                .font(Font.theme.rowTitle)
-                .foregroundStyle(Color.theme.textPrimary)
+    private var bottomBar: some View {
+        HStack(spacing: Spacing.md) {
+            if !viewModel.isFirstStep {
+                Button(L10n.Form.back) {
+                    viewModel.back()
+                }
+                .buttonStyle(.secondaryAction)
+                .frame(maxWidth: 140)
+            }
             
-            Spacer(minLength: 0)
-            
-            Group {
-                if let range {
-                    DatePicker("", selection: selection, in: range, displayedComponents: .date)
+            Button(viewModel.isLastStep ? CommonText.save : L10n.Form.next) {
+                if viewModel.isLastStep {
+                    Task {
+                        if await viewModel.save() {
+                            onFinish(true)
+                        }
+                    }
                 }
                 else {
-                    DatePicker("", selection: selection, displayedComponents: .date)
+                    viewModel.next()
                 }
             }
-            .labelsHidden()
-            .fixedSize()
+            .buttonStyle(.primaryAction)
+            .disabled(viewModel.isSaving)
         }
-        .padding(Spacing.lg)
+        .padding(.horizontal, Spacing.lg)
+        .padding(.top, Spacing.md)
+        .padding(.bottom, Spacing.sm)
+        .background(Color.theme.background)
     }
+}
+
+// MARK: - Editing
+
+private struct MedicationEditPage: View {
+    @Bindable var viewModel: MedicationEditorViewModel
     
-    private var remindersSection: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            SectionHeader(title: L10n.Editor.reminders)
-            
-            CardSection {
-                ForEach(viewModel.times) { time in
-                    if time.id != viewModel.times.first?.id {
-                        RowSeparator()
+    let onFinish: (Bool) -> Void
+    
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: Spacing.xl) {
+                    preview
+                    stepRows
+                }
+                .padding(.vertical, Spacing.lg)
+            }
+            .background(Color.theme.background)
+            .navigationTitle(viewModel.title)
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(for: EditorStep.self) { step in
+                ScrollView {
+                    EditorStepContent(step: step, viewModel: viewModel)
+                        .padding(.vertical, Spacing.lg)
+                }
+                .scrollDismissesKeyboard(.interactively)
+                .background(Color.theme.background)
+                .navigationTitle(step.title)
+                .navigationBarTitleDisplayMode(.inline)
+            }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(CommonText.cancel, systemImage: "xmark") {
+                        onFinish(false)
                     }
-                    
-                    HStack(spacing: Spacing.md) {
-                        DatePicker(
-                            "",
-                            selection: Binding(
-                                get: { time.date },
-                                set: { viewModel.updateTime(id: time.id, to: $0) }
-                            ),
-                            displayedComponents: .hourAndMinute
-                        )
-                        .labelsHidden()
-                        
-                        Spacer()
-                        
-                        if viewModel.times.count > 1 {
-                            Button {
-                                viewModel.removeTime(id: time.id)
-                            } label: {
-                                Image(systemName: "minus.circle.fill")
-                                    .font(.system(.title3))
-                                    .foregroundStyle(Color.theme.danger)
-                                    .frame(width: Size.minTarget, height: Size.minTarget)
-                                    .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
+                    .labelStyle(.iconOnly)
+                    .tint(Color.theme.accentText)
+                }
+            }
+            .safeAreaInset(edge: .bottom) {
+                Button(CommonText.save) {
+                    Task {
+                        if await viewModel.save() {
+                            onFinish(true)
                         }
                     }
-                    .padding(Spacing.lg)
+                }
+                .buttonStyle(.primaryAction)
+                .disabled(viewModel.isSaving)
+                .padding(.horizontal, Spacing.lg)
+                .padding(.top, Spacing.md)
+                .padding(.bottom, Spacing.sm)
+                .background(Color.theme.background)
+            }
+            .editorErrorAlert(viewModel)
+        }
+    }
+    
+    /// Shows the medication as it will look once saved.
+    private var preview: some View {
+        HStack(alignment: .center, spacing: Spacing.lg) {
+            if viewModel.photo != nil {
+                MedicationAvatar(photo: viewModel.photo, size: 64)
+            }
+            
+            VStack(alignment: .leading, spacing: Spacing.xs) {
+                Text(viewModel.name.isEmpty ? L10n.Editor.namePlaceholder : viewModel.name)
+                    .font(.system(.title2, weight: .bold))
+                    .foregroundStyle(Color.theme.onHero.opacity(viewModel.name.isEmpty ? 0.6 : 1))
+                
+                Text("\(viewModel.dosage?.displayText ?? viewModel.amountText) · \(viewModel.recurrence.displayText)")
+                    .font(Font.theme.rowSubtitle)
+                    .foregroundStyle(Color.theme.onHero.opacity(0.85))
+                
+                Text(viewModel.times.sorted().map(\.displayText).joined(separator: "  ·  "))
+                    .font(Font.theme.time)
+                    .foregroundStyle(Color.theme.onHero)
+                    .padding(.top, Spacing.xs)
+            }
+            
+            Spacer(minLength: 0)
+        }
+        .padding(Spacing.xl)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .heroCardBackground()
+        .padding(.horizontal, Spacing.lg)
+        .accessibilityElement(children: .combine)
+    }
+    
+    private var stepRows: some View {
+        CardSection {
+            ForEach(EditorStep.allCases) { step in
+                if step != EditorStep.allCases.first {
+                    RowSeparator(leadingInset: Spacing.lg + 44 + Spacing.md)
                 }
                 
-                if viewModel.canAddTime {
-                    RowSeparator()
-                    
-                    Button {
-                        viewModel.addTime()
-                    } label: {
-                        HStack(spacing: Spacing.sm) {
-                            Image(systemName: "plus.circle.fill")
-                            Text(L10n.Editor.addTime)
-                        }
-                        .font(Font.theme.rowTitle)
-                        .foregroundStyle(Color.theme.accentText)
-                        .frame(maxWidth: .infinity, minHeight: Size.minTarget, alignment: .leading)
-                        .padding(.horizontal, Spacing.lg)
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
+                NavigationLink(value: step) {
+                    row(for: step)
                 }
+                .buttonStyle(.plain)
             }
         }
     }
     
-    private var statusSection: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            SectionHeader(title: L10n.Editor.status)
+    private func row(for step: EditorStep) -> some View {
+        HStack(spacing: Spacing.md) {
+            IconTile(
+                systemName: step.systemImage,
+                foreground: Color.theme.accentText,
+                background: Color.theme.accentTint,
+                size: 44
+            )
             
-            CardSection {
-                ToggleRow(title: L10n.Editor.remindersEnabled, isOn: $viewModel.isActive)
+            VStack(alignment: .leading, spacing: Spacing.xs) {
+                Text(step.title)
+                    .font(Font.theme.rowTitle)
+                    .foregroundStyle(Color.theme.textPrimary)
+                
+                Text(viewModel.summary(of: step))
+                    .font(Font.theme.rowSubtitle)
+                    .foregroundStyle(Color.theme.textSecondary)
+                    .lineLimit(2)
             }
+            
+            Spacer(minLength: Spacing.sm)
+            
+            Image(systemName: "chevron.right")
+                .font(.system(.footnote, weight: .semibold))
+                .foregroundStyle(Color.theme.textSecondary.opacity(0.6))
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, Spacing.md)
+        .padding(.horizontal, Spacing.lg)
+        .frame(minHeight: 72)
+        .contentShape(Rectangle())
     }
 }
