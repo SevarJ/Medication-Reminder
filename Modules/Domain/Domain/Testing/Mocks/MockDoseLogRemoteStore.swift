@@ -11,6 +11,8 @@ import Foundation
 public actor MockDoseLogRemoteStore: DoseLogRemoteStore {
     public private(set) var logs: [DoseLog]
     public private(set) var fetchedFrom: Date?
+    public private(set) var fetchedTo: Date?
+    public private(set) var fetchCount = 0
     public private(set) var deletedIds: [UUID] = []
     public private(set) var clearedMedicationIds: [UUID] = []
 
@@ -21,12 +23,16 @@ public actor MockDoseLogRemoteStore: DoseLogRemoteStore {
         self.fails = fails
     }
 
-    public func fetch(from date: Date) async throws -> [DoseLog] {
+    public func fetch(from date: Date, to end: Date?) async throws -> [DoseLog] {
         try failIfNeeded()
 
         fetchedFrom = date
+        fetchedTo = end
+        fetchCount += 1
 
-        return logs.filter { $0.scheduledDate >= date }
+        return logs.filter { log in
+            log.scheduledDate >= date && (end.map { log.scheduledDate < $0 } ?? true)
+        }
     }
 
     public func save(_ log: DoseLog) async throws {

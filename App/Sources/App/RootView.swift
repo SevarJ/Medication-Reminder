@@ -108,6 +108,7 @@ struct RootView<Account: AccountModule, Dashboard: DashboardModule, Settings: Se
 private enum AppTab: Hashable {
     case today
     case medications
+    case history
     case settings
 }
 
@@ -130,6 +131,12 @@ private struct MainTabView<Dashboard: DashboardModule, Settings: SettingsModule>
                     Label("Medications", systemImage: "pills.fill")
                 }
                 .tag(AppTab.medications)
+            
+            dashboard.makeScreen(.history(reloadToken: revision))
+                .tabItem {
+                    Label("History", systemImage: "calendar")
+                }
+                .tag(AppTab.history)
             
             settings.makeScreen(.settings)
                 .tabItem {

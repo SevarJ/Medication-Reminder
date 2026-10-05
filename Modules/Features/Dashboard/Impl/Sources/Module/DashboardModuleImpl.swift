@@ -15,6 +15,7 @@ import SwiftUI
 struct DashboardModuleImpl: DashboardModule {
     private let medications: any MedicationRepository
     private let doseLogs: any DoseLogRepository
+    private let remoteDoseLogs: any DoseLogRemoteStore
     private let scheduler: any ReminderScheduling
     private let authorizer: any NotificationAuthorizing
     private let preferences: AppPreferences
@@ -22,12 +23,14 @@ struct DashboardModuleImpl: DashboardModule {
     init(
         medications: any MedicationRepository = resolve(),
         doseLogs: any DoseLogRepository = resolve(),
+        remoteDoseLogs: any DoseLogRemoteStore = resolve(),
         scheduler: any ReminderScheduling = resolve(),
         authorizer: any NotificationAuthorizing = resolve(),
         preferences: AppPreferences = AppPreferences()
     ) {
         self.medications = medications
         self.doseLogs = doseLogs
+        self.remoteDoseLogs = remoteDoseLogs
         self.scheduler = scheduler
         self.authorizer = authorizer
         self.preferences = preferences
@@ -41,6 +44,8 @@ struct DashboardModuleImpl: DashboardModule {
             makeTodayView(reloadToken: reloadToken)
         case .medications(let reloadToken):
             makeMedicationsView(reloadToken: reloadToken)
+        case .history(let reloadToken):
+            makeHistoryView(reloadToken: reloadToken)
         case .doseReminder(let medicationId, let scheduledDate):
             makeDoseReminderView(medicationId: medicationId, scheduledDate: scheduledDate)
         }
@@ -73,6 +78,20 @@ struct DashboardModuleImpl: DashboardModule {
                 syncReminder: SyncReminderUseCase(repository: medications, scheduler: scheduler),
                 loadMedicationHistory: LoadMedicationHistoryUseCase(doseLogRepository: doseLogs),
                 authorizer: authorizer
+            ),
+            reloadToken: reloadToken
+        )
+    }
+
+    @MainActor
+    private func makeHistoryView(reloadToken: Int) -> some View {
+        HistoryView(
+            viewModel: HistoryViewModel(
+                loadMonth: LoadMonthHistoryUseCase(
+                    medicationRepository: medications,
+                    doseLogRepository: doseLogs,
+                    remoteDoseLogs: remoteDoseLogs
+                )
             ),
             reloadToken: reloadToken
         )

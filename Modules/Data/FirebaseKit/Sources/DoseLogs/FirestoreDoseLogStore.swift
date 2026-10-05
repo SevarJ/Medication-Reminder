@@ -15,10 +15,16 @@ struct FirestoreDoseLogStore: DoseLogRemoteStore {
 
     /// Asks the server only, so an offline device gets an error instead of a partial offline copy.
     /// Writes that are still queued on this device are part of the result.
-    func fetch(from date: Date) async throws -> [DoseLog] {
-        let snapshot = try await AccountCollections.doseLogs()
-            .whereField(DoseLogDocument.CodingKeys.scheduledDate.stringValue, isGreaterThanOrEqualTo: date)
-            .getDocuments(source: .server)
+    func fetch(from date: Date, to end: Date?) async throws -> [DoseLog] {
+        let scheduledDate = DoseLogDocument.CodingKeys.scheduledDate.stringValue
+        var query = try AccountCollections.doseLogs()
+            .whereField(scheduledDate, isGreaterThanOrEqualTo: date)
+
+        if let end {
+            query = query.whereField(scheduledDate, isLessThan: end)
+        }
+
+        let snapshot = try await query.getDocuments(source: .server)
 
         return try snapshot.documents.map { document in
             try document.data(as: DoseLogDocument.self).doseLog(id: document.documentID)

@@ -174,6 +174,48 @@ enum L10n {
         }
     }
     
+    enum History {
+        static var title: String {
+            String(localized: "history.title", defaultValue: "History", bundle: .module.localized())
+        }
+        
+        static var previousMonth: String {
+            String(localized: "history.month.previous", defaultValue: "Previous month", bundle: .module.localized())
+        }
+        
+        static var nextMonth: String {
+            String(localized: "history.month.next", defaultValue: "Next month", bundle: .module.localized())
+        }
+        
+        static var taken: String {
+            String(localized: "history.total.taken", defaultValue: "taken", bundle: .module.localized())
+        }
+        
+        static var upcoming: String {
+            String(localized: "history.dose.upcoming", defaultValue: "Upcoming", bundle: .module.localized())
+        }
+        
+        static var noDosesDue: String {
+            String(localized: "history.adherence.none", defaultValue: "No doses due yet", bundle: .module.localized())
+        }
+        
+        static var emptyMonth: String {
+            String(localized: "history.empty", defaultValue: "No doses were scheduled this month.", bundle: .module.localized())
+        }
+        
+        static var loadFailedTitle: String {
+            String(localized: "history.failure.title", defaultValue: "Could Not Load History", bundle: .module.localized())
+        }
+        
+        static var loadFailedMessage: String {
+            String(localized: "history.failure.message", defaultValue: "Older months need an internet connection.", bundle: .module.localized())
+        }
+        
+        static func adherence(_ percent: String) -> String {
+            String(localized: "history.adherence", defaultValue: "Taken: \(percent)", bundle: .module.localized())
+        }
+    }
+    
     enum Schedule {
         static var everyDay: String {
             String(localized: "schedule.everyDay", defaultValue: "Every day", bundle: .module.localized())

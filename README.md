@@ -1,12 +1,12 @@
 # Medora
 
-A medication reminder and adherence tracker for iOS. Schedule medications, get a local notification for every dose, mark each one taken or skipped, and review the last seven days.
+A medication reminder and adherence tracker for iOS. Schedule medications, get a local notification for every dose, mark each one taken or skipped, and review your whole history in a calendar.
 
 <p align="left">
   <a href="https://github.com/SevarJ/Medication-Reminder/actions/workflows/ci.yml"><img src="https://github.com/SevarJ/Medication-Reminder/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/iOS-17%2B-blue" alt="iOS 17+">
   <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
-  <img src="https://img.shields.io/badge/tests-226-brightgreen" alt="226 tests">
+  <img src="https://img.shields.io/badge/tests-290-brightgreen" alt="290 tests">
 </p>
 
 ## Features
@@ -16,6 +16,7 @@ A medication reminder and adherence tracker for iOS. Schedule medications, get a
 - Local notifications with take and snooze actions
 - Medication page with a seven-day adherence summary, pause and delete
 - Today screen with next dose, daily progress and a seven-day week strip
+- History tab with a month calendar and totals, going back to your first medication
 - English, Azerbaijani and Russian
 - Light and dark appearance, Dynamic Type
 
@@ -72,7 +73,7 @@ Firestore holds the account's data and SwiftData is a cache of it. Data modules 
 
 - `Persistence` implements `MedicationCache` and `DoseLogCache`, `FirebaseKit` implements `MedicationRemoteStore` and `DoseLogRemoteStore`.
 - `DataSync` registers the `MedicationRepository` and `DoseLogRepository` the features use. Reads come from the cache. A write goes to the cache and then to Firestore, which queues it while the device is offline.
-- `RefreshAccountDataUseCase` replaces the cache with what the server holds and reschedules the reminders that changed. `SessionStore` runs it when a session starts and when the app returns from the background. Offline it fails and the cache stays as it is. Only the last 14 days of dose logs are cached; older ones stay on the server.
+- `RefreshAccountDataUseCase` replaces the cache with what the server holds and reschedules the reminders that changed. `SessionStore` runs it when a session starts and when the app returns from the background. Offline it fails and the cache stays as it is. Only the last 14 days of dose logs are cached; older ones stay on the server, and the History tab reads them from there one month at a time (`LoadMonthHistoryUseCase`), keeping each month in memory until the app closes. Older months need a connection.
 - `ClearLocalDataUseCase` runs on sign-out and on every launch that finds nobody signed in.
 
 Documents live under the account: `users/{uid}/medications/{medicationId}` and `users/{uid}/doseLogs/{logId}`.
