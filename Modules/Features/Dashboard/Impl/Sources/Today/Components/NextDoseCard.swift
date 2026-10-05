@@ -36,6 +36,8 @@ struct NextDoseCard: View {
             VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(dose.scheduledDate.timeText)
                     .font(Font.theme.display)
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
                     .foregroundStyle(Color.theme.onHero)
                 
                 Text(dose.medication.name)

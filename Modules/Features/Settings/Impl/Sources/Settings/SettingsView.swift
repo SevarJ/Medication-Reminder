@@ -20,6 +20,7 @@ struct SettingsView: View {
     
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     
     init(viewModel: SettingsViewModel) {
         _viewModel = State(initialValue: viewModel)
@@ -96,7 +97,7 @@ struct SettingsView: View {
         options: [Option],
         label: KeyPath<Option, String>
     ) -> some View {
-        HStack(spacing: Spacing.md) {
+        AdaptiveStack {
             IconTile(
                 systemName: systemName,
                 foreground: Color.theme.accentText,
@@ -107,7 +108,7 @@ struct SettingsView: View {
                 .font(Font.theme.rowTitle)
                 .foregroundStyle(Color.theme.textPrimary)
             
-            Spacer(minLength: Spacing.sm)
+            Spacer(minLength: 0)
             
             Picker(title, selection: selection) {
                 ForEach(options) { option in
@@ -116,8 +117,9 @@ struct SettingsView: View {
             }
             .pickerStyle(.menu)
             .labelsHidden()
-            .fixedSize()
+            .fixedSize(horizontal: !dynamicTypeSize.isAccessibilitySize, vertical: false)
             .tint(Color.theme.textSecondary)
+            .frame(maxWidth: dynamicTypeSize.isAccessibilitySize ? .infinity : nil, alignment: .leading)
         }
         .padding(.horizontal, Spacing.lg)
         .padding(.vertical, Spacing.sm)
@@ -139,7 +141,7 @@ struct SettingsView: View {
             
             CardSection {
                 Button(action: performNotificationAction) {
-                    HStack(spacing: Spacing.md) {
+                    AdaptiveStack {
                         IconTile(
                             systemName: "bell.fill",
                             foreground: Color.theme.accentText,
@@ -150,15 +152,17 @@ struct SettingsView: View {
                             .font(Font.theme.rowTitle)
                             .foregroundStyle(Color.theme.textPrimary)
                         
-                        Spacer(minLength: Spacing.sm)
+                        Spacer(minLength: 0)
                         
                         Text(notificationStatus)
                             .font(Font.theme.rowSubtitle)
                             .foregroundStyle(Color.theme.textSecondary)
                         
-                        Image(systemName: "chevron.right")
-                            .font(Font.theme.caption)
-                            .foregroundStyle(Color.theme.textSecondary)
+                        if !dynamicTypeSize.isAccessibilitySize {
+                            Image(systemName: "chevron.right")
+                                .font(Font.theme.caption)
+                                .foregroundStyle(Color.theme.textSecondary)
+                        }
                     }
                     .padding(Spacing.lg)
                     .contentShape(Rectangle())
@@ -207,7 +211,7 @@ struct SettingsView: View {
                         Task { await viewModel.signOut() }
                     }
                 } label: {
-                    HStack(spacing: Spacing.md) {
+                    AdaptiveStack {
                         AccountAvatar(photoURL: account.photoURL, size: 56)
                         
                         VStack(alignment: .leading, spacing: Spacing.xs) {
@@ -226,11 +230,13 @@ struct SettingsView: View {
                             }
                         }
                         
-                        Spacer(minLength: Spacing.sm)
+                        Spacer(minLength: 0)
                         
-                        Image(systemName: "chevron.right")
-                            .font(.system(.footnote, weight: .semibold))
-                            .foregroundStyle(Color.theme.textSecondary.opacity(0.6))
+                        if !dynamicTypeSize.isAccessibilitySize {
+                            Image(systemName: "chevron.right")
+                                .font(.system(.footnote, weight: .semibold))
+                                .foregroundStyle(Color.theme.textSecondary.opacity(0.6))
+                        }
                     }
                     .padding(Spacing.lg)
                     .contentShape(Rectangle())
@@ -245,7 +251,7 @@ struct SettingsView: View {
             SectionHeader(title: L10n.Settings.about)
             
             CardSection {
-                HStack(spacing: Spacing.md) {
+                AdaptiveStack {
                     IconTile(
                         systemName: "info.circle.fill",
                         foreground: Color.theme.accentText,
@@ -256,7 +262,7 @@ struct SettingsView: View {
                         .font(Font.theme.rowTitle)
                         .foregroundStyle(Color.theme.textPrimary)
                     
-                    Spacer(minLength: Spacing.sm)
+                    Spacer(minLength: 0)
                     
                     Text(viewModel.appVersion)
                         .font(Font.theme.rowSubtitle)

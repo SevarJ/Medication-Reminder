@@ -29,6 +29,7 @@ struct WeekStrip: View {
                 .accessibilityAddTraits(isSelected(day.date) ? .isSelected : [])
             }
         }
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         .sensoryFeedback(.selection, trigger: days.first(where: { isSelected($0.date) })?.date)
     }
     

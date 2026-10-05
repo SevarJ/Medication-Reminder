@@ -13,8 +13,15 @@ import SwiftUI
 struct MedicationRow: View {
     let medication: Medication
     
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    
     var body: some View {
-        HStack(spacing: Spacing.md) {
+        let isLarge = dynamicTypeSize.isAccessibilitySize
+        let layout = isLarge
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: Spacing.md))
+            : AnyLayout(HStackLayout(spacing: Spacing.md))
+        
+        return layout {
             IconTile(
                 systemName: "pills.fill",
                 foreground: medication.isActive ? Color.theme.accentText : Color.theme.textSecondary,
@@ -38,7 +45,9 @@ struct MedicationRow: View {
             }
             .opacity(medication.isActive ? 1 : 0.65)
             
-            Spacer(minLength: Spacing.sm)
+            if !isLarge {
+                Spacer(minLength: Spacing.sm)
+            }
             
             if !medication.isActive {
                 Badge(
@@ -49,10 +58,13 @@ struct MedicationRow: View {
                 )
             }
             
-            Image(systemName: "chevron.right")
-                .font(.system(.footnote, weight: .semibold))
-                .foregroundStyle(Color.theme.textSecondary.opacity(0.6))
+            if !isLarge {
+                Image(systemName: "chevron.right")
+                    .font(.system(.footnote, weight: .semibold))
+                    .foregroundStyle(Color.theme.textSecondary.opacity(0.6))
+            }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.vertical, Spacing.md)
         .padding(.horizontal, Spacing.lg)
         .frame(minHeight: 76)

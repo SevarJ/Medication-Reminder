@@ -15,6 +15,8 @@ struct TodayView: View {
     @State private var editorViewModel: MedicationEditorViewModel?
     
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @ScaledMetric(relativeTo: .title3) private var periodIconWidth: CGFloat = 28
     
     private let reloadToken: Int
     
@@ -140,14 +142,22 @@ struct TodayView: View {
     }
     
     private var summary: some View {
-        HStack(spacing: Spacing.lg) {
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: Spacing.md))
+            : AnyLayout(HStackLayout(spacing: Spacing.lg))
+        
+        return layout {
             ProgressRing(progress: viewModel.progress, lineWidth: 8)
-                .frame(width: 60, height: 60)
+                .frame(width: 64, height: 64)
                 .overlay {
                     Text("\(Int((viewModel.progress * 100).rounded()))%")
                         .font(.system(.footnote, design: .rounded, weight: .bold))
+                        .dynamicTypeSize(...DynamicTypeSize.xLarge)
+                        .minimumScaleFactor(0.6)
+                        .lineLimit(1)
                         .foregroundStyle(Color.theme.textPrimary)
                         .contentTransition(.numericText())
+                        .padding(.horizontal, Spacing.sm)
                 }
             
             VStack(alignment: .leading, spacing: Spacing.xs) {
@@ -166,8 +176,11 @@ struct TodayView: View {
             }
             .animation(.spring, value: viewModel.takenCount)
             
-            Spacer(minLength: 0)
+            if !dynamicTypeSize.isAccessibilitySize {
+                Spacer(minLength: 0)
+            }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Spacing.lg)
         .cardSurface()
         .accessibilityElement(children: .combine)
@@ -217,10 +230,12 @@ struct TodayView: View {
             HStack(spacing: Spacing.sm) {
                 Image(systemName: period.iconName)
                     .foregroundStyle(Color.theme.textSecondary)
-                    .frame(width: 28)
+                    .frame(width: periodIconWidth)
                 
                 Text(period.title)
                     .foregroundStyle(Color.theme.textPrimary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
                 
                 Spacer()
                 
@@ -230,6 +245,7 @@ struct TodayView: View {
                     .monospacedDigit()
             }
             .font(Font.theme.sectionTitle)
+            .dynamicTypeSize(...DynamicTypeSize.accessibility2)
             .textCase(nil)
             .padding(.top, Spacing.xs)
             .accessibilityElement(children: .combine)

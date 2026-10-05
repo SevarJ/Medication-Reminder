@@ -87,12 +87,12 @@ struct MedicationEditorView: View {
                 
                 RowSeparator()
                 
-                HStack(spacing: Spacing.md) {
+                AdaptiveStack {
                     Text(L10n.Editor.dosage)
                         .font(Font.theme.rowTitle)
                         .foregroundStyle(Color.theme.textPrimary)
                     
-                    Spacer()
+                    Spacer(minLength: 0)
                     
                     TextField(L10n.Editor.amount, text: $viewModel.amountText)
                         .keyboardType(.decimalPad)
@@ -198,12 +198,12 @@ struct MedicationEditorView: View {
         selection: Binding<Date>,
         in range: PartialRangeFrom<Date>? = nil
     ) -> some View {
-        HStack {
+        AdaptiveStack {
             Text(title)
                 .font(Font.theme.rowTitle)
                 .foregroundStyle(Color.theme.textPrimary)
             
-            Spacer()
+            Spacer(minLength: 0)
             
             Group {
                 if let range {

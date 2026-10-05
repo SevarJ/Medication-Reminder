@@ -16,8 +16,14 @@ struct DoseRow: View {
     let onTake: () -> Void
     let onSkip: () -> Void
     
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    
     var body: some View {
-        HStack(spacing: Spacing.md) {
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: Spacing.md))
+            : AnyLayout(HStackLayout(spacing: Spacing.md))
+        
+        return layout {
             glyph
             
             VStack(alignment: .leading, spacing: Spacing.xs) {
@@ -37,10 +43,13 @@ struct DoseRow: View {
             }
             .opacity(state == .skipped ? 0.65 : 1)
             
-            Spacer(minLength: Spacing.sm)
+            if !dynamicTypeSize.isAccessibilitySize {
+                Spacer(minLength: Spacing.sm)
+            }
             
             trailing
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.vertical, Spacing.md)
         .padding(.horizontal, Spacing.lg)
         .frame(minHeight: 72)
@@ -105,7 +114,7 @@ struct DoseRow: View {
             .buttonStyle(.plain)
             .accessibilityLabel(L10n.Today.markNotTaken)
         case .pending, .missed:
-            HStack(spacing: 0) {
+            HStack(spacing: Spacing.xs) {
                 Button(action: onTake) {
                     Text(L10n.Today.take)
                         .font(.system(.subheadline, weight: .semibold))

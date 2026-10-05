@@ -57,12 +57,12 @@ struct ProfileView: View {
     }
     
     private func infoRow(title: String, value: String) -> some View {
-        HStack(spacing: Spacing.md) {
+        AdaptiveStack {
             Text(title)
                 .font(Font.theme.rowTitle)
                 .foregroundStyle(Color.theme.textPrimary)
             
-            Spacer(minLength: Spacing.sm)
+            Spacer(minLength: 0)
             
             Text(value)
                 .font(Font.theme.rowSubtitle)
