@@ -222,6 +222,7 @@ struct MedicationListViewModelTests {
                 repository: repository,
                 scheduler: scheduler
             ),
+            loadMedicationHistory: LoadMedicationHistoryUseCase(doseLogRepository: logRepository),
             authorizer: authorizer
         )
     }

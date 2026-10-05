@@ -14,6 +14,7 @@ import UIKit
 struct MedicationListView: View {
     @State private var viewModel: MedicationListViewModel
     @State private var editorViewModel: MedicationEditorViewModel?
+    @State private var detailViewModel: MedicationDetailViewModel?
     @State private var pendingDeletion: Medication?
     
     @Environment(\.openURL) private var openURL
@@ -50,6 +51,19 @@ struct MedicationListView: View {
                     }
                     .tint(Color.theme.accentText)
                     .accessibilityLabel(L10n.List.addMedication)
+                }
+            }
+            .navigationDestination(isPresented: Binding(
+                get: { detailViewModel != nil },
+                set: { if !$0 { detailViewModel = nil } }
+            )) {
+                if let detailViewModel {
+                    MedicationDetailView(viewModel: detailViewModel) {
+                        Task {
+                            await viewModel.load()
+                            await viewModel.refreshNotificationAccess()
+                        }
+                    }
                 }
             }
         }
@@ -115,7 +129,7 @@ struct MedicationListView: View {
             Section {
                 ForEach(medications) { medication in
                     Button {
-                        editorViewModel = viewModel.makeEditorViewModel(for: medication)
+                        detailViewModel = viewModel.makeDetailViewModel(for: medication)
                     } label: {
                         MedicationRow(medication: medication)
                     }

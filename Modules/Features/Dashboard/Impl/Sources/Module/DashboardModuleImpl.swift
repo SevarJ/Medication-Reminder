@@ -71,6 +71,7 @@ struct DashboardModuleImpl: DashboardModule {
                 ),
                 toggleMedicationActive: ToggleMedicationActiveUseCase(saveMedication: saveMedication),
                 syncReminder: SyncReminderUseCase(repository: medications, scheduler: scheduler),
+                loadMedicationHistory: LoadMedicationHistoryUseCase(doseLogRepository: doseLogs),
                 authorizer: authorizer
             ),
             reloadToken: reloadToken

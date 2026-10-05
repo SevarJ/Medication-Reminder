@@ -6,7 +6,7 @@ A medication reminder and adherence tracker for iOS. Schedule medications, get a
   <a href="https://github.com/SevarJ/Medication-Reminder/actions/workflows/ci.yml"><img src="https://github.com/SevarJ/Medication-Reminder/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/iOS-17%2B-blue" alt="iOS 17+">
   <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
-  <img src="https://img.shields.io/badge/tests-215-brightgreen" alt="215 tests">
+  <img src="https://img.shields.io/badge/tests-226-brightgreen" alt="226 tests">
 </p>
 
 ## Features
@@ -14,6 +14,7 @@ A medication reminder and adherence tracker for iOS. Schedule medications, get a
 - Google sign-in, with medications and dose history stored in Cloud Firestore and cached offline
 - Medications with dosage, unit, weekdays, date range and several daily reminder times
 - Local notifications with take and snooze actions
+- Medication page with a seven-day adherence summary, pause and delete
 - Today screen with next dose, daily progress and a seven-day week strip
 - English, Azerbaijani and Russian
 - Light and dark appearance, Dynamic Type

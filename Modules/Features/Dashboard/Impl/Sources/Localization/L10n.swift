@@ -156,6 +156,24 @@ enum L10n {
         }
     }
     
+    enum Detail {
+        static var edit: String {
+            String(localized: "detail.action.edit", defaultValue: "Edit", bundle: .module.localized())
+        }
+        
+        static var history: String {
+            String(localized: "detail.section.history", defaultValue: "Last 7 Days", bundle: .module.localized())
+        }
+        
+        static var taken: String {
+            String(localized: "detail.history.taken", defaultValue: "Taken", bundle: .module.localized())
+        }
+        
+        static var noHistory: String {
+            String(localized: "detail.history.empty", defaultValue: "No doses were scheduled in the last 7 days.", bundle: .module.localized())
+        }
+    }
+    
     enum Schedule {
         static var everyDay: String {
             String(localized: "schedule.everyDay", defaultValue: "Every day", bundle: .module.localized())

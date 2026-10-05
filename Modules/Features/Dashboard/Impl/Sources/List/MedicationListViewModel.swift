@@ -21,6 +21,7 @@ final class MedicationListViewModel {
     private let deleteMedication: DeleteMedicationUseCase
     private let toggleMedicationActive: ToggleMedicationActiveUseCase
     private let syncReminder: SyncReminderUseCase
+    private let loadMedicationHistory: LoadMedicationHistoryUseCase
     private let authorizer: any NotificationAuthorizing
     
     private(set) var state: MedicationListState = .loading
@@ -31,6 +32,7 @@ final class MedicationListViewModel {
         deleteMedication: DeleteMedicationUseCase,
         toggleMedicationActive: ToggleMedicationActiveUseCase,
         syncReminder: SyncReminderUseCase,
+        loadMedicationHistory: LoadMedicationHistoryUseCase,
         authorizer: any NotificationAuthorizing
     ) {
         self.repository = repository
@@ -38,6 +40,7 @@ final class MedicationListViewModel {
         self.deleteMedication = deleteMedication
         self.toggleMedicationActive = toggleMedicationActive
         self.syncReminder = syncReminder
+        self.loadMedicationHistory = loadMedicationHistory
         self.authorizer = authorizer
     }
     
@@ -99,6 +102,17 @@ final class MedicationListViewModel {
         MedicationEditorViewModel(
             medication: medication,
             saveMedication: saveMedication
+        )
+    }
+    
+    func makeDetailViewModel(for medication: Medication) -> MedicationDetailViewModel {
+        MedicationDetailViewModel(
+            medication: medication,
+            repository: repository,
+            loadHistory: loadMedicationHistory,
+            saveMedication: saveMedication,
+            deleteMedication: deleteMedication,
+            toggleMedicationActive: toggleMedicationActive
         )
     }
     
