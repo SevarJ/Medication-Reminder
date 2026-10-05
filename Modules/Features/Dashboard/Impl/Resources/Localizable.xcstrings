@@ -783,29 +783,6 @@
         }
       }
     },
-    "list.section.all": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "All Medications"
-          }
-        },
-        "az": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bütün dərmanlar"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Все лекарства"
-          }
-        }
-      }
-    },
     "list.title": {
       "extractionState": "manual",
       "localizations": {
