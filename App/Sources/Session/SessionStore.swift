@@ -25,6 +25,7 @@ final class SessionStore {
     private let profiles: any UserProfileRepository
     private let refreshData: RefreshAccountDataUseCase
     private let clearLocalData: ClearLocalDataUseCase
+    private let upcomingDoses: PublishUpcomingDosesUseCase
     private var profileSave: Task<Void, Never>?
     private var refreshTask: Task<Void, Never>?
     
@@ -32,12 +33,14 @@ final class SessionStore {
         authenticator: any AccountAuthenticating,
         profiles: any UserProfileRepository,
         refreshData: RefreshAccountDataUseCase,
-        clearLocalData: ClearLocalDataUseCase
+        clearLocalData: ClearLocalDataUseCase,
+        upcomingDoses: PublishUpcomingDosesUseCase
     ) {
         self.authenticator = authenticator
         self.profiles = profiles
         self.refreshData = refreshData
         self.clearLocalData = clearLocalData
+        self.upcomingDoses = upcomingDoses
     }
     
     /// Follows sign-ins and sign-outs for as long as the calling task lives.
@@ -71,6 +74,12 @@ final class SessionStore {
         await startRefresh().value
     }
     
+    func publishUpcomingDoses() async {
+        guard case .signedIn = state else { return }
+        
+        try? await upcomingDoses.execute()
+    }
+    
     @discardableResult
     private func startRefresh() -> Task<Void, Never> {
         if let refreshTask {
@@ -82,6 +91,7 @@ final class SessionStore {
                 revision += 1
             }
             
+            try? await upcomingDoses.execute()
             refreshTask = nil
         }
         
@@ -99,6 +109,7 @@ final class SessionStore {
         await refreshTask?.value
         
         try? await clearLocalData.execute()
+        await upcomingDoses.clear()
     }
     
     private func saveProfile(of account: UserAccount) {

@@ -17,6 +17,7 @@ import OnboardingImpl
 import Persistence
 import SettingsImpl
 import SwiftUI
+import WidgetBridge
 
 @main
 struct MedoraApp: App {
@@ -29,11 +30,17 @@ struct MedoraApp: App {
         PersistenceConfigurator.setup()
         NotificationsConfigurator.setup()
         DataSyncConfigurator.setup()
+        WidgetBridgeConfigurator.setup()
         
         let router = ReminderRouter()
         let medications: any MedicationRepository = resolve()
         let doseLogs: any DoseLogRepository = resolve()
         let scheduler: any ReminderScheduling = resolve()
+        let upcomingDoses = PublishUpcomingDosesUseCase(
+            medicationRepository: medications,
+            doseLogRepository: doseLogs,
+            publisher: resolve()
+        )
         
         self.router = router
         session = SessionStore(
@@ -51,7 +58,8 @@ struct MedoraApp: App {
                 doseLogCache: resolve(),
                 remoteOffline: resolve(),
                 scheduler: scheduler
-            )
+            ),
+            upcomingDoses: upcomingDoses
         )
         notificationCoordinator = ReminderNotificationCoordinator(
             recordDose: RecordDoseForMedicationUseCase(
@@ -60,6 +68,7 @@ struct MedoraApp: App {
                 recordDose: RecordDoseUseCase(doseLogRepository: doseLogs, medicationRepository: medications, scheduler: scheduler)
             ),
             snoozeReminder: SnoozeReminderUseCase(repository: medications, scheduler: scheduler),
+            upcomingDoses: upcomingDoses,
             preferences: AppPreferences(),
             router: router
         )

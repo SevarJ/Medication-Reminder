@@ -6,16 +6,17 @@ A medication reminder and adherence tracker for iOS. Schedule medications, get a
   <a href="https://github.com/SevarJ/Medication-Reminder/actions/workflows/ci.yml"><img src="https://github.com/SevarJ/Medication-Reminder/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/iOS-17%2B-blue" alt="iOS 17+">
   <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
-  <img src="https://img.shields.io/badge/tests-316-brightgreen" alt="316 tests">
+  <img src="https://img.shields.io/badge/tests-337-brightgreen" alt="337 tests">
 </p>
 
 ## Features
 
 - Google sign-in, with medications and dose history stored in Cloud Firestore and cached offline
-- Medications with dosage, unit, weekdays, date range and several daily reminder times, plus an optional photo, notes and remaining stock that counts down as you take doses
+- Medications with dosage, unit, weekdays, date range and several daily reminder times, plus an optional photo, notes, intake tags (before or after meals, on an empty stomach, or your own) and remaining stock that counts down as you take doses
 - Adding walks through four short steps, and editing opens only the step you want to change
 - Local notifications with take and snooze actions
 - Medication page with a seven-day adherence summary, pause and delete
+- Home screen widget with the next dose
 - Today screen with next dose, daily progress and a week strip that opens into a month calendar, going back to your first medication
 - English, Azerbaijani and Russian
 - Light and dark appearance, Dynamic Type
@@ -26,7 +27,7 @@ Modular clean architecture generated with [Tuist](https://tuist.dev). Every laye
 
 ```
                                ┌──────────────┐
-                               │    Medora    │  app target, composition root
+                               │    Medora    │  app target, composition root, embeds MedoraWidget
                                └──────┬───────┘
       ┌──────────────────┬────────────┴─────┬──────────────────┐
 ┌─────┴───────┐  ┌───────┴────────┐  ┌──────┴────────┐  ┌──────┴───────┐
@@ -37,15 +38,15 @@ Modular clean architecture generated with [Tuist](https://tuist.dev). Every laye
                               ┌───────┴───────┐
                               │ AppFormatters │                            Shared
                               └───────┬───────┘
-┌─────────────┐  ┌──────────────────┐ │  ┌─────────────┐  ┌──────────┐
-│ Persistence │  │ NotificationsKit │ │  │ FirebaseKit │  │ DataSync │    Data
-└──────┬──────┘  └─────────┬────────┘ │  └──────┬──────┘  └─────┬────┘
-       └───────────────────┴──────────┼─────────┴───────────────┘
+┌─────────────┐  ┌──────────────────┐ │  ┌─────────────┐  ┌──────────┐  ┌──────────────┐
+│ Persistence │  │ NotificationsKit │ │  │ FirebaseKit │  │ DataSync │  │ WidgetBridge │   Data
+└──────┬──────┘  └─────────┬────────┘ │  └──────┬──────┘  └─────┬────┘  └──────┬───────┘
+       └───────────────────┴──────────┼─────────┴───────────────┴──────────────┘
                                 ┌─────┴─────┐
                                 │  Domain   │  entities, use cases, ports    Domain
                                 └───────────┘
 
-  AppLocalization · AppPreferences · DependencyInjection · DesignSystem   Foundation, usable by every layer
+  AppLocalization · AppPreferences · DependencyInjection · DesignSystem · WidgetSnapshot   Foundation, usable by every layer
 ```
 
 - `Domain` depends on nothing: no UI, no localization, no storage.
@@ -61,6 +62,7 @@ FirebaseConfigurator.setup()
 PersistenceConfigurator.setup()
 NotificationsConfigurator.setup()
 DataSyncConfigurator.setup()
+WidgetBridgeConfigurator.setup()
 ```
 
 Third-party SDKs are linked only by data modules, which list them as `packages` in `Project.swift`. `FirebaseKit` is the only module that imports Firebase or Google Sign-In.
@@ -78,6 +80,13 @@ Firestore holds the account's data and SwiftData is a cache of it. Data modules 
 
 Documents live under the account: `users/{uid}/medications/{medicationId}` and `users/{uid}/doseLogs/{logId}`.
 
+### Home screen widget
+
+- `MedoraWidget` is a WidgetKit extension with one small widget that shows the next dose.
+- `PublishUpcomingDosesUseCase` collects the doses of the next 7 days that are not recorded yet. `WidgetBridge` writes them, with their text already localized, to the App Group `group.com.sevarjafarli.medora` and reloads the widget. `SessionStore` publishes after every refresh and when the app goes to the background, a dose recorded from a notification publishes too, and sign-out clears the widget.
+- The widget links only `WidgetSnapshot`, `AppLocalization` and `DesignSystem`, which have no dependencies, and merges them into its own binary. The app merges its frameworks into its binary, so the extension cannot load them from the app bundle.
+- Tapping the widget opens the dose screen from 30 minutes before a dose until 30 minutes after it, and the Today tab at any other time.
+
 ## Design
 
 `DesignSystem` holds the tokens and shared components. Screens use them instead of raw colors or sizes.
@@ -89,7 +98,7 @@ Documents live under the account: `users/{uid}/medications/{medicationId}` and `
 
 ## Tech stack
 
-Swift 6 with strict concurrency · SwiftUI · SwiftData · UserNotifications · Firebase Authentication · Cloud Firestore · Google Sign-In · Swift Testing · Tuist
+Swift 6 with strict concurrency · SwiftUI · SwiftData · UserNotifications · WidgetKit · Firebase Authentication · Cloud Firestore · Google Sign-In · Swift Testing · Tuist
 
 ## Getting started
 

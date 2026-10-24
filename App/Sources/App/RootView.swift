@@ -16,6 +16,7 @@ import NotificationsKit
 import Onboarding
 import Settings
 import SwiftUI
+import WidgetSnapshot
 
 struct RootView<Account: AccountModule, Dashboard: DashboardModule, Settings: SettingsModule, Onboarding: OnboardingModule>: View {
     @Bindable var router: ReminderRouter
@@ -42,7 +43,15 @@ struct RootView<Account: AccountModule, Dashboard: DashboardModule, Settings: Se
                 await session.observe()
             }
             .onOpenURL { url in
-                FirebaseConfigurator.open(url)
+                if let link = DoseLink(url: url) {
+                    router.open(medicationId: link.medicationId, scheduledDate: link.scheduledDate)
+                }
+                else if TodayLink.matches(url) {
+                    selectedTab = .today
+                }
+                else {
+                    FirebaseConfigurator.open(url)
+                }
             }
             .onChange(of: session.state) {
                 if session.state == .signedOut {
@@ -95,6 +104,8 @@ struct RootView<Account: AccountModule, Dashboard: DashboardModule, Settings: Se
         switch scenePhase {
         case .background:
             wasInBackground = true
+            
+            Task { await session.publishUpcomingDoses() }
         case .active where wasInBackground:
             wasInBackground = false
             
