@@ -28,6 +28,18 @@ struct LocalNotificationSchedulerTests {
         #expect(added.allSatisfy { $0.medicationId == medication.id })
     }
     
+    @Test func reminderBodyNamesTheIntakeTags() async throws {
+        let center = MockUserNotificationCenter()
+        let sut = LocalNotificationScheduler(center: center, alertLog: MockLowStockAlertLog())
+        let medication = try makeMedication(intakeTags: [.custom("With water")])
+        
+        try await sut.schedule(for: medication)
+        
+        let added = await center.added
+        
+        #expect(added.allSatisfy { $0.body.hasSuffix(" · With water") })
+    }
+    
     @Test func reschedulingReplacesPreviousReminders() async throws {
         let center = MockUserNotificationCenter()
         let sut = LocalNotificationScheduler(center: center, alertLog: MockLowStockAlertLog())

@@ -98,7 +98,7 @@ struct LocalNotificationScheduler: ReminderScheduling {
                     ),
                     medicationId: medication.id,
                     title: medication.name,
-                    body: medication.dosage.displayText,
+                    body: medication.doseText,
                     components: DateComponents(hour: time.hour, minute: time.minute, weekday: weekday),
                     repeats: true
                 )
@@ -117,7 +117,7 @@ struct LocalNotificationScheduler: ReminderScheduling {
                 identifier: Self.snoozeIdentifier(medicationId: medication.id),
                 medicationId: medication.id,
                 title: medication.name,
-                body: medication.dosage.displayText,
+                body: medication.doseText,
                 components: components,
                 repeats: false
             )
