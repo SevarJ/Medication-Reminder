@@ -31,10 +31,15 @@ struct FirebaseAccountAuthenticator: AccountAuthenticating {
 
     @MainActor
     func signInWithGoogle() async throws -> UserAccount {
-        let google = try await signInToGoogle()
-        let result = try await Auth.auth().signIn(with: Self.credential(for: google))
+        do {
+            let google = try await signInToGoogle()
+            let result = try await Auth.auth().signIn(with: Self.credential(for: google))
 
-        return UserAccount(user: result.user)
+            return UserAccount(user: result.user)
+        }
+        catch {
+            throw Self.signInError(from: error)
+        }
     }
 
     @MainActor
@@ -49,16 +54,21 @@ struct FirebaseAccountAuthenticator: AccountAuthenticating {
             throw AccountError.notSignedIn
         }
 
-        let google: GIDGoogleUser
+        do {
+            let google: GIDGoogleUser
 
-        if let restored = try? await GIDSignIn.sharedInstance.restorePreviousSignIn().refreshTokensIfNeeded() {
-            google = restored
-        }
-        else {
-            google = try await signInToGoogle()
-        }
+            if let restored = try? await GIDSignIn.sharedInstance.restorePreviousSignIn().refreshTokensIfNeeded() {
+                google = restored
+            }
+            else {
+                google = try await signInToGoogle()
+            }
 
-        try await user.reauthenticate(with: Self.credential(for: google))
+            try await user.reauthenticate(with: Self.credential(for: google))
+        }
+        catch {
+            throw Self.signInError(from: error)
+        }
     }
 
     @MainActor
@@ -67,7 +77,13 @@ struct FirebaseAccountAuthenticator: AccountAuthenticating {
             throw AccountError.notSignedIn
         }
 
-        try await user.delete()
+        do {
+            try await user.delete()
+        }
+        catch {
+            throw NetworkErrors.map(error)
+        }
+
         try? await GIDSignIn.sharedInstance.disconnect()
     }
 
@@ -85,6 +101,18 @@ struct FirebaseAccountAuthenticator: AccountAuthenticating {
         catch let error as GIDSignInError where error.code == .canceled {
             throw AccountError.signInCancelled
         }
+    }
+
+    private static func signInError(from error: Error) -> Error {
+        if error is AccountError {
+            return error
+        }
+
+        if NetworkErrors.isOffline(error) {
+            return ConnectionError.offline
+        }
+
+        return AccountError.signInFailed
     }
 
     private static func credential(for google: GIDGoogleUser) throws -> AuthCredential {

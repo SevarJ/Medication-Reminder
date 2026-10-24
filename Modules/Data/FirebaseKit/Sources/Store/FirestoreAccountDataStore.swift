@@ -12,9 +12,14 @@ struct FirestoreAccountDataStore: AccountDataRemoteStore {
     private static let batchLimit = 500
 
     func deleteAll() async throws {
-        try await Self.deleteDocuments(in: AccountCollections.doseLogs())
-        try await Self.deleteDocuments(in: AccountCollections.medications())
-        try await AccountCollections.userDocument().delete()
+        do {
+            try await Self.deleteDocuments(in: AccountCollections.doseLogs())
+            try await Self.deleteDocuments(in: AccountCollections.medications())
+            try await AccountCollections.userDocument().delete()
+        }
+        catch {
+            throw NetworkErrors.map(error)
+        }
     }
 
     private static func deleteDocuments(in collection: CollectionReference) async throws {
