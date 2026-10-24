@@ -70,6 +70,7 @@ struct TodayViewModelTests {
             recordDose: RecordDoseUseCase(
                 doseLogRepository: doseLogRepository,
                 medicationRepository: medicationRepository,
+                scheduler: MockReminderScheduler(),
                 calendar: calendar
             ),
             saveMedication: saveMedication,
