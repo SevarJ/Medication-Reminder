@@ -31,30 +31,8 @@ struct FirebaseAccountAuthenticator: AccountAuthenticating {
 
     @MainActor
     func signInWithGoogle() async throws -> UserAccount {
-        guard let clientID = FirebaseApp.app()?.options.clientID, let presenter = Self.presenter else {
-            throw AccountError.signInFailed
-        }
-
-        GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
-
-        let google: GIDGoogleUser
-
-        do {
-            google = try await GIDSignIn.sharedInstance.signIn(withPresenting: presenter).user
-        }
-        catch let error as GIDSignInError where error.code == .canceled {
-            throw AccountError.signInCancelled
-        }
-
-        guard let idToken = google.idToken?.tokenString else {
-            throw AccountError.signInFailed
-        }
-
-        let credential = GoogleAuthProvider.credential(
-            withIDToken: idToken,
-            accessToken: google.accessToken.tokenString
-        )
-        let result = try await Auth.auth().signIn(with: credential)
+        let google = try await signInToGoogle()
+        let result = try await Auth.auth().signIn(with: Self.credential(for: google))
 
         return UserAccount(user: result.user)
     }
@@ -63,6 +41,61 @@ struct FirebaseAccountAuthenticator: AccountAuthenticating {
     func signOut() async throws {
         try Auth.auth().signOut()
         GIDSignIn.sharedInstance.signOut()
+    }
+
+    @MainActor
+    func reauthenticate() async throws {
+        guard let user = Auth.auth().currentUser else {
+            throw AccountError.notSignedIn
+        }
+
+        let google: GIDGoogleUser
+
+        if let restored = try? await GIDSignIn.sharedInstance.restorePreviousSignIn().refreshTokensIfNeeded() {
+            google = restored
+        }
+        else {
+            google = try await signInToGoogle()
+        }
+
+        try await user.reauthenticate(with: Self.credential(for: google))
+    }
+
+    @MainActor
+    func deleteAccount() async throws {
+        guard let user = Auth.auth().currentUser else {
+            throw AccountError.notSignedIn
+        }
+
+        try await user.delete()
+        try? await GIDSignIn.sharedInstance.disconnect()
+    }
+
+    @MainActor
+    private func signInToGoogle() async throws -> GIDGoogleUser {
+        guard let clientID = FirebaseApp.app()?.options.clientID, let presenter = Self.presenter else {
+            throw AccountError.signInFailed
+        }
+
+        GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
+
+        do {
+            return try await GIDSignIn.sharedInstance.signIn(withPresenting: presenter).user
+        }
+        catch let error as GIDSignInError where error.code == .canceled {
+            throw AccountError.signInCancelled
+        }
+    }
+
+    private static func credential(for google: GIDGoogleUser) throws -> AuthCredential {
+        guard let idToken = google.idToken?.tokenString else {
+            throw AccountError.signInFailed
+        }
+
+        return GoogleAuthProvider.credential(
+            withIDToken: idToken,
+            accessToken: google.accessToken.tokenString
+        )
     }
 
     @MainActor

@@ -34,5 +34,6 @@ public enum FirebaseConfigurator {
         container.registerSingleton((any MedicationRemoteStore).self) { FirebaseFactory.makeMedicationStore() }
         container.registerSingleton((any DoseLogRemoteStore).self) { FirebaseFactory.makeDoseLogStore() }
         container.registerSingleton((any RemoteOfflineStore).self) { FirebaseFactory.makeOfflineStore() }
+        container.registerSingleton((any AccountDataRemoteStore).self) { FirebaseFactory.makeAccountDataStore() }
     }
 }

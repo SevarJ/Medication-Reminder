@@ -28,5 +28,6 @@ struct FirebaseConfiguratorTests {
         #expect(container.isRegistered((any MedicationRemoteStore).self))
         #expect(container.isRegistered((any DoseLogRemoteStore).self))
         #expect(container.isRegistered((any RemoteOfflineStore).self))
+        #expect(container.isRegistered((any AccountDataRemoteStore).self))
     }
 }

@@ -20,7 +20,7 @@ enum AccountCollections {
         try userDocument().collection(DoseLogDocument.collection)
     }
 
-    private static func userDocument() throws -> DocumentReference {
+    static func userDocument() throws -> DocumentReference {
         guard let userId = Auth.auth().currentUser?.uid else {
             throw AccountError.notSignedIn
         }

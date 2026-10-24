@@ -27,4 +27,8 @@ enum FirebaseFactory {
     static func makeOfflineStore() -> any RemoteOfflineStore {
         FirestoreOfflineStore()
     }
+
+    static func makeAccountDataStore() -> any AccountDataRemoteStore {
+        FirestoreAccountDataStore()
+    }
 }

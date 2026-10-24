@@ -209,8 +209,8 @@ service cloud.firestore {
 
       allow create, update: if isOwner(userId) && isValidUser(request.resource.data);
 
-      // The app never deletes profiles.
-      allow delete: if false;
+      // Deleting the account removes the profile after its medications and dose logs.
+      allow delete: if isOwner(userId);
 
       // ===============================================================
       // users/{userId}/medications/{medicationId}: the account's medications
