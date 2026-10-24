@@ -30,6 +30,7 @@ struct MedicationDetailView: View {
             VStack(alignment: .leading, spacing: Spacing.xl) {
                 summaryCard
                 historyCard
+                tagsCard
                 notesCard
                 actions
             }
@@ -264,6 +265,29 @@ struct MedicationDetailView: View {
         .accessibilityLabel(
             "\(day.date.formatted(.dateTime.weekday(.wide).day().month(.wide).locale(locale)))\(day.doses.isEmpty ? "" : ", \(day.takenCount)/\(day.doses.count)")"
         )
+    }
+    
+    @ViewBuilder private var tagsCard: some View {
+        let tags = viewModel.medication.intakeTags
+        
+        if !tags.isEmpty {
+            VStack(alignment: .leading, spacing: Spacing.md) {
+                Text(L10n.Form.tagsTitle)
+                    .font(Font.theme.sectionTitle)
+                    .foregroundStyle(Color.theme.textPrimary)
+                
+                FlowLayout {
+                    ForEach(tags, id: \.self) { tag in
+                        Badge(title: tag.displayText)
+                    }
+                }
+            }
+            .padding(Spacing.lg)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .cardSurface()
+            .padding(.horizontal, Spacing.lg)
+            .accessibilityElement(children: .combine)
+        }
     }
     
     @ViewBuilder private var notesCard: some View {

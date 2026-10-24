@@ -34,7 +34,7 @@ struct DoseRow: View {
                             .font(Font.theme.rowTitle)
                             .foregroundStyle(Color.theme.textPrimary)
                         
-                        Text("\(dose.scheduledDate.timeText) · \(dose.medication.dosage.displayText)")
+                        Text("\(dose.scheduledDate.timeText) · \(dose.medication.doseText)")
                             .font(Font.theme.rowSubtitle)
                             .foregroundStyle(Color.theme.textSecondary)
                         

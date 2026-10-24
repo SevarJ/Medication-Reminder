@@ -275,6 +275,70 @@ struct MedicationEditorViewModelTests {
         #expect(saved.stock == nil)
     }
     
+    @Test func savesPresetTagsFirstThenCustomTags() async throws {
+        let repository = MockMedicationRepository()
+        let sut = makeSUT(repository: repository)
+        sut.name = "Magnesium"
+        sut.customTagText = "With water"
+        sut.addCustomTag()
+        sut.toggleTag(.emptyStomach)
+        sut.toggleTag(.beforeMeal)
+        
+        #expect(await sut.save())
+        
+        let saved = try #require(await repository.medications.first)
+        
+        #expect(saved.intakeTags == [.beforeMeal, .emptyStomach, .custom("With water")])
+    }
+    
+    @Test func togglingATagTwiceRemovesIt() async throws {
+        let sut = makeSUT()
+        
+        sut.toggleTag(.afterMeal)
+        sut.toggleTag(.afterMeal)
+        
+        #expect(sut.intakeTags.isEmpty)
+    }
+    
+    @Test func addingACustomTagClearsTheFieldAndSkipsDuplicates() async throws {
+        let sut = makeSUT()
+        
+        sut.customTagText = " With water "
+        sut.addCustomTag()
+        sut.customTagText = "With water"
+        sut.addCustomTag()
+        
+        #expect(sut.intakeTags == [.custom("With water")])
+        #expect(sut.customTagText.isEmpty)
+        #expect(sut.tagChoices == IntakeTag.presets + [.custom("With water")])
+    }
+    
+    @Test func blankCustomTagCannotBeAdded() async throws {
+        let sut = makeSUT()
+        sut.customTagText = "   "
+        
+        #expect(sut.canAddCustomTag == false)
+        
+        sut.addCustomTag()
+        
+        #expect(sut.intakeTags.isEmpty)
+    }
+    
+    @Test func tagsStopAtTheLimit() async throws {
+        let sut = makeSUT()
+        
+        for index in 0..<(IntakeTag.maxCount + 2) {
+            sut.customTagText = "Tag \(index)"
+            sut.addCustomTag()
+        }
+        
+        #expect(sut.intakeTags.count == IntakeTag.maxCount)
+        
+        sut.toggleTag(.afterMeal)
+        
+        #expect(sut.isSelected(.afterMeal) == false)
+    }
+    
     @Test func rejectsAStockThatIsNotANumber() async throws {
         let repository = MockMedicationRepository()
         let sut = makeSUT(repository: repository)
@@ -292,6 +356,14 @@ struct MedicationEditorViewModelTests {
         
         #expect(sut.notes == "With food")
         #expect(sut.stockText == "12")
+    }
+    
+    @Test func editingKeepsTheIntakeTagsTheMedicationHad() async throws {
+        let existing = try makeMedication(intakeTags: [.afterMeal, .custom("With water")])
+        let sut = makeSUT(medication: existing)
+        
+        #expect(sut.intakeTags == [.afterMeal, .custom("With water")])
+        #expect(sut.isSelected(.afterMeal))
     }
     
     private func makeSUT(

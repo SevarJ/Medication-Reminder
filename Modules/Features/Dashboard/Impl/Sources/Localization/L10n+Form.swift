@@ -45,6 +45,10 @@ extension L10n {
         static var removeTime: String { string("form.time.remove", "Remove time") }
         static var stockTitle: String { string("form.stock.title", "How much do you have?") }
         static var stockHint: String { string("form.stock.hint", "Optional. Each dose you take is subtracted, and you'll see when you're running low.") }
+        static var tagsTitle: String { string("form.tags.title", "How to take it") }
+        static var customTagPlaceholder: String { string("form.tags.custom.placeholder", "Add your own, e.g. with plenty of water") }
+        static var addCustomTag: String { string("form.tags.custom.add", "Add tag") }
+        static var removeTag: String { string("form.tags.remove", "Removes the tag") }
         static var notesTitle: String { string("form.notes.title", "Notes") }
         static var notesPlaceholder: String { string("form.notes.placeholder", "For example, take with food") }
         

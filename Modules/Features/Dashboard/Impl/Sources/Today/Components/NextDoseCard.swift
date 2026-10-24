@@ -44,7 +44,7 @@ struct NextDoseCard: View {
                     .font(.system(.title3, weight: .semibold))
                     .foregroundStyle(Color.theme.onHero)
                 
-                Text(dose.medication.dosage.displayText)
+                Text(dose.medication.doseText)
                     .font(Font.theme.rowSubtitle)
                     .foregroundStyle(Color.theme.onHero.opacity(0.85))
             }

@@ -28,6 +28,8 @@ final class MedicationEditorViewModel: Identifiable {
     var isActive: Bool
     var photo: Data?
     var notes: String
+    var intakeTags: [IntakeTag]
+    var customTagText = ""
     var stockText: String
     var errorMessage: String?
     private(set) var isSaving = false
@@ -55,6 +57,7 @@ final class MedicationEditorViewModel: Identifiable {
         self.hasEndDate = medication?.schedule.endDate != nil
         self.photo = medication?.photo
         self.notes = medication?.notes ?? ""
+        self.intakeTags = medication?.intakeTags ?? []
         self.stockText = medication?.stock.map(Self.text(for:)) ?? ""
         
         switch medication?.schedule.recurrence {
@@ -136,6 +139,7 @@ final class MedicationEditorViewModel: Identifiable {
             return hasEndDate ? "\(start) – \(shortDate(endDate))" : L10n.Form.from(start)
         case .extras:
             let parts = [
+                intakeTags.displayText,
                 stock.map { Dosage(amount: $0, unit: unit).displayText + " " + L10n.Form.leftSuffix },
                 notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : notes
             ].compactMap { $0 }
@@ -234,6 +238,37 @@ final class MedicationEditorViewModel: Identifiable {
         times[index] = updated
     }
     
+    var tagChoices: [IntakeTag] {
+        IntakeTag.presets + intakeTags.filter(\.isCustom)
+    }
+    
+    var canAddCustomTag: Bool {
+        IntakeTag.custom(named: customTagText) != nil && intakeTags.count < IntakeTag.maxCount
+    }
+    
+    func isSelected(_ tag: IntakeTag) -> Bool {
+        intakeTags.contains(tag)
+    }
+    
+    func toggleTag(_ tag: IntakeTag) {
+        if let index = intakeTags.firstIndex(of: tag) {
+            intakeTags.remove(at: index)
+        }
+        else if intakeTags.count < IntakeTag.maxCount {
+            intakeTags.append(tag)
+        }
+    }
+    
+    func addCustomTag() {
+        guard canAddCustomTag, let tag = IntakeTag.custom(named: customTagText) else { return }
+        
+        if !intakeTags.contains(tag) {
+            intakeTags.append(tag)
+        }
+        
+        customTagText = ""
+    }
+    
     // MARK: Save
     
     func save() async -> Bool {
@@ -264,6 +299,7 @@ final class MedicationEditorViewModel: Identifiable {
                 createdDate: medication?.createdDate ?? .now,
                 photo: photo,
                 notes: trimmedNotes.isEmpty ? nil : String(trimmedNotes.prefix(Medication.notesLimit)),
+                intakeTags: IntakeTag.presets.filter(intakeTags.contains) + intakeTags.filter(\.isCustom),
                 stock: stock
             )
             

@@ -122,7 +122,7 @@ struct DoseReminderView: View {
                     .foregroundStyle(Color.theme.textPrimary)
                     .multilineTextAlignment(.center)
                 
-                Text(dose.medication.dosage.displayText)
+                Text(dose.medication.doseText)
                     .font(.system(.title3))
                     .foregroundStyle(Color.theme.textSecondary)
                 

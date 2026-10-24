@@ -377,9 +377,89 @@ private struct ExtrasStepView: View {
     
     var body: some View {
         VStack(spacing: Spacing.xl) {
+            tagsSection
             stockSection
             notesSection
         }
+    }
+    
+    private var tagsSection: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            SectionHeader(title: L10n.Form.tagsTitle)
+            
+            CardSection {
+                FlowLayout {
+                    ForEach(viewModel.tagChoices, id: \.self) { tag in
+                        tagButton(tag)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(Spacing.lg)
+                
+                RowSeparator()
+                
+                HStack(spacing: Spacing.md) {
+                    TextField(L10n.Form.customTagPlaceholder, text: $viewModel.customTagText)
+                        .font(Font.theme.rowTitle)
+                        .foregroundStyle(Color.theme.textPrimary)
+                        .submitLabel(.done)
+                        .onSubmit {
+                            withAnimation(.snappy) { viewModel.addCustomTag() }
+                        }
+                        .onChange(of: viewModel.customTagText) { _, text in
+                            if text.count > IntakeTag.customLimit {
+                                viewModel.customTagText = String(text.prefix(IntakeTag.customLimit))
+                            }
+                        }
+                    
+                    Button {
+                        withAnimation(.snappy) { viewModel.addCustomTag() }
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(viewModel.canAddCustomTag ? Color.theme.accentText : Color.theme.textSecondary.opacity(0.5))
+                            .frame(minWidth: Size.minTarget, minHeight: Size.minTarget)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(!viewModel.canAddCustomTag)
+                    .accessibilityLabel(L10n.Form.addCustomTag)
+                }
+                .padding(.leading, Spacing.lg)
+                .padding(.trailing, Spacing.sm)
+                .frame(minHeight: Size.minTarget)
+            }
+        }
+    }
+    
+    private func tagButton(_ tag: IntakeTag) -> some View {
+        let isSelected = viewModel.isSelected(tag)
+        
+        return Button {
+            withAnimation(.snappy) { viewModel.toggleTag(tag) }
+        } label: {
+            HStack(spacing: Spacing.xs) {
+                if isSelected {
+                    Image(systemName: tag.isCustom ? "xmark" : "checkmark")
+                        .imageScale(.small)
+                        .fontWeight(.semibold)
+                }
+                
+                Text(tag.displayText)
+                    .lineLimit(1)
+            }
+            .font(Font.theme.rowSubtitle)
+            .fontWeight(isSelected ? .semibold : .regular)
+            .foregroundStyle(isSelected ? Color.theme.onHero : Color.theme.textPrimary)
+            .padding(.horizontal, Spacing.md)
+            .frame(minHeight: 36)
+            .background(isSelected ? Color.theme.hero : Color.theme.fill, in: Capsule())
+            .frame(minHeight: Size.minTarget)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityHint(tag.isCustom ? L10n.Form.removeTag : "")
     }
     
     private var stockSection: some View {
