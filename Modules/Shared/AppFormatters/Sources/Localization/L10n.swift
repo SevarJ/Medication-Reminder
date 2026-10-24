@@ -53,6 +53,20 @@ enum L10n {
         }
     }
     
+    enum IntakeTag {
+        static var beforeMeal: String {
+            String(localized: "intakeTag.beforeMeal", defaultValue: "Before meals", bundle: .module.localized())
+        }
+        
+        static var afterMeal: String {
+            String(localized: "intakeTag.afterMeal", defaultValue: "After meals", bundle: .module.localized())
+        }
+        
+        static var emptyStomach: String {
+            String(localized: "intakeTag.emptyStomach", defaultValue: "On an empty stomach", bundle: .module.localized())
+        }
+    }
+    
     enum Error {
         static var nameEmpty: String {
             String(localized: "error.nameEmpty", defaultValue: "Enter a medication name.", bundle: .module.localized())
