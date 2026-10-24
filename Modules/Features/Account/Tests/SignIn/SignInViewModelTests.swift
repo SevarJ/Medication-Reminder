@@ -42,7 +42,7 @@ struct SignInViewModelTests {
 
         await sut.signIn()
 
-        #expect(sut.errorMessage == "Something went wrong. Please try again.")
+        #expect(sut.errorMessage == "Couldn't sign in with Google. Please try again.")
         #expect(sut.isSigningIn == false)
     }
 }
