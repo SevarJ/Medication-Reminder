@@ -34,6 +34,19 @@ public enum ErrorFormatter {
             return L10n.Error.notificationsOff
         }
         
+        if error is ConnectionError {
+            return L10n.Error.offline
+        }
+        
+        switch error as? AccountError {
+        case .signInFailed:
+            return L10n.Error.signInFailed
+        case .notSignedIn:
+            return L10n.Error.notSignedIn
+        case .signInCancelled, nil:
+            break
+        }
+        
         return L10n.Error.generic
     }
 }

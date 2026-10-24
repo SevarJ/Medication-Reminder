@@ -90,6 +90,18 @@ enum L10n {
             String(localized: "error.notificationsOff", defaultValue: "Notifications are turned off, so reminders were not scheduled.", bundle: .module.localized())
         }
         
+        static var offline: String {
+            String(localized: "error.offline", defaultValue: "No internet connection. Connect and try again.", bundle: .module.localized())
+        }
+        
+        static var signInFailed: String {
+            String(localized: "error.signInFailed", defaultValue: "Couldn't sign in with Google. Please try again.", bundle: .module.localized())
+        }
+        
+        static var notSignedIn: String {
+            String(localized: "error.notSignedIn", defaultValue: "You're signed out. Please sign in again.", bundle: .module.localized())
+        }
+        
         static var generic: String {
             String(localized: "error.generic", defaultValue: "Something went wrong. Please try again.", bundle: .module.localized())
         }

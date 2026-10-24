@@ -384,6 +384,29 @@
         }
       }
     },
+    "error.notSignedIn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're signed out. Please sign in again."
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hesabdan çıxmısınız. Yenidən daxil olun."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вы вышли из аккаунта. Войдите снова."
+          }
+        }
+      }
+    },
     "error.notificationsOff": {
       "extractionState": "manual",
       "localizations": {
@@ -403,6 +426,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "Уведомления выключены, поэтому напоминания не запланированы."
+          }
+        }
+      }
+    },
+    "error.offline": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No internet connection. Connect and try again."
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İnternet bağlantısı yoxdur. Qoşulub yenidən cəhd edin."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет подключения к интернету. Подключитесь и попробуйте ещё раз."
+          }
+        }
+      }
+    },
+    "error.signInFailed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't sign in with Google. Please try again."
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google ilə daxil olmaq alınmadı. Yenidən cəhd edin."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось войти через Google. Попробуйте ещё раз."
           }
         }
       }
