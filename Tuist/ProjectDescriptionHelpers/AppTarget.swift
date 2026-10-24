@@ -22,13 +22,16 @@ public extension Target {
     }
 }
 
-private let urlTypes: [String: Plist.Value] = AppConfig.googleSignInURLScheme.isEmpty ? [:] : [
-    "CFBundleURLTypes": [
-        [
-            "CFBundleTypeRole": "Editor",
-            "CFBundleURLSchemes": [.string(AppConfig.googleSignInURLScheme)],
-        ],
-    ],
+private let urlTypes: [String: Plist.Value] = [
+    "CFBundleURLTypes": .array(
+        ([AppConfig.urlScheme] + (AppConfig.googleSignInURLScheme.isEmpty ? [] : [AppConfig.googleSignInURLScheme]))
+            .map { scheme in
+                [
+                    "CFBundleTypeRole": "Editor",
+                    "CFBundleURLSchemes": [.string(scheme)],
+                ]
+            }
+    ),
 ]
 
 public extension Scheme {

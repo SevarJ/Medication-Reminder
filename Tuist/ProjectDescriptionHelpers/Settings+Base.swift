@@ -25,6 +25,17 @@ public extension Settings {
         ]
     )
 
+    static let widget: Settings = .settings(
+        base: [
+            "CODE_SIGN_STYLE": "Automatic",
+            "CURRENT_PROJECT_VERSION": "1",
+            "MARKETING_VERSION": "1.0",
+            "SWIFT_EMIT_LOC_STRINGS": "YES",
+            "SWIFT_APPROACHABLE_CONCURRENCY": "YES",
+            "SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY": "YES",
+        ]
+    )
+
     static let app: Settings = .settings(
         base: [
             "ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",

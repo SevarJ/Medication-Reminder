@@ -5,6 +5,7 @@ let appLocalization = Module.foundation("AppLocalization", hasResources: true)
 let appPreferences = Module.foundation("AppPreferences")
 let dependencyInjection = Module.foundation("DependencyInjection")
 let designSystem = Module.foundation("DesignSystem", hasTests: false)
+let widgetSnapshot = Module.foundation("WidgetSnapshot")
 
 let domain = Module.domain("Domain", hasTesting: true)
 
@@ -19,6 +20,12 @@ let notificationsKit = Module.data(
 )
 
 let dataSync = Module.data("DataSync", dependencies: [domain, dependencyInjection], testDependencies: [domain, domain.testing, dependencyInjection])
+
+let widgetBridge = Module.data(
+    "WidgetBridge",
+    dependencies: [domain, appLocalization, appFormatters, dependencyInjection, widgetSnapshot],
+    testDependencies: [domain, domain.testing, appLocalization, widgetSnapshot]
+)
 
 let firebaseKit = Module.data(
     "FirebaseKit",
@@ -51,7 +58,7 @@ let settings = Feature.feature(
     testDependencies: [domain, domain.testing, appLocalization]
 )
 
-let modules = [appLocalization, appPreferences, dependencyInjection, designSystem, domain, appFormatters, persistence, notificationsKit, firebaseKit, dataSync]
+let modules = [appLocalization, appPreferences, dependencyInjection, designSystem, widgetSnapshot, domain, appFormatters, persistence, notificationsKit, firebaseKit, dataSync, widgetBridge]
 let features = [account, onboarding, dashboard, settings]
 
 let project = Project(
@@ -62,7 +69,10 @@ let project = Project(
         disableSynthesizedResourceAccessors: true
     ),
     settings: .project,
-    targets: [.app(dependencies: modules.map(\.dependency) + features.flatMap { [$0.interface, $0.implementation] })]
+    targets: [
+        .app(dependencies: modules.map(\.dependency) + features.flatMap { [$0.interface, $0.implementation] } + [.target(name: AppConfig.widgetName)]),
+        .widget(dependencies: [widgetSnapshot, appLocalization, designSystem].map(\.dependency)),
+    ]
         + modules.flatMap(\.targets)
         + features.flatMap(\.targets),
     schemes: [.app(testTargets: modules.compactMap(\.testTargetName) + features.map(\.testTargetName))]
