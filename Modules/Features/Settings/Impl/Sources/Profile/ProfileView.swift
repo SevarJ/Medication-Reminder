@@ -12,9 +12,12 @@ import SwiftUI
 
 struct ProfileView: View {
     let account: UserAccount
+    let isDeletingAccount: Bool
     let onSignOut: () -> Void
+    let onDeleteAccount: () -> Void
     
     @State private var isConfirmingSignOut = false
+    @State private var isConfirmingDeletion = false
     
     var body: some View {
         ScrollView {
@@ -43,8 +46,21 @@ struct ProfileView: View {
                         isConfirmingSignOut = true
                     }
                 }
+                
+                CardSection {
+                    DestructiveRow(title: L10n.Settings.deleteAccount) {
+                        isConfirmingDeletion = true
+                    }
+                }
             }
             .padding(.vertical, Spacing.lg)
+        }
+        .disabled(isDeletingAccount)
+        .overlay {
+            if isDeletingAccount {
+                ProgressView()
+                    .controlSize(.large)
+            }
         }
         .background(Color.theme.background)
         .navigationTitle(L10n.Settings.account)
@@ -53,6 +69,13 @@ struct ProfileView: View {
             Button(L10n.Settings.signOut, role: .destructive, action: onSignOut)
             
             Button(CommonText.cancel, role: .cancel) {}
+        }
+        .alert(L10n.Settings.deleteAccountConfirmation, isPresented: $isConfirmingDeletion) {
+            Button(L10n.Settings.deleteAccount, role: .destructive, action: onDeleteAccount)
+            
+            Button(CommonText.cancel, role: .cancel) {}
+        } message: {
+            Text(L10n.Settings.deleteAccountMessage)
         }
     }
     

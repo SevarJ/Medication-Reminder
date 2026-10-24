@@ -25,6 +25,7 @@ struct SettingsViewModelTests {
         authorizer: MockNotificationAuthorizer = MockNotificationAuthorizer(),
         authenticator: MockAccountAuthenticator = MockAccountAuthenticator(),
         scheduler: MockReminderScheduler = MockReminderScheduler(),
+        accountData: MockAccountDataRemoteStore = MockAccountDataRemoteStore(),
         medications: [Medication] = []
     ) -> SettingsViewModel {
         let syncReminder = SyncReminderUseCase(
@@ -37,6 +38,7 @@ struct SettingsViewModelTests {
             syncReminder: syncReminder,
             authorizer: authorizer,
             authenticator: authenticator,
+            deleteAccount: DeleteAccountUseCase(authenticator: authenticator, accountData: accountData),
             appVersion: "1.0 (1)"
         )
     }
@@ -143,6 +145,43 @@ struct SettingsViewModelTests {
         
         await sut.signOut()
         
+        #expect(sut.errorMessage == "Something went wrong. Please try again.")
+    }
+    
+    @Test func deletingAccountRemovesDataAndAccount() async {
+        let authenticator = MockAccountAuthenticator(account: makeUserAccount())
+        let accountData = MockAccountDataRemoteStore()
+        let sut = makeSUT(authenticator: authenticator, accountData: accountData)
+        
+        await sut.deleteAccount()
+        
+        #expect(await accountData.deleteAllCount == 1)
+        #expect(await authenticator.deleteAccountCount == 1)
+        #expect(sut.isDeletingAccount == false)
+        #expect(sut.errorMessage == nil)
+    }
+    
+    @Test func cancelledReauthenticationDeletesNothingAndShowsNoError() async {
+        let authenticator = MockAccountAuthenticator(
+            account: makeUserAccount(),
+            reauthenticateError: AccountError.signInCancelled
+        )
+        let accountData = MockAccountDataRemoteStore()
+        let sut = makeSUT(authenticator: authenticator, accountData: accountData)
+        
+        await sut.deleteAccount()
+        
+        #expect(await accountData.deleteAllCount == 0)
+        #expect(sut.errorMessage == nil)
+    }
+    
+    @Test func failedAccountDeletionShowsAnError() async {
+        let authenticator = MockAccountAuthenticator(account: makeUserAccount())
+        let sut = makeSUT(authenticator: authenticator, accountData: MockAccountDataRemoteStore(fails: true))
+        
+        await sut.deleteAccount()
+        
+        #expect(await authenticator.deleteAccountCount == 0)
         #expect(sut.errorMessage == "Something went wrong. Please try again.")
     }
 }

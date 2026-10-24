@@ -17,6 +17,7 @@ final class SettingsViewModel {
     private(set) var language: AppLanguage
     private(set) var notificationAccess: NotificationAccess?
     private(set) var account: UserAccount?
+    private(set) var isDeletingAccount = false
     var errorMessage: String?
     
     let appVersion: String
@@ -25,12 +26,14 @@ final class SettingsViewModel {
     private let syncReminder: SyncReminderUseCase
     private let authorizer: any NotificationAuthorizing
     private let authenticator: any AccountAuthenticating
+    private let deleteAccountUseCase: DeleteAccountUseCase
     
     init(
         languageStore: any LanguagePreferenceStoring,
         syncReminder: SyncReminderUseCase,
         authorizer: any NotificationAuthorizing,
         authenticator: any AccountAuthenticating,
+        deleteAccount: DeleteAccountUseCase,
         appVersion: String
     ) {
         self.language = languageStore.language
@@ -38,6 +41,7 @@ final class SettingsViewModel {
         self.syncReminder = syncReminder
         self.authorizer = authorizer
         self.authenticator = authenticator
+        self.deleteAccountUseCase = deleteAccount
         self.appVersion = appVersion
     }
     
@@ -50,6 +54,23 @@ final class SettingsViewModel {
     func signOut() async {
         do {
             try await authenticator.signOut()
+        }
+        catch {
+            errorMessage = ErrorFormatter.message(for: error)
+        }
+    }
+    
+    func deleteAccount() async {
+        guard !isDeletingAccount else { return }
+        
+        isDeletingAccount = true
+        defer { isDeletingAccount = false }
+        
+        do {
+            try await deleteAccountUseCase.execute()
+        }
+        catch AccountError.signInCancelled {
+            return
         }
         catch {
             errorMessage = ErrorFormatter.message(for: error)

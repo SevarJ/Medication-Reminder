@@ -207,9 +207,12 @@ struct SettingsView: View {
         if let account = viewModel.account {
             CardSection {
                 NavigationLink {
-                    ProfileView(account: account) {
-                        Task { await viewModel.signOut() }
-                    }
+                    ProfileView(
+                        account: account,
+                        isDeletingAccount: viewModel.isDeletingAccount,
+                        onSignOut: { Task { await viewModel.signOut() } },
+                        onDeleteAccount: { Task { await viewModel.deleteAccount() } }
+                    )
                 } label: {
                     AdaptiveStack {
                         AccountAvatar(photoURL: account.photoURL, size: 56)

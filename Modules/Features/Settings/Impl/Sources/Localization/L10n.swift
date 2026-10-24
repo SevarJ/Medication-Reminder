@@ -90,6 +90,22 @@ enum L10n {
             String(localized: "settings.account.signOut.confirm", defaultValue: "Sign out of your account?", bundle: .module.localized())
         }
         
+        static var deleteAccount: String {
+            String(localized: "settings.account.delete", defaultValue: "Delete Account", bundle: .module.localized())
+        }
+        
+        static var deleteAccountConfirmation: String {
+            String(localized: "settings.account.delete.confirm", defaultValue: "Delete your account?", bundle: .module.localized())
+        }
+        
+        static var deleteAccountMessage: String {
+            String(
+                localized: "settings.account.delete.message",
+                defaultValue: "Your medications and dose history will be removed from every device. This can't be undone.",
+                bundle: .module.localized()
+            )
+        }
+        
         static var about: String {
             String(localized: "settings.section.about", defaultValue: "About", bundle: .module.localized())
         }

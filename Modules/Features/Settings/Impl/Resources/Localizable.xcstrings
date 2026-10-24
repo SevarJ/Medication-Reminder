@@ -1,6 +1,75 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "settings.account.delete": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Account"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hesabı sil"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить аккаунт"
+          }
+        }
+      }
+    },
+    "settings.account.delete.confirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete your account?"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hesabınızı silmək istəyirsiniz?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить аккаунт?"
+          }
+        }
+      }
+    },
+    "settings.account.delete.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your medications and dose history will be removed from every device. This can't be undone."
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dərmanlarınız və doza tarixçəniz bütün cihazlardan silinəcək. Bunu geri qaytarmaq mümkün deyil."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваши лекарства и история приёма будут удалены со всех устройств. Это действие нельзя отменить."
+          }
+        }
+      }
+    },
     "settings.account.email": {
       "extractionState": "manual",
       "localizations": {
