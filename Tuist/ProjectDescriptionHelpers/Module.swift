@@ -65,7 +65,8 @@ public struct Module: Sendable {
         dependencies: [Module] = [],
         packages: [String] = [],
         testDependencies: [Module] = [],
-        hasResources: Bool = false
+        hasResources: Bool = false,
+        hasTests: Bool = true
     ) -> Module {
         Module(
             name: name,
@@ -74,7 +75,8 @@ public struct Module: Sendable {
             testDependencies: testDependencies,
             packages: packages,
             allowedLayers: [.foundation, .domain, .shared],
-            hasResources: hasResources
+            hasResources: hasResources,
+            hasTests: hasTests
         )
     }
 

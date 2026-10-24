@@ -24,7 +24,7 @@ let firebaseKit = Module.data(
     "FirebaseKit",
     dependencies: [domain, dependencyInjection],
     packages: ["FirebaseCore", "FirebaseAuth", "FirebaseFirestore", "GoogleSignIn"],
-    testDependencies: [domain, domain.testing, dependencyInjection]
+    hasTests: false
 )
 
 let account = Feature.feature(

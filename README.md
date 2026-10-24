@@ -6,7 +6,7 @@ A medication reminder and adherence tracker for iOS. Schedule medications, get a
   <a href="https://github.com/SevarJ/Medication-Reminder/actions/workflows/ci.yml"><img src="https://github.com/SevarJ/Medication-Reminder/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/iOS-17%2B-blue" alt="iOS 17+">
   <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
-  <img src="https://img.shields.io/badge/tests-301-brightgreen" alt="301 tests">
+  <img src="https://img.shields.io/badge/tests-285-brightgreen" alt="285 tests">
 </p>
 
 ## Features
@@ -117,7 +117,7 @@ The starter code imports only its own interface, so the feature starts with no d
 
 ## Tests
 
-Every module has its own test target, and the `Medora` scheme runs them all:
+Every module except `DesignSystem` and `FirebaseKit` has its own test target, and the `Medora` scheme runs them all. `FirebaseKit` has none because Firebase links GameKit, and a test bundle without a host app crashes while loading it:
 
 ```bash
 xcodebuild test -workspace Medora.xcworkspace -scheme Medora -destination 'platform=iOS Simulator,name=iPhone 17'
