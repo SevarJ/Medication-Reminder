@@ -23,6 +23,7 @@ enum MedicationMapper {
             createdDate: medication.createdDate,
             photo: medication.photo,
             notes: medication.notes,
+            intakeTags: medication.intakeTags.map(tagCode),
             stock: medication.stock
         )
     }
@@ -42,6 +43,7 @@ enum MedicationMapper {
         entity.isActive = medication.isActive
         entity.photo = medication.photo
         entity.notes = medication.notes
+        entity.intakeTags = medication.intakeTags.map(tagCode)
         entity.stock = medication.stock
     }
 
@@ -65,6 +67,7 @@ enum MedicationMapper {
             createdDate: entity.createdDate,
             photo: entity.photo,
             notes: entity.notes,
+            intakeTags: (entity.intakeTags ?? []).compactMap(intakeTag),
             stock: entity.stock
         )
     }
@@ -101,6 +104,26 @@ enum MedicationMapper {
             minute: medTime.minute
         )
     }
+
+    private static func tagCode(_ tag: IntakeTag) -> String {
+        switch tag {
+        case .beforeMeal: "beforeMeal"
+        case .afterMeal: "afterMeal"
+        case .emptyStomach: "emptyStomach"
+        case .custom(let text): customTagPrefix + text
+        }
+    }
+
+    private static func intakeTag(from code: String) -> IntakeTag? {
+        switch code {
+        case "beforeMeal": .beforeMeal
+        case "afterMeal": .afterMeal
+        case "emptyStomach": .emptyStomach
+        default: code.hasPrefix(customTagPrefix) ? .custom(named: String(code.dropFirst(customTagPrefix.count))) : nil
+        }
+    }
+
+    private static let customTagPrefix = "custom:"
 
     private static func unitCode(_ unit: DosageUnit) -> String {
         switch unit {

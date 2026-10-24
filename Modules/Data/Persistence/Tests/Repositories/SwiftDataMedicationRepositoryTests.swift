@@ -24,6 +24,7 @@ struct SwiftDataMedicationRepositoryTests {
         createdDate: Date = .now,
         photo: Data? = nil,
         notes: String? = nil,
+        intakeTags: [IntakeTag] = [],
         stock: Double? = nil
     ) throws -> Medication {
         Medication(
@@ -39,6 +40,7 @@ struct SwiftDataMedicationRepositoryTests {
             createdDate: createdDate,
             photo: photo,
             notes: notes,
+            intakeTags: intakeTags,
             stock: stock
         )
     }
@@ -121,6 +123,17 @@ struct SwiftDataMedicationRepositoryTests {
         #expect(stored.photo == Data([1, 2, 3]))
         #expect(stored.notes == "With food")
         #expect(stored.stock == 12)
+    }
+    
+    @Test func storesPresetAndCustomIntakeTags() async throws {
+        let sut = try makeSUT()
+        let medication = try makeMedication(intakeTags: [.afterMeal, .custom("With water")])
+        
+        try await sut.save(medication)
+        
+        let stored = try await sut.fetch(id: medication.id)
+        
+        #expect(stored.intakeTags == [.afterMeal, .custom("With water")])
     }
     
     @Test func clearingTheExtrasRemovesThem() async throws {

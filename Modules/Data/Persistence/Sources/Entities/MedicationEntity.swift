@@ -23,6 +23,7 @@ final class MedicationEntity {
     var createdDate: Date
     var photo: Data?
     var notes: String?
+    var intakeTags: [String]?
     var stock: Double?
     
     init(
@@ -39,6 +40,7 @@ final class MedicationEntity {
         createdDate: Date,
         photo: Data? = nil,
         notes: String? = nil,
+        intakeTags: [String]? = nil,
         stock: Double? = nil
     ) {
         self.id = id
@@ -54,6 +56,7 @@ final class MedicationEntity {
         self.createdDate = createdDate
         self.photo = photo
         self.notes = notes
+        self.intakeTags = intakeTags
         self.stock = stock
     }
 }
