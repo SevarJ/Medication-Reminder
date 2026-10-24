@@ -254,6 +254,35 @@ struct SettingsView: View {
             SectionHeader(title: L10n.Settings.about)
             
             CardSection {
+                if let url = viewModel.privacyPolicyURL {
+                    Link(destination: url) {
+                        AdaptiveStack {
+                            IconTile(
+                                systemName: "hand.raised.fill",
+                                foreground: Color.theme.accentText,
+                                background: Color.theme.accentTint
+                            )
+                            
+                            Text(L10n.Settings.privacyPolicy)
+                                .font(Font.theme.rowTitle)
+                                .foregroundStyle(Color.theme.textPrimary)
+                            
+                            Spacer(minLength: 0)
+                            
+                            if !dynamicTypeSize.isAccessibilitySize {
+                                Image(systemName: "arrow.up.right")
+                                    .font(Font.theme.caption)
+                                    .foregroundStyle(Color.theme.textSecondary)
+                            }
+                        }
+                        .padding(Spacing.lg)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    
+                    RowSeparator(leadingInset: 58)
+                }
+                
                 AdaptiveStack {
                     IconTile(
                         systemName: "info.circle.fill",

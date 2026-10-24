@@ -22,6 +22,12 @@ final class SettingsViewModel {
     
     let appVersion: String
     
+    var privacyPolicyURL: URL? {
+        let code = language.code ?? Bundle.module.preferredLocalizations.first ?? "en"
+        
+        return PrivacyPolicy.url(languageCode: code)
+    }
+    
     private let changeLanguage: ChangeLanguageUseCase
     private let syncReminder: SyncReminderUseCase
     private let authorizer: any NotificationAuthorizing

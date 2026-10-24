@@ -184,4 +184,12 @@ struct SettingsViewModelTests {
         #expect(await authenticator.deleteAccountCount == 0)
         #expect(sut.errorMessage == "Something went wrong. Please try again.")
     }
+    
+    @Test func privacyPolicyOpensInChosenLanguage() {
+        store.save(.azerbaijani)
+        
+        let sut = makeSUT()
+        
+        #expect(sut.privacyPolicyURL?.absoluteString == "https://sevarj.github.io/Medication-Reminder/privacy/#az")
+    }
 }

@@ -110,6 +110,10 @@ enum L10n {
             String(localized: "settings.section.about", defaultValue: "About", bundle: .module.localized())
         }
         
+        static var privacyPolicy: String {
+            String(localized: "settings.privacyPolicy", defaultValue: "Privacy Policy", bundle: .module.localized())
+        }
+        
         static var version: String {
             String(localized: "settings.version", defaultValue: "Version", bundle: .module.localized())
         }
