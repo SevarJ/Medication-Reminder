@@ -11,4 +11,6 @@ public protocol AccountAuthenticating: Sendable {
     func accounts() -> AsyncStream<UserAccount?>
     func signInWithGoogle() async throws -> UserAccount
     func signOut() async throws
+    func reauthenticate() async throws
+    func deleteAccount() async throws
 }

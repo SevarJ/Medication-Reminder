@@ -10,21 +10,29 @@ import Domain
 public actor MockAccountAuthenticator: AccountAuthenticating {
     public private(set) var signInCount = 0
     public private(set) var signOutCount = 0
+    public private(set) var reauthenticateCount = 0
+    public private(set) var deleteAccountCount = 0
 
     private var account: UserAccount?
     private let signInResult: Result<UserAccount, any Error>
     private let failsSignOut: Bool
+    private let reauthenticateError: (any Error)?
+    private let failsDeleteAccount: Bool
     private let stream: AsyncStream<UserAccount?>
     private let continuation: AsyncStream<UserAccount?>.Continuation
 
     public init(
         account: UserAccount? = nil,
         signInResult: Result<UserAccount, any Error> = .success(makeUserAccount()),
-        failsSignOut: Bool = false
+        failsSignOut: Bool = false,
+        reauthenticateError: (any Error)? = nil,
+        failsDeleteAccount: Bool = false
     ) {
         self.account = account
         self.signInResult = signInResult
         self.failsSignOut = failsSignOut
+        self.reauthenticateError = reauthenticateError
+        self.failsDeleteAccount = failsDeleteAccount
         (stream, continuation) = AsyncStream.makeStream()
         continuation.yield(account)
     }
@@ -51,6 +59,25 @@ public actor MockAccountAuthenticator: AccountAuthenticating {
         signOutCount += 1
 
         if failsSignOut {
+            throw PersistenceFailure()
+        }
+
+        account = nil
+        continuation.yield(nil)
+    }
+
+    public func reauthenticate() async throws {
+        reauthenticateCount += 1
+
+        if let reauthenticateError {
+            throw reauthenticateError
+        }
+    }
+
+    public func deleteAccount() async throws {
+        deleteAccountCount += 1
+
+        if failsDeleteAccount {
             throw PersistenceFailure()
         }
 
