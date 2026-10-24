@@ -31,6 +31,8 @@ rules_version = '2';
 //   - createdDate: timestamp (required)
 //   - photo: bytes (optional, up to 100000 bytes) - a small JPEG of the pack
 //   - notes: string (optional, 1...900 chars) - the app cuts notes to 300 characters
+//   - intakeTags: list (optional, 1...10 items) of strings, 1...150 chars each - beforeMeal, afterMeal,
+//       emptyStomach, or custom: followed by the user's own text, which the app cuts to 40 characters
 //   - stock: number (optional, not below 0) - what is left, in the unit of the dosage
 //   - updatedAt: timestamp (required, server time of the write)
 //
@@ -145,9 +147,25 @@ service cloud.firestore {
             data.recurrenceDays.hasOnly([1, 2, 3, 4, 5, 6, 7])));
     }
 
+    function isValidTagAt(tags, index) {
+      return tags.size() <= index ||
+        (tags[index] is string && tags[index].size() >= 1 && tags[index].size() <= 150);
+    }
+
+    function isValidOptionalTags(data) {
+      return !('intakeTags' in data) ||
+        (data.intakeTags is list && data.intakeTags.size() >= 1 && data.intakeTags.size() <= 10 &&
+          isValidTagAt(data.intakeTags, 0) && isValidTagAt(data.intakeTags, 1) &&
+          isValidTagAt(data.intakeTags, 2) && isValidTagAt(data.intakeTags, 3) &&
+          isValidTagAt(data.intakeTags, 4) && isValidTagAt(data.intakeTags, 5) &&
+          isValidTagAt(data.intakeTags, 6) && isValidTagAt(data.intakeTags, 7) &&
+          isValidTagAt(data.intakeTags, 8) && isValidTagAt(data.intakeTags, 9));
+    }
+
     function isValidOptionalExtras(data) {
       return (!('photo' in data) || (data.photo is bytes && data.photo.size() <= 100000)) &&
         isValidOptionalString(data, 'notes', 1, 900) &&
+        isValidOptionalTags(data) &&
         (!('stock' in data) || (data.stock is number && data.stock >= 0));
     }
 
@@ -172,8 +190,8 @@ service cloud.firestore {
 
     function isValidMedication(data) {
       return hasOnlyAllowedFields(['name', 'dosageAmount', 'dosageUnit', 'times', 'recurrenceKind',
-          'recurrenceDays', 'startDate', 'endDate', 'isActive', 'createdDate', 'photo', 'notes', 'stock',
-          'updatedAt']) &&
+          'recurrenceDays', 'startDate', 'endDate', 'isActive', 'createdDate', 'photo', 'notes', 'intakeTags',
+          'stock', 'updatedAt']) &&
         hasRequiredFields(['name', 'dosageAmount', 'dosageUnit', 'times', 'recurrenceKind',
           'recurrenceDays', 'startDate', 'isActive', 'createdDate', 'updatedAt']) &&
         data.name is string && data.name.size() >= 1 && data.name.size() <= 300 &&

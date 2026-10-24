@@ -18,6 +18,7 @@ struct MedicationDocument: Codable {
     static let notesLimit = Medication.notesLimit
     /// The rules refuse a larger photo, and the app shrinks photos far below this.
     static let photoLimit = 100_000
+    static let customTagPrefix = "custom:"
 
     struct Time: Codable, Equatable {
         let id: String
@@ -37,6 +38,7 @@ struct MedicationDocument: Codable {
     let createdDate: Date
     let photo: Data?
     let notes: String?
+    let intakeTags: [String]?
     let stock: Double?
     /// Left empty on every write, which makes the server fill in its own time.
     @ServerTimestamp private(set) var updatedAt: Date? = nil
@@ -59,6 +61,9 @@ extension MedicationDocument {
             createdDate: medication.createdDate,
             photo: medication.photo.flatMap { $0.count <= Self.photoLimit ? $0 : nil },
             notes: medication.notes.map { String($0.prefix(Self.notesLimit)) },
+            intakeTags: medication.intakeTags.isEmpty
+                ? nil
+                : medication.intakeTags.prefix(IntakeTag.maxCount).map(Self.tagCode),
             stock: medication.stock
         )
     }
@@ -82,6 +87,7 @@ extension MedicationDocument {
             createdDate: createdDate,
             photo: photo,
             notes: notes,
+            intakeTags: (intakeTags ?? []).compactMap(intakeTag),
             stock: stock
         )
     }
@@ -116,6 +122,24 @@ extension MedicationDocument {
         switch recurrence {
         case .daily: []
         case .daysOfWeek(let days): days.map { $0.rawValue }.sorted()
+        }
+    }
+
+    private static func tagCode(_ tag: IntakeTag) -> String {
+        switch tag {
+        case .beforeMeal: "beforeMeal"
+        case .afterMeal: "afterMeal"
+        case .emptyStomach: "emptyStomach"
+        case .custom(let text): customTagPrefix + String(text.prefix(IntakeTag.customLimit))
+        }
+    }
+
+    private func intakeTag(from code: String) -> IntakeTag? {
+        switch code {
+        case "beforeMeal": .beforeMeal
+        case "afterMeal": .afterMeal
+        case "emptyStomach": .emptyStomach
+        default: code.hasPrefix(Self.customTagPrefix) ? .custom(named: String(code.dropFirst(Self.customTagPrefix.count))) : nil
         }
     }
 
