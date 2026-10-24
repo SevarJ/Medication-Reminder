@@ -536,19 +536,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "For example, take with food"
+            "value": "For example, what your doctor advised"
           }
         },
         "az": {
           "stringUnit": {
             "state": "translated",
-            "value": "Məsələn, yeməklə qəbul edin"
+            "value": "Məsələn, həkimin tövsiyəsi"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Например, принимать во время еды"
+            "value": "Например, совет врача"
           }
         }
       }

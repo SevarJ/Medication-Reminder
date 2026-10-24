@@ -50,7 +50,7 @@ extension L10n {
         static var addCustomTag: String { string("form.tags.custom.add", "Add tag") }
         static var removeTag: String { string("form.tags.remove", "Removes the tag") }
         static var notesTitle: String { string("form.notes.title", "Notes") }
-        static var notesPlaceholder: String { string("form.notes.placeholder", "For example, take with food") }
+        static var notesPlaceholder: String { string("form.notes.placeholder", "For example, what your doctor advised") }
         
         static func stockLeft(_ amount: String) -> String { string("form.stock.left", "\(amount) left") }
         static var stockOut: String { string("form.stock.out", "Out of stock") }
