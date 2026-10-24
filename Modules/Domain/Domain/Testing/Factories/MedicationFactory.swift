@@ -20,6 +20,7 @@ public func makeMedication(
     createdDate: Date = .now,
     photo: Data? = nil,
     notes: String? = nil,
+    intakeTags: [IntakeTag] = [],
     stock: Double? = nil
 ) throws -> Medication {
     Medication(
@@ -36,6 +37,7 @@ public func makeMedication(
         createdDate: createdDate,
         photo: photo,
         notes: notes,
+        intakeTags: intakeTags,
         stock: stock
     )
 }

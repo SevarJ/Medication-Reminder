@@ -19,6 +19,7 @@ public struct Medication: Identifiable, Equatable, Hashable, Sendable {
     /// A small JPEG of the pack, if the user added one.
     public let photo: Data?
     public let notes: String?
+    public let intakeTags: [IntakeTag]
     /// How much is left, counted in the unit of the dosage. Taking a dose uses up one dosage.
     public let stock: Double?
     
@@ -31,6 +32,7 @@ public struct Medication: Identifiable, Equatable, Hashable, Sendable {
         createdDate: Date,
         photo: Data? = nil,
         notes: String? = nil,
+        intakeTags: [IntakeTag] = [],
         stock: Double? = nil
     ) {
         self.id = id
@@ -41,6 +43,7 @@ public struct Medication: Identifiable, Equatable, Hashable, Sendable {
         self.createdDate = createdDate
         self.photo = photo
         self.notes = notes
+        self.intakeTags = intakeTags
         self.stock = stock
     }
     
@@ -54,6 +57,7 @@ public struct Medication: Identifiable, Equatable, Hashable, Sendable {
             createdDate: createdDate,
             photo: photo,
             notes: notes,
+            intakeTags: intakeTags,
             stock: stock
         )
     }
@@ -68,6 +72,7 @@ public struct Medication: Identifiable, Equatable, Hashable, Sendable {
             createdDate: createdDate,
             photo: photo,
             notes: notes,
+            intakeTags: intakeTags,
             stock: stock
         )
     }
