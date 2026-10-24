@@ -69,6 +69,94 @@
           }
         }
       }
+    },
+    "lowStock.daysLeft": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "About %lld day left. Time to refill."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "About %lld days left. Time to refill."
+                }
+              }
+            }
+          }
+        },
+        "az": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Təxminən %lld gün qalıb. Yenisini almağın vaxtıdır."
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Осталось примерно на %lld день. Пора пополнить запас."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Осталось примерно на %lld дня. Пора пополнить запас."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Осталось примерно на %lld дней. Пора пополнить запас."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Осталось примерно на %lld дня. Пора пополнить запас."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "lowStock.out": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Out of stock. Time to refill."
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dərman bitib. Yenisini almağın vaxtıdır."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Лекарство закончилось. Пора пополнить запас."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -9,7 +9,7 @@ import Domain
 
 enum NotificationsFactory {
     static func makeScheduler() -> any ReminderScheduling {
-        LocalNotificationScheduler(center: SystemNotificationCenter())
+        LocalNotificationScheduler(center: SystemNotificationCenter(), alertLog: UserDefaultsLowStockAlertLog())
     }
     
     static func makeAuthorizer() -> any NotificationAuthorizing {

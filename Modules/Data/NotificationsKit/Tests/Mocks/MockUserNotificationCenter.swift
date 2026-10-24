@@ -10,6 +10,7 @@ import UserNotifications
 
 actor MockUserNotificationCenter: UserNotificationCenter {
     private(set) var added: [ReminderRequest] = []
+    private(set) var addedAlerts: [LowStockAlertRequest] = []
     private(set) var removedIdentifiers: [String] = []
     private(set) var requestedOptions: UNAuthorizationOptions?
     private(set) var removeAllDeliveredCount = 0
@@ -39,13 +40,18 @@ actor MockUserNotificationCenter: UserNotificationCenter {
         added.append(reminder)
     }
     
+    func add(_ alert: LowStockAlertRequest) async throws {
+        addedAlerts.append(alert)
+    }
+    
     func pendingIdentifiers() async -> [String] {
-        added.map { $0.identifier }
+        added.map { $0.identifier } + addedAlerts.filter { $0.fireDate != nil }.map { $0.identifier }
     }
     
     func removePending(identifiers: [String]) async {
         removedIdentifiers.append(contentsOf: identifiers)
         added.removeAll { identifiers.contains($0.identifier) }
+        addedAlerts.removeAll { $0.fireDate != nil && identifiers.contains($0.identifier) }
     }
     
     func removeAllDelivered() async {

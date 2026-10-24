@@ -14,6 +14,8 @@ protocol UserNotificationCenter: Sendable {
     
     func add(_ reminder: ReminderRequest) async throws
     
+    func add(_ alert: LowStockAlertRequest) async throws
+    
     func pendingIdentifiers() async -> [String]
     
     func removePending(identifiers: [String]) async
@@ -60,6 +62,23 @@ final class SystemNotificationCenter: UserNotificationCenter, @unchecked Sendabl
         )
         
         try await center.add(request)
+    }
+    
+    func add(_ alert: LowStockAlertRequest) async throws {
+        let content = UNMutableNotificationContent()
+        content.title = alert.title
+        content.body = alert.body
+        content.sound = .default
+        content.threadIdentifier = alert.medicationId.uuidString
+        
+        let trigger = alert.fireDate.map { date in
+            UNCalendarNotificationTrigger(
+                dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: date),
+                repeats: false
+            )
+        }
+        
+        try await center.add(UNNotificationRequest(identifier: alert.identifier, content: content, trigger: trigger))
     }
     
     func pendingIdentifiers() async -> [String] {

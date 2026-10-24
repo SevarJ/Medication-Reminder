@@ -12,22 +12,67 @@ internal import UserNotifications
 
 struct LocalNotificationScheduler: ReminderScheduling {
     private let center: any UserNotificationCenter
+    private let alertLog: any LowStockAlertLog
     
-    init(center: any UserNotificationCenter) {
+    init(center: any UserNotificationCenter, alertLog: any LowStockAlertLog) {
         self.center = center
+        self.alertLog = alertLog
     }
     
     func schedule(for medication: Medication) async throws {
         try await cancel(for: medication.id)
+        try await requireAuthorization()
         
+        for reminder in Self.reminders(for: medication) {
+            try await center.add(reminder)
+        }
+        
+        try await addLowStockAlert(for: medication)
+    }
+    
+    func scheduleLowStockAlert(for medication: Medication) async throws {
+        let identifier = Self.lowStockIdentifier(medicationId: medication.id)
+        
+        if await center.pendingIdentifiers().contains(identifier) {
+            await center.removePending(identifiers: [identifier])
+        }
+        
+        try await requireAuthorization()
+        try await addLowStockAlert(for: medication)
+    }
+    
+    func addLowStockAlert(for medication: Medication, now: Date = .now) async throws {
+        guard medication.isActive, let date = medication.lowStockAlertDate(now: now) else {
+            alertLog.setAlertDate(nil, for: medication.id)
+            return
+        }
+        
+        let isDue = date <= now
+        
+        if isDue, let alerted = alertLog.alertDate(for: medication.id), alerted <= now {
+            return
+        }
+        
+        let days = min(medication.daysOfStockLeft ?? 0, Medication.lowStockDays)
+        
+        try await center.add(
+            LowStockAlertRequest(
+                identifier: Self.lowStockIdentifier(medicationId: medication.id),
+                medicationId: medication.id,
+                title: medication.name,
+                body: days > 0 ? L10n.LowStock.daysLeft(days) : L10n.LowStock.outOfStock,
+                fireDate: isDue ? nil : date
+            )
+        )
+        
+        alertLog.setAlertDate(isDue ? now : date, for: medication.id)
+    }
+    
+    private func requireAuthorization() async throws {
         let status = await center.authorizationStatus()
         
         guard status == .authorized || status == .provisional else {
             throw ReminderError.authorizationDenied
-        }
-        
-        for reminder in Self.reminders(for: medication) {
-            try await center.add(reminder)
         }
     }
     
@@ -100,12 +145,17 @@ struct LocalNotificationScheduler: ReminderScheduling {
         }
         
         await center.removeAllDelivered()
+        alertLog.removeAll()
     }
     
     static let reminderPrefix = "medication."
     
     static func identifierPrefix(medicationId: UUID) -> String {
         reminderPrefix + "\(medicationId.uuidString)."
+    }
+    
+    static func lowStockIdentifier(medicationId: UUID) -> String {
+        identifierPrefix(medicationId: medicationId) + "lowStock"
     }
     
     static func identifier(medicationId: UUID, timeId: UUID, weekday: Int? = nil) -> String {

@@ -23,4 +23,14 @@ enum L10n {
             String(localized: "action.snooze", defaultValue: "Snooze \(minutes) min", bundle: .module.localized())
         }
     }
+    
+    enum LowStock {
+        static func daysLeft(_ days: Int) -> String {
+            String(localized: "lowStock.daysLeft", defaultValue: "About \(days) days left. Time to refill.", bundle: .module.localized())
+        }
+        
+        static var outOfStock: String {
+            String(localized: "lowStock.out", defaultValue: "Out of stock. Time to refill.", bundle: .module.localized())
+        }
+    }
 }
