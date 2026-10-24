@@ -14,6 +14,8 @@ import WidgetSnapshot
 struct NextDoseView: View {
     let entry: NextDoseEntry
 
+    @Environment(\.widgetFamily) private var family
+
     var body: some View {
         Group {
             if let dose = entry.dose {
@@ -26,11 +28,72 @@ struct NextDoseView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .containerBackground(Color.theme.hero, for: .widget)
+        .containerBackground(isLockScreen ? Color.clear : Color.theme.hero, for: .widget)
         .environment(\.locale, entry.language.locale)
     }
 
+    private var isLockScreen: Bool {
+        family == .accessoryRectangular
+    }
+
+    @ViewBuilder
     private func content(for dose: UpcomingDoseEntry) -> some View {
+        if isLockScreen {
+            lockScreenContent(for: dose)
+        }
+        else {
+            smallContent(for: dose)
+        }
+    }
+
+    @ViewBuilder
+    private var emptyState: some View {
+        if isLockScreen {
+            lockScreenEmptyState
+        }
+        else {
+            smallEmptyState
+        }
+    }
+
+    private func lockScreenContent(for dose: UpcomingDoseEntry) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .firstTextBaseline, spacing: Spacing.xs) {
+                Text(formattedTime(dose.date))
+                    .font(.system(size: 22, weight: .bold, design: .rounded).monospacedDigit())
+                    .layoutPriority(1)
+
+                Spacer(minLength: 0)
+
+                Text(dayLabel(for: dose.date))
+                    .font(.system(.caption, weight: .semibold))
+                    .foregroundStyle(.secondary)
+            }
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            .widgetAccentable()
+
+            Text(dose.name)
+                .font(.system(.subheadline, weight: .semibold))
+                .lineLimit(1)
+
+            Text(dose.detail)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private var lockScreenEmptyState: some View {
+        Label(L10n.noDoses(entry.language), systemImage: "checkmark.circle.fill")
+            .font(.system(.headline, weight: .semibold))
+            .lineLimit(2)
+            .frame(maxHeight: .infinity)
+            .accessibilityElement(children: .combine)
+    }
+
+    private func smallContent(for dose: UpcomingDoseEntry) -> some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             Text(dayLabel(for: dose.date))
                 .font(.system(.caption, weight: .semibold))
@@ -39,7 +102,7 @@ struct NextDoseView: View {
 
             Spacer(minLength: 0)
 
-            Text(dose.date.formatted(.dateTime.hour().minute().locale(entry.language.locale)))
+            Text(formattedTime(dose.date))
                 .font(.system(size: 34, weight: .bold, design: .rounded).monospacedDigit())
                 .minimumScaleFactor(0.6)
                 .lineLimit(1)
@@ -58,7 +121,7 @@ struct NextDoseView: View {
         .accessibilityElement(children: .combine)
     }
 
-    private var emptyState: some View {
+    private var smallEmptyState: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             Image(systemName: "checkmark.circle.fill")
                 .font(.title)
@@ -78,6 +141,10 @@ struct NextDoseView: View {
         dose.isDueSoon(at: entry.date)
             ? DoseLink(medicationId: dose.medicationId, scheduledDate: dose.date).url
             : TodayLink.url
+    }
+
+    private func formattedTime(_ date: Date) -> String {
+        date.formatted(.dateTime.hour().minute().locale(entry.language.locale))
     }
 
     private func dayLabel(for date: Date) -> String {

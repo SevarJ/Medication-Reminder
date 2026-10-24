@@ -16,6 +16,6 @@ struct NextDoseWidget: Widget {
         }
         .configurationDisplayName(L10n.galleryName)
         .description(L10n.galleryDescription)
-        .supportedFamilies([.systemSmall])
+        .supportedFamilies([.systemSmall, .accessoryRectangular])
     }
 }
