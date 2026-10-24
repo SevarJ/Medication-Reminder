@@ -88,6 +88,22 @@ struct RefreshAccountDataUseCaseTests {
         #expect(await scheduler.cancelledIds == [paused.id])
     }
     
+    @Test func updatesTheLowStockAlertOfUnchangedMedications() async throws {
+        let unchanged = try makeMedication(name: "Unchanged", stock: 10)
+        let paused = try makeMedication(name: "Paused", isActive: false, stock: 10)
+        let scheduler = MockReminderScheduler()
+        let sut = makeSUT(
+            remoteMedications: MockMedicationRemoteStore(medications: [unchanged.updating(stock: 4), paused]),
+            medicationCache: MockMedicationRepository(medications: [unchanged, paused]),
+            scheduler: scheduler
+        )
+        
+        try await sut.execute(now: now)
+        
+        #expect(await scheduler.lowStockAlerts.map { $0.stock } == [4])
+        #expect(await scheduler.scheduledIds.isEmpty)
+    }
+    
     @Test func cancelsRemindersOfMedicationsDeletedElsewhere() async throws {
         let deleted = try makeMedication()
         let scheduler = MockReminderScheduler()

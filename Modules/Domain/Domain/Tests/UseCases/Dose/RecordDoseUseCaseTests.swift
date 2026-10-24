@@ -21,11 +21,13 @@ struct RecordDoseUseCaseTests {
     
     private func makeSUT(
         repository: MockDoseLogRepository,
-        medications: MockMedicationRepository = MockMedicationRepository()
+        medications: MockMedicationRepository = MockMedicationRepository(),
+        scheduler: MockReminderScheduler = MockReminderScheduler()
     ) -> RecordDoseUseCase {
         RecordDoseUseCase(
             doseLogRepository: repository,
             medicationRepository: medications,
+            scheduler: scheduler,
             calendar: calendar
         )
     }
@@ -178,6 +180,45 @@ struct RecordDoseUseCaseTests {
         
         #expect(result.log == nil)
         #expect(result.medication.stock == 10)
+    }
+    
+    @Test func takingADoseUpdatesTheLowStockAlert() async throws {
+        let medication = try makeMedication(dosage: Dosage(amount: 1, unit: .tablet), stock: 9)
+        let medications = MockMedicationRepository(medications: [medication])
+        let scheduler = MockReminderScheduler()
+        let dose = makeDose(medication: medication, scheduledDate: try date(day: 17, hour: 9, minute: 0))
+        
+        try await makeSUT(repository: MockDoseLogRepository(), medications: medications, scheduler: scheduler)
+            .execute(dose, status: .taken, now: try date(day: 17, hour: 14, minute: 30))
+        
+        #expect(await scheduler.lowStockAlerts.map { $0.stock } == [8])
+    }
+    
+    @Test func skippingADoseLeavesTheLowStockAlertAlone() async throws {
+        let medication = try makeMedication(dosage: Dosage(amount: 1, unit: .tablet), stock: 9)
+        let medications = MockMedicationRepository(medications: [medication])
+        let scheduler = MockReminderScheduler()
+        let dose = makeDose(medication: medication, scheduledDate: try date(day: 17, hour: 9, minute: 0))
+        
+        try await makeSUT(repository: MockDoseLogRepository(), medications: medications, scheduler: scheduler)
+            .execute(dose, status: .skipped, now: try date(day: 17, hour: 14, minute: 30))
+        
+        #expect(await scheduler.lowStockAlerts.isEmpty)
+    }
+    
+    @Test func recordingADoseSucceedsWhileNotificationsAreOff() async throws {
+        let medication = try makeMedication(dosage: Dosage(amount: 1, unit: .tablet), stock: 9)
+        let medications = MockMedicationRepository(medications: [medication])
+        let dose = makeDose(medication: medication, scheduledDate: try date(day: 17, hour: 9, minute: 0))
+        
+        let result = try await makeSUT(
+            repository: MockDoseLogRepository(),
+            medications: medications,
+            scheduler: MockReminderScheduler(failsWithAuthorizationDenied: true)
+        )
+        .execute(dose, status: .taken, now: try date(day: 17, hour: 14, minute: 30))
+        
+        #expect(result.medication.stock == 8)
     }
     
     @Test func skippingADoseLeavesTheStockAlone() async throws {

@@ -83,4 +83,36 @@ public struct Medication: Identifiable, Equatable, Hashable, Sendable {
         
         return Int((stock / usedPerDay).rounded(.down))
     }
+
+    public static let lowStockDays = 3
+
+    public func lowStockAlertDate(now: Date = .now, calendar: Calendar = .current) -> Date? {
+        guard let days = daysOfStockLeft else { return nil }
+
+        let today = calendar.startOfDay(for: now)
+
+        if let endDate = schedule.endDate,
+           let runOutDay = calendar.date(byAdding: .day, value: days, to: today),
+           runOutDay > calendar.startOfDay(for: endDate) {
+            return nil
+        }
+
+        guard days > Self.lowStockDays else { return now }
+
+        guard let alertDay = calendar.date(byAdding: .day, value: days - Self.lowStockDays, to: today) else {
+            return nil
+        }
+
+        let firstDay = max(alertDay, calendar.startOfDay(for: schedule.startDate))
+
+        for offset in 0..<7 {
+            guard let day = calendar.date(byAdding: .day, value: offset, to: firstDay) else { continue }
+
+            if let firstDose = schedule.doses(on: day, calendar: calendar).first {
+                return firstDose
+            }
+        }
+
+        return nil
+    }
 }

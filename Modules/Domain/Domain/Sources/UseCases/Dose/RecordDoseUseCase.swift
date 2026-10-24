@@ -10,15 +10,18 @@ import Foundation
 public struct RecordDoseUseCase: Sendable {
     private let doseLogRepository: any DoseLogRepository
     private let medicationRepository: any MedicationRepository
+    private let scheduler: any ReminderScheduling
     private let calendar: Calendar
     
     public init(
         doseLogRepository: any DoseLogRepository,
         medicationRepository: any MedicationRepository,
+        scheduler: any ReminderScheduling,
         calendar: Calendar = .current
     ) {
         self.doseLogRepository = doseLogRepository
         self.medicationRepository = medicationRepository
+        self.scheduler = scheduler
         self.calendar = calendar
     }
     
@@ -87,6 +90,10 @@ public struct RecordDoseUseCase: Sendable {
         let updated = current.updating(stock: max(0, stock + change))
         
         try await medicationRepository.save(updated)
+        
+        if updated.isActive {
+            try? await scheduler.scheduleLowStockAlert(for: updated)
+        }
         
         return updated
     }

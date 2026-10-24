@@ -65,8 +65,13 @@ public struct RefreshAccountDataUseCase: Sendable {
             try? await scheduler.cancel(for: medication.id)
         }
         
-        for medication in medications where !unchanged.contains(signature(of: medication)) {
-            if medication.isActive {
+        for medication in medications {
+            if unchanged.contains(signature(of: medication)) {
+                if medication.isActive {
+                    try? await scheduler.scheduleLowStockAlert(for: medication)
+                }
+            }
+            else if medication.isActive {
                 try? await scheduler.schedule(for: medication)
             }
             else {
