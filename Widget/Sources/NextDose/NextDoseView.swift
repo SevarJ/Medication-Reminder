@@ -144,7 +144,9 @@ struct NextDoseView: View {
     }
 
     private func formattedTime(_ date: Date) -> String {
-        date.formatted(.dateTime.hour().minute().locale(entry.language.locale))
+        let components = Calendar.current.dateComponents([.hour, .minute], from: date)
+
+        return String(format: "%02d:%02d", components.hour ?? 0, components.minute ?? 0)
     }
 
     private func dayLabel(for date: Date) -> String {

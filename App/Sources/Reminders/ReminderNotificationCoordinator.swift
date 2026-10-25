@@ -71,6 +71,7 @@ final class ReminderNotificationCoordinator: NSObject, UNUserNotificationCenterD
         case .snooze:
             try? await snoozeReminder.execute(
                 medicationId: reminder.medicationId,
+                scheduledDate: reminder.scheduledDate,
                 delay: snoozeDuration.interval
             )
         case .opened:
