@@ -6,6 +6,7 @@
 //
 
 import AppLocalization
+import AppPreferences
 import Domain
 import DomainTesting
 import Foundation
@@ -14,10 +15,11 @@ import Testing
 
 @MainActor
 struct SettingsViewModelTests {
+    private let defaults: UserDefaults
     private let store: UserDefaultsLanguageStore
     
     init() throws {
-        let defaults = try #require(UserDefaults(suiteName: "SettingsViewModelTests.\(UUID().uuidString)"))
+        defaults = try #require(UserDefaults(suiteName: "SettingsViewModelTests.\(UUID().uuidString)"))
         store = UserDefaultsLanguageStore(defaults: defaults)
     }
     
@@ -26,6 +28,7 @@ struct SettingsViewModelTests {
         authenticator: MockAccountAuthenticator = MockAccountAuthenticator(),
         scheduler: MockReminderScheduler = MockReminderScheduler(),
         accountData: MockAccountDataRemoteStore = MockAccountDataRemoteStore(),
+        entitlements: MockEntitlementProvider = MockEntitlementProvider(),
         medications: [Medication] = []
     ) -> SettingsViewModel {
         let syncReminder = SyncReminderUseCase(
@@ -39,8 +42,41 @@ struct SettingsViewModelTests {
             authorizer: authorizer,
             authenticator: authenticator,
             deleteAccount: DeleteAccountUseCase(authenticator: authenticator, accountData: accountData),
+            entitlements: entitlements,
+            preferences: AppPreferences(defaults: defaults),
             appVersion: "1.0 (1)"
         )
+    }
+    
+    @Test func hidesProWhileThePaywallIsOff() async {
+        let sut = makeSUT()
+        
+        await sut.start()
+        
+        #expect(!sut.showsPro)
+        #expect(sut.entitlement == nil)
+    }
+    
+    @Test func showsTheCurrentEntitlementWhenThePaywallIsOn() async {
+        defaults.set(true, forKey: PreferenceKey.paywallEnabled)
+        let sut = makeSUT(entitlements: MockEntitlementProvider(entitlement: .free))
+        
+        await sut.start()
+        
+        #expect(sut.showsPro)
+        #expect(sut.entitlement == .free)
+    }
+    
+    @Test func picksUpAPurchaseOnRefresh() async {
+        defaults.set(true, forKey: PreferenceKey.paywallEnabled)
+        let entitlements = MockEntitlementProvider(entitlement: .free)
+        let sut = makeSUT(entitlements: entitlements)
+        
+        await sut.start()
+        await entitlements.setEntitlement(.pro)
+        await sut.refreshEntitlement()
+        
+        #expect(sut.entitlement == .pro)
     }
     
     @Test func startsWithStoredLanguage() {

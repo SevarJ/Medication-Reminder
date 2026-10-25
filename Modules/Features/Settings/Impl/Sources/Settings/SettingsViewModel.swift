@@ -7,6 +7,7 @@
 
 import AppFormatters
 import AppLocalization
+import AppPreferences
 import Domain
 import Foundation
 import Observation
@@ -18,9 +19,11 @@ final class SettingsViewModel {
     private(set) var notificationAccess: NotificationAccess?
     private(set) var account: UserAccount?
     private(set) var isDeletingAccount = false
+    private(set) var entitlement: Entitlement?
     var errorMessage: String?
     
     let appVersion: String
+    let showsPro: Bool
     
     var privacyPolicyURL: URL? {
         let code = language.code ?? Bundle.module.preferredLocalizations.first ?? "en"
@@ -33,6 +36,7 @@ final class SettingsViewModel {
     private let authorizer: any NotificationAuthorizing
     private let authenticator: any AccountAuthenticating
     private let deleteAccountUseCase: DeleteAccountUseCase
+    private let entitlements: any EntitlementProviding
     
     init(
         languageStore: any LanguagePreferenceStoring,
@@ -40,6 +44,8 @@ final class SettingsViewModel {
         authorizer: any NotificationAuthorizing,
         authenticator: any AccountAuthenticating,
         deleteAccount: DeleteAccountUseCase,
+        entitlements: any EntitlementProviding,
+        preferences: AppPreferences,
         appVersion: String
     ) {
         self.language = languageStore.language
@@ -48,13 +54,22 @@ final class SettingsViewModel {
         self.authorizer = authorizer
         self.authenticator = authenticator
         self.deleteAccountUseCase = deleteAccount
+        self.entitlements = entitlements
         self.appVersion = appVersion
+        self.showsPro = preferences.isPaywallEnabled
     }
     
     func start() async {
         account = await authenticator.currentAccount()
         
         await refreshNotificationAccess()
+        await refreshEntitlement()
+    }
+    
+    func refreshEntitlement() async {
+        guard showsPro else { return }
+        
+        entitlement = await entitlements.currentEntitlement()
     }
     
     func signOut() async {

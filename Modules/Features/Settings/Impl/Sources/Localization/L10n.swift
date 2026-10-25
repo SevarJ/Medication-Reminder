@@ -106,6 +106,10 @@ enum L10n {
             )
         }
         
+        static var proActive: String {
+            String(localized: "settings.pro.active", defaultValue: "Active", bundle: .module.localized())
+        }
+        
         static var about: String {
             String(localized: "settings.section.about", defaultValue: "About", bundle: .module.localized())
         }

@@ -9,11 +9,17 @@ import AppLocalization
 import AppPreferences
 import DesignSystem
 import Domain
+import Paywall
+import StoreKit
 import SwiftUI
 import UIKit
 
-struct SettingsView: View {
+struct SettingsView<Paywall: PaywallModule>: View {
     @State private var viewModel: SettingsViewModel
+    @State private var isPaywallPresented = false
+    @State private var isManagingSubscription = false
+    
+    private let paywall: Paywall
     
     @AppStorage(PreferenceKey.appearance) private var appearance: AppAppearance = .system
     @AppStorage(PreferenceKey.snoozeMinutes) private var snoozeDuration: SnoozeDuration = .default
@@ -22,7 +28,8 @@ struct SettingsView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     
-    init(viewModel: SettingsViewModel) {
+    init(paywall: Paywall, viewModel: SettingsViewModel) {
+        self.paywall = paywall
         _viewModel = State(initialValue: viewModel)
     }
     
@@ -31,6 +38,7 @@ struct SettingsView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.xl) {
                     accountHeader
+                    proSection
                     generalSection
                     notificationsSection
                     aboutSection
@@ -54,6 +62,19 @@ struct SettingsView: View {
         }
         .task {
             await viewModel.start()
+        }
+        .fullScreenCover(isPresented: $isPaywallPresented) {
+            Task { await viewModel.refreshEntitlement() }
+        } content: {
+            paywall.makeScreen(.settings) {
+                isPaywallPresented = false
+            }
+        }
+        .manageSubscriptionsSheet(isPresented: $isManagingSubscription)
+        .onChange(of: isManagingSubscription) {
+            if !isManagingSubscription {
+                Task { await viewModel.refreshEntitlement() }
+            }
         }
         .onChange(of: scenePhase) { _, newValue in
             if newValue == .active {
@@ -243,6 +264,51 @@ struct SettingsView: View {
                             Image(systemName: "chevron.right")
                                 .font(.system(.footnote, weight: .semibold))
                                 .foregroundStyle(Color.theme.textSecondary.opacity(0.6))
+                        }
+                    }
+                    .padding(Spacing.lg)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var proSection: some View {
+        if let entitlement = viewModel.entitlement {
+            CardSection {
+                Button {
+                    if entitlement == .pro {
+                        isManagingSubscription = true
+                    }
+                    else {
+                        isPaywallPresented = true
+                    }
+                } label: {
+                    AdaptiveStack {
+                        IconTile(
+                            systemName: "crown.fill",
+                            foreground: .white,
+                            background: Color.theme.hero
+                        )
+                        
+                        Text(verbatim: "Medora Pro")
+                            .font(Font.theme.rowTitle)
+                            .foregroundStyle(Color.theme.textPrimary)
+                        
+                        Spacer(minLength: 0)
+                        
+                        if entitlement == .pro {
+                            Text(L10n.Settings.proActive)
+                                .font(Font.theme.rowSubtitle)
+                                .foregroundStyle(Color.theme.successText)
+                        }
+                        
+                        if !dynamicTypeSize.isAccessibilitySize {
+                            Image(systemName: "chevron.right")
+                                .font(Font.theme.caption)
+                                .foregroundStyle(Color.theme.textSecondary)
                         }
                     }
                     .padding(Spacing.lg)

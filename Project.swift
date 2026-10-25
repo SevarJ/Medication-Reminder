@@ -64,7 +64,8 @@ let dashboard = Feature.feature(
 let settings = Feature.feature(
     "Settings",
     dependencies: [domain, appLocalization, appPreferences, appFormatters, dependencyInjection, designSystem],
-    testDependencies: [domain, domain.testing, appLocalization]
+    interfaces: [paywall],
+    testDependencies: [domain, domain.testing, appLocalization, appPreferences]
 )
 
 let modules = [appLocalization, appPreferences, dependencyInjection, designSystem, widgetSnapshot, domain, appFormatters, persistence, notificationsKit, firebaseKit, dataSync, widgetBridge, storeKitKit]
