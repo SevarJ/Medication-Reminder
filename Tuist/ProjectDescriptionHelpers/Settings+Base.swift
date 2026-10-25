@@ -43,6 +43,7 @@ public extension Settings {
             "CODE_SIGN_STYLE": "Automatic",
             "CURRENT_PROJECT_VERSION": "1",
             "MARKETING_VERSION": "1.0",
+            "DEBUG_INFORMATION_FORMAT": "dwarf-with-dsym",
             "ENABLE_PREVIEWS": "YES",
             "GENERATE_INFOPLIST_FILE": "YES",
             "INFOPLIST_KEY_UIApplicationSceneManifest_Generation": "YES",

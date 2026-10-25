@@ -14,6 +14,7 @@ public extension Target {
                 .folder(.relativeToRoot("App/Resources")),
             ],
             entitlements: .file(path: .relativeToRoot("App/Medora.entitlements")),
+            scripts: [.crashlyticsSymbolsUpload],
             dependencies: dependencies,
             settings: .app,
             mergedBinaryType: .automatic,
@@ -33,6 +34,21 @@ private let urlTypes: [String: Plist.Value] = [
             }
     ),
 ]
+
+private let crashlyticsPath = "Tuist/.build/checkouts/firebase-ios-sdk/Crashlytics"
+
+private extension TargetScript {
+    static let crashlyticsSymbolsUpload: TargetScript = .post(
+        script: "\"${SRCROOT}/\(crashlyticsPath)/run\"",
+        name: "Upload dSYMs to Crashlytics",
+        inputPaths: [
+            .glob(.relativeToRoot("\(crashlyticsPath)/run")),
+            .glob(.relativeToRoot("\(crashlyticsPath)/upload-symbols")),
+        ],
+        inputFileListPaths: [.relativeToRoot("\(crashlyticsPath)/CrashlyticsInputFiles.xcfilelist")],
+        basedOnDependencyAnalysis: false
+    )
+}
 
 public extension Scheme {
     static func app(testTargets: [String]) -> Scheme {
