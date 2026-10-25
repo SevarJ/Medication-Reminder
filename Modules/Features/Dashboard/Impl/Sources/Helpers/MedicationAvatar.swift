@@ -13,13 +13,15 @@ import UIKit
 struct MedicationAvatar: View {
     let photo: Data?
     let isActive: Bool
+    let category: CategoryColor?
     var size: CGFloat = 44
     
     @ScaledMetric private var scaledSize: CGFloat
     
-    init(photo: Data?, isActive: Bool = true, size: CGFloat = 44) {
+    init(photo: Data?, isActive: Bool = true, category: CategoryColor? = nil, size: CGFloat = 44) {
         self.photo = photo
         self.isActive = isActive
+        self.category = category
         self.size = size
         _scaledSize = ScaledMetric(wrappedValue: size)
     }
@@ -38,8 +40,8 @@ struct MedicationAvatar: View {
         else {
             IconTile(
                 systemName: "pills.fill",
-                foreground: isActive ? Color.theme.accentText : Color.theme.textSecondary,
-                background: isActive ? Color.theme.accentTint : Color.theme.fill,
+                foreground: isActive ? category?.tint ?? Color.theme.accentText : Color.theme.textSecondary,
+                background: isActive ? category?.background ?? Color.theme.accentTint : Color.theme.fill,
                 size: size
             )
         }

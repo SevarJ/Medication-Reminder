@@ -54,13 +54,18 @@ struct HistoryDoseRow: View {
     @ViewBuilder private var glyph: some View {
         switch state {
         case .taken:
-            IconTile(systemName: "checkmark", foreground: Color.theme.onHero, background: Color.theme.accent, size: 40)
+            IconTile(systemName: "checkmark", foreground: Color.theme.onHero, background: Color.theme.success, size: 40)
         case .missed:
             IconTile(systemName: "exclamationmark", foreground: Color.theme.warning, background: Color.theme.warningTint, size: 40)
         case .skipped:
             IconTile(systemName: "forward.end.fill", foreground: Color.theme.info, background: Color.theme.infoTint, size: 40)
         case .pending:
-            IconTile(systemName: "pills.fill", foreground: Color.theme.accentText, background: Color.theme.accentTint, size: 40)
+            IconTile(
+                systemName: "pills.fill",
+                foreground: Color.theme.category(for: dose.medication.id).tint,
+                background: Color.theme.category(for: dose.medication.id).background,
+                size: 40
+            )
         }
     }
     
@@ -69,7 +74,7 @@ struct HistoryDoseRow: View {
         case .taken:
             Text(dose.log.map { L10n.Today.takenAt($0.recordedAt.timeText) } ?? "")
                 .font(Font.theme.badge)
-                .foregroundStyle(Color.theme.accentText)
+                .foregroundStyle(Color.theme.successText)
         case .skipped:
             Text(L10n.Today.skipped)
                 .font(Font.theme.badge)

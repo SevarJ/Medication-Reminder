@@ -73,7 +73,7 @@ struct DoseRow: View {
                     systemImage: state == .taken ? "arrow.uturn.backward" : "checkmark"
                 )
             }
-            .tint(Color.theme.hero)
+            .tint(Color.theme.success)
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             if state != .taken {
@@ -91,13 +91,13 @@ struct DoseRow: View {
     @ViewBuilder private var glyph: some View {
         switch state {
         case .taken:
-            IconTile(systemName: "checkmark", foreground: Color.theme.onHero, background: Color.theme.accent, size: 40)
+            IconTile(systemName: "checkmark", foreground: Color.theme.onHero, background: Color.theme.success, size: 40)
         case .missed:
             IconTile(systemName: "exclamationmark", foreground: Color.theme.warning, background: Color.theme.warningTint, size: 40)
         case .skipped:
             IconTile(systemName: "forward.end.fill", foreground: Color.theme.info, background: Color.theme.infoTint, size: 40)
         case .pending:
-            MedicationAvatar(photo: dose.medication.photo, size: 40)
+            MedicationAvatar(photo: dose.medication.photo, category: Color.theme.category(for: dose.medication.id), size: 40)
         }
     }
     
@@ -107,7 +107,7 @@ struct DoseRow: View {
             Button(action: onTake) {
                 Text(dose.log.map { L10n.Today.takenAt($0.recordedAt.timeText) } ?? "")
                     .font(Font.theme.badge)
-                    .foregroundStyle(Color.theme.accentText)
+                    .foregroundStyle(Color.theme.successText)
                     .frame(minHeight: Size.minTarget)
             }
             .buttonStyle(.plain)

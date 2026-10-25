@@ -55,8 +55,8 @@ struct WeekStrip: View {
                     ProgressRing(
                         progress: day.adherence,
                         lineWidth: 3,
-                        tint: isSelected ? Color.white : Color.theme.accent,
-                        track: isSelected ? Color.white.opacity(0.25) : Color.theme.accentTint
+                        tint: isSelected ? Color.white : Color.theme.success,
+                        track: isSelected ? Color.white.opacity(0.25) : Color.theme.successTint
                     )
                 }
                 

@@ -119,7 +119,7 @@ struct MedicationDetailView: View {
         }
         .padding(Spacing.xl)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .heroCardBackground()
+        .heroCardBackground(Color.theme.category(for: medication.id).deep)
         .padding(.horizontal, Spacing.lg)
     }
     
@@ -205,7 +205,7 @@ struct MedicationDetailView: View {
                 if !viewModel.dueDoses.isEmpty {
                     Text(viewModel.adherence.formatted(.percent.precision(.fractionLength(0)).locale(AppLanguage.current.locale)))
                         .font(.system(.title3, design: .rounded, weight: .bold).monospacedDigit())
-                        .foregroundStyle(Color.theme.accentText)
+                        .foregroundStyle(Color.theme.successText)
                 }
             }
             
@@ -249,8 +249,8 @@ struct MedicationDetailView: View {
                     ProgressRing(
                         progress: day.adherence,
                         lineWidth: 3,
-                        tint: Color.theme.accent,
-                        track: Color.theme.accentTint
+                        tint: Color.theme.success,
+                        track: Color.theme.successTint
                     )
                 }
                 

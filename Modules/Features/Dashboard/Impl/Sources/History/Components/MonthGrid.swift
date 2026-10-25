@@ -85,7 +85,7 @@ struct MonthGrid: View {
         switch outcome {
         case .complete:
             Circle()
-                .fill(Color.theme.accent)
+                .fill(Color.theme.success)
                 .padding(4)
         case .partial:
             ProgressRing(progress: adherence, lineWidth: 4)

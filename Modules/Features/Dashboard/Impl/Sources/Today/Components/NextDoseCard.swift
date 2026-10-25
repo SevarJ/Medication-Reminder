@@ -68,7 +68,7 @@ struct DayCompleteCard: View {
         HStack(spacing: Spacing.md) {
             Image(systemName: "checkmark.seal.fill")
                 .font(.system(size: 34))
-                .foregroundStyle(Color.theme.accent)
+                .foregroundStyle(Color.theme.success)
                 .symbolEffect(.bounce, value: appeared)
             
             Text(L10n.Today.allDone)
@@ -79,7 +79,7 @@ struct DayCompleteCard: View {
         }
         .padding(Spacing.xl)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .cardSurface(Color.theme.accentTint)
+        .cardSurface(Color.theme.successTint)
         .onAppear { appeared = true }
     }
 }

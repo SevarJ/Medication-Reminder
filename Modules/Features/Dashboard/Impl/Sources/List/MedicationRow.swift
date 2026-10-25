@@ -22,7 +22,7 @@ struct MedicationRow: View {
             : AnyLayout(HStackLayout(spacing: Spacing.md))
         
         return layout {
-            MedicationAvatar(photo: medication.photo, isActive: medication.isActive, size: 44)
+            MedicationAvatar(photo: medication.photo, isActive: medication.isActive, category: Color.theme.category(for: medication.id), size: 44)
             
             VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(medication.name)
@@ -35,7 +35,7 @@ struct MedicationRow: View {
                 
                 Text(medication.schedule.times.map(\.displayText).joined(separator: "  ·  "))
                     .font(.system(.footnote, design: .rounded, weight: .semibold).monospacedDigit())
-                    .foregroundStyle(medication.isActive ? Color.theme.accentText : Color.theme.textSecondary)
+                    .foregroundStyle(medication.isActive ? Color.theme.textPrimary : Color.theme.textSecondary)
                     .padding(.top, 2)
             }
             .opacity(medication.isActive ? 1 : 0.65)

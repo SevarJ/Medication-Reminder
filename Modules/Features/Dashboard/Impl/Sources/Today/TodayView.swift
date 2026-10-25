@@ -257,7 +257,7 @@ struct TodayView: View {
         } header: {
             HStack(spacing: Spacing.sm) {
                 Image(systemName: period.iconName)
-                    .foregroundStyle(Color.theme.textSecondary)
+                    .foregroundStyle(period.iconColor)
                     .frame(width: periodIconWidth)
                 
                 Text(period.title)

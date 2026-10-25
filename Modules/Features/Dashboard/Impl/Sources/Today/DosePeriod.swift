@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 enum DosePeriod: CaseIterable, Identifiable {
     case morning
@@ -27,6 +28,14 @@ enum DosePeriod: CaseIterable, Identifiable {
         case .morning: L10n.Today.morning
         case .afternoon: L10n.Today.afternoon
         case .evening: L10n.Today.evening
+        }
+    }
+    
+    var iconColor: Color {
+        switch self {
+        case .morning: .orange
+        case .afternoon: .yellow
+        case .evening: .indigo
         }
     }
     

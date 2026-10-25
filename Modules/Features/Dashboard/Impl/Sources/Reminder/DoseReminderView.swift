@@ -102,7 +102,7 @@ struct DoseReminderView: View {
                 .contentTransition(.symbolEffect(.replace))
                 .frame(width: 112, height: 112)
                 .background(
-                    isTaken ? Color.theme.hero : Color.theme.accentTint,
+                    isTaken ? Color.theme.success : Color.theme.accentTint,
                     in: RoundedRectangle(cornerRadius: 32, style: .continuous)
                 )
                 .animation(.spring(duration: 0.4), value: isTaken)
