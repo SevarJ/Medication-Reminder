@@ -71,7 +71,7 @@ final class MedicationListViewModel {
         do {
             let medications = try await repository
                 .fetchAll()
-                .sorted { $0.createdDate < $1.createdDate }
+                .sorted { $0.createdDate > $1.createdDate }
             
             state = medications.isEmpty ? .empty : .loaded(medications)
         }

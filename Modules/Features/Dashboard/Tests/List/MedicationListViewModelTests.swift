@@ -20,14 +20,14 @@ extension MedicationListState {
 
 @MainActor
 struct MedicationListViewModelTests {
-    @Test func loadsMedicationsSortedByCreationDate() async throws {
+    @Test func loadsNewestMedicationsFirst() async throws {
         let older = try makeMedication(name: "Older", createdDate: .now.addingTimeInterval(-60))
         let newer = try makeMedication(name: "Newer")
-        let sut = makeSUT(repository: MockMedicationRepository(medications: [newer, older]))
+        let sut = makeSUT(repository: MockMedicationRepository(medications: [older, newer]))
         
         await sut.load()
         
-        #expect(sut.state.medications?.map { $0.name } == ["Older", "Newer"])
+        #expect(sut.state.medications?.map { $0.name } == ["Newer", "Older"])
     }
     
     @Test func togglingFlipsActiveState() async throws {
