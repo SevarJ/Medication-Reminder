@@ -1,0 +1,29 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "NSCameraUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medora uses the camera to take a photo of your medication's box."
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medora dərman qutunuzun şəklini çəkmək üçün kameradan istifadə edir."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medora использует камеру, чтобы сфотографировать упаковку вашего лекарства."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

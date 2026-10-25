@@ -46,6 +46,7 @@ public extension Settings {
             "DEBUG_INFORMATION_FORMAT": "dwarf-with-dsym",
             "ENABLE_PREVIEWS": "YES",
             "GENERATE_INFOPLIST_FILE": "YES",
+            "INFOPLIST_KEY_NSCameraUsageDescription": "Medora uses the camera to take a photo of your medication's box.",
             "INFOPLIST_KEY_UIApplicationSceneManifest_Generation": "YES",
             "INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents": "YES",
             "INFOPLIST_KEY_UILaunchScreen_Generation": "YES",
