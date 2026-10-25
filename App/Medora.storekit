@@ -55,12 +55,12 @@
           },
           "localizations" : [
             {
-              "description" : "Medora Pro for a year",
+              "description" : "Save 44% compared to monthly",
               "displayName" : "Yearly",
               "locale" : "en_US"
             },
             {
-              "description" : "Medora Pro на год",
+              "description" : "Экономия 44% по сравнению с помесячной",
               "displayName" : "На год",
               "locale" : "ru"
             }
@@ -87,12 +87,12 @@
           "internalID" : "6739000002",
           "localizations" : [
             {
-              "description" : "Medora Pro for a month",
+              "description" : "Cancel anytime",
               "displayName" : "Monthly",
               "locale" : "en_US"
             },
             {
-              "description" : "Medora Pro на месяц",
+              "description" : "Отмена в любое время",
               "displayName" : "На месяц",
               "locale" : "ru"
             }

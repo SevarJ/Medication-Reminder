@@ -88,7 +88,7 @@ struct MedoraApp: App {
                 session: session,
                 account: AccountModuleConfigurator.makeModule(),
                 dashboard: DashboardModuleConfigurator.makeModule(),
-                settings: SettingsModuleConfigurator.makeModule(),
+                settings: SettingsModuleConfigurator.makeModule(paywall: PaywallModuleConfigurator.makeModule()),
                 onboarding: OnboardingModuleConfigurator.makeModule(paywall: PaywallModuleConfigurator.makeModule())
             )
         }

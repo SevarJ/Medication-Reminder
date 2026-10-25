@@ -6,7 +6,7 @@ A medication reminder and adherence tracker for iOS. Schedule medications, get a
   <a href="https://github.com/SevarJ/Medication-Reminder/actions/workflows/ci.yml"><img src="https://github.com/SevarJ/Medication-Reminder/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/iOS-17%2B-blue" alt="iOS 17+">
   <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
-  <img src="https://img.shields.io/badge/tests-401-brightgreen" alt="401 tests">
+  <img src="https://img.shields.io/badge/tests-409-brightgreen" alt="409 tests">
 </p>
 
 ## Features
@@ -94,7 +94,8 @@ Documents live under the account: `users/{uid}/medications/{medicationId}` and `
 - `Domain` knows only `Entitlement` (`free` or `pro`), the product identifiers in `ProSubscription` and the `EntitlementProviding` port. No Pro feature is gated yet.
 - `StoreKitKit` implements the port with StoreKit 2: it reads `Transaction.currentEntitlements`, restores with `AppStore.sync()` and finishes every verified transaction from `Transaction.updates` from launch on. Another data module, such as one built on RevenueCat, can replace it behind the same port.
 - `Paywall` shows a `SubscriptionStoreView` with a monthly and a yearly plan, the yearly one with a free week. The screen has a close button, Restore, and links to the terms of use and the privacy policy, and it tracks `paywall_shown`, `purchase_result` and `restore_result`.
-- Onboarding offers it once after the notification step to anyone without Pro. It stays off until the `feature.paywall` preference is set, for example by launching with `-feature.paywall YES`.
+- Every purchase carries an `appAccountToken`, a name-based UUID made from the Firebase user ID, so a server can match the subscription to the account.
+- Onboarding offers it once after the notification step to anyone without Pro, and Settings shows a Medora Pro row that opens the paywall or, for subscribers, the App Store's subscription management. Both stay off until the `feature.paywall` preference is set, for example by launching with `-feature.paywall YES`.
 - `App/Medora.storekit` is the scheme's StoreKit configuration, so purchases work in the simulator without App Store Connect when the app is run from Xcode.
 
 ## Design
