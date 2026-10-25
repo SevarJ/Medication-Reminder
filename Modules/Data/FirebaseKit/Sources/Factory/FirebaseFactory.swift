@@ -31,4 +31,8 @@ enum FirebaseFactory {
     static func makeAccountDataStore() -> any AccountDataRemoteStore {
         FirestoreAccountDataStore()
     }
+
+    static func makeAnalyticsTracker() -> any AnalyticsTracking {
+        FirebaseAnalyticsTracker()
+    }
 }

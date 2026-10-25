@@ -30,7 +30,7 @@ let widgetBridge = Module.data(
 let firebaseKit = Module.data(
     "FirebaseKit",
     dependencies: [domain, dependencyInjection],
-    packages: ["FirebaseCore", "FirebaseAuth", "FirebaseFirestore", "FirebaseCrashlytics", "FirebasePerformance", "GoogleSignIn"],
+    packages: ["FirebaseCore", "FirebaseAuth", "FirebaseFirestore", "FirebaseAnalyticsCore", "FirebaseCrashlytics", "FirebasePerformance", "GoogleSignIn"],
     hasTests: false
 )
 
