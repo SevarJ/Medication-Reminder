@@ -109,13 +109,37 @@ struct MedicationListView: View {
         switch viewModel.state {
         case .loading:
             ProgressView()
-        case .loaded(let medications):
-            content(medications: medications)
+        case .loaded:
+            VStack(spacing: Spacing.md) {
+                filterPicker
+                
+                if viewModel.visibleMedications.isEmpty {
+                    placeholder(
+                        systemName: viewModel.filter == .active ? "pills.fill" : "pause.fill",
+                        title: viewModel.filter.emptyTitle,
+                        message: viewModel.filter.emptyMessage
+                    )
+                    .frame(maxHeight: .infinity)
+                }
+                else {
+                    content(medications: viewModel.visibleMedications)
+                }
+            }
         case .empty:
             emptyState
         case .failure(let message):
             failureState(message: message)
         }
+    }
+    
+    private var filterPicker: some View {
+        Picker(L10n.List.title, selection: $viewModel.filter) {
+            ForEach(MedicationFilter.allCases) { filter in
+                Text(filter.title).tag(filter)
+            }
+        }
+        .pickerStyle(.segmented)
+        .padding(.horizontal, Spacing.lg)
     }
     
     private func content(medications: [Medication]) -> some View {
@@ -252,19 +276,23 @@ struct MedicationListView: View {
     }
     
     private var emptyState: some View {
+        placeholder(systemName: "pills.fill", title: L10n.List.emptyTitle, message: L10n.List.emptyMessage)
+    }
+    
+    private func placeholder(systemName: String, title: String, message: String) -> some View {
         VStack(spacing: Spacing.md) {
             IconTile(
-                systemName: "pills.fill",
+                systemName: systemName,
                 foreground: Color.theme.accentText,
                 background: Color.theme.accentTint,
                 size: 56
             )
             
-            Text(L10n.List.emptyTitle)
+            Text(title)
                 .font(Font.theme.rowTitle)
                 .foregroundStyle(Color.theme.textPrimary)
             
-            Text(L10n.List.emptyMessage)
+            Text(message)
                 .font(Font.theme.rowSubtitle)
                 .foregroundStyle(Color.theme.textSecondary)
                 .multilineTextAlignment(.center)

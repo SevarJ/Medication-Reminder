@@ -50,6 +50,30 @@ enum L10n {
         static var resumeReminders: String {
             String(localized: "list.action.resume", defaultValue: "Resume Reminders", bundle: .module.localized())
         }
+        
+        static var activeFilter: String {
+            String(localized: "list.filter.active", defaultValue: "Active", bundle: .module.localized())
+        }
+        
+        static var pausedFilter: String {
+            String(localized: "list.filter.paused", defaultValue: "Paused", bundle: .module.localized())
+        }
+        
+        static var noActiveTitle: String {
+            String(localized: "list.filter.active.empty.title", defaultValue: "No Active Medications", bundle: .module.localized())
+        }
+        
+        static var noActiveMessage: String {
+            String(localized: "list.filter.active.empty.message", defaultValue: "Resume a paused medication or add a new one.", bundle: .module.localized())
+        }
+        
+        static var noPausedTitle: String {
+            String(localized: "list.filter.paused.empty.title", defaultValue: "No Paused Medications", bundle: .module.localized())
+        }
+        
+        static var noPausedMessage: String {
+            String(localized: "list.filter.paused.empty.message", defaultValue: "Medications whose reminders you pause will appear here.", bundle: .module.localized())
+        }
     }
     
     enum Banner {

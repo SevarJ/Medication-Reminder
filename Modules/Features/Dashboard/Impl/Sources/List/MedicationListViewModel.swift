@@ -15,7 +15,8 @@ import Observation
 final class MedicationListViewModel {
     private(set) var notificationAccess: NotificationAccess?
     var errorMessage: String?
-    
+    var filter: MedicationFilter = .active
+
     private let repository: any MedicationRepository
     private let saveMedication: SaveMedicationUseCase
     private let deleteMedication: DeleteMedicationUseCase
@@ -44,6 +45,12 @@ final class MedicationListViewModel {
         self.authorizer = authorizer
     }
     
+    var visibleMedications: [Medication] {
+        guard case .loaded(let medications) = state else { return [] }
+
+        return medications.filter(filter.includes)
+    }
+
     var notificationsUnavailable: Bool {
         notificationAccess.map { $0 != .authorized } ?? false
     }

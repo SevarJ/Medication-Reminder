@@ -39,6 +39,42 @@ struct MedicationListViewModelTests {
         #expect(sut.state.medications?.first?.isActive == false)
     }
     
+    @Test func showsActiveMedicationsByDefault() async throws {
+        let active = try makeMedication(name: "Active", isActive: true)
+        let paused = try makeMedication(name: "Paused", isActive: false)
+        let sut = makeSUT(repository: MockMedicationRepository(medications: [active, paused]))
+        
+        await sut.load()
+        
+        #expect(sut.filter == .active)
+        #expect(sut.visibleMedications.map { $0.name } == ["Active"])
+    }
+    
+    @Test func pausedFilterShowsOnlyPausedMedications() async throws {
+        let active = try makeMedication(name: "Active", isActive: true)
+        let paused = try makeMedication(name: "Paused", isActive: false)
+        let sut = makeSUT(repository: MockMedicationRepository(medications: [active, paused]))
+        
+        await sut.load()
+        sut.filter = .paused
+        
+        #expect(sut.visibleMedications.map { $0.name } == ["Paused"])
+    }
+    
+    @Test func pausingMovesMedicationToPausedFilter() async throws {
+        let medication = try makeMedication(isActive: true)
+        let sut = makeSUT(repository: MockMedicationRepository(medications: [medication]))
+        
+        await sut.load()
+        await sut.toggle(medication)
+        
+        #expect(sut.visibleMedications.isEmpty)
+        
+        sut.filter = .paused
+        
+        #expect(sut.visibleMedications.map { $0.id } == [medication.id])
+    }
+    
     @Test func deletingRemovesMedication() async throws {
         let medication = try makeMedication()
         let sut = makeSUT(repository: MockMedicationRepository(medications: [medication]))

@@ -760,6 +760,144 @@
         }
       }
     },
+    "list.filter.active": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktiv"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Активные"
+          }
+        }
+      }
+    },
+    "list.filter.active.empty.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resume a paused medication or add a new one."
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dayandırılmış dərmanı bərpa edin və ya yenisini əlavə edin."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Возобновите приостановленное лекарство или добавьте новое."
+          }
+        }
+      }
+    },
+    "list.filter.active.empty.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Active Medications"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktiv dərman yoxdur"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет активных лекарств"
+          }
+        }
+      }
+    },
+    "list.filter.paused": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paused"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dayandırılıb"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приостановлены"
+          }
+        }
+      }
+    },
+    "list.filter.paused.empty.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medications whose reminders you pause will appear here."
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xatırlatmalarını dayandırdığınız dərmanlar burada görünəcək."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Здесь появятся лекарства, напоминания для которых вы приостановили."
+          }
+        }
+      }
+    },
+    "list.filter.paused.empty.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Paused Medications"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dayandırılmış dərman yoxdur"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет приостановленных лекарств"
+          }
+        }
+      }
+    },
     "list.row.paused": {
       "extractionState": "manual",
       "localizations": {
