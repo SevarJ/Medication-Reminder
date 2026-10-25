@@ -24,6 +24,9 @@ private extension AnalyticsEvent {
         case .introductionCompleted: "introduction_completed"
         case .signedIn: AnalyticsEventLogin
         case .notificationPromptAnswered: "notification_prompt_answered"
+        case .paywallShown: "paywall_shown"
+        case .purchaseFinished: "purchase_result"
+        case .purchasesRestored: "restore_result"
         }
     }
 
@@ -32,7 +35,9 @@ private extension AnalyticsEvent {
         case .doseLogged(let status): ["status": status.analyticsValue]
         case .signedIn: [AnalyticsParameterMethod: "google"]
         case .notificationPromptAnswered(let answer): ["answer": answer.analyticsValue]
-        case .medicationAdded, .medicationDeleted, .reminderSnoozed, .introductionCompleted: nil
+        case .purchaseFinished(let outcome): outcome.analyticsParameters
+        case .purchasesRestored(let outcome): ["result": outcome.analyticsValue]
+        case .medicationAdded, .medicationDeleted, .reminderSnoozed, .introductionCompleted, .paywallShown: nil
         }
     }
 }
@@ -52,6 +57,27 @@ private extension NotificationPromptAnswer {
         case .allowed: "allowed"
         case .denied: "denied"
         case .postponed: "postponed"
+        }
+    }
+}
+
+private extension PurchaseOutcome {
+    var analyticsParameters: [String: Any] {
+        switch self {
+        case .purchased(let productID): ["result": "purchased", "product_id": productID]
+        case .pending: ["result": "pending"]
+        case .cancelled: ["result": "cancelled"]
+        case .failed: ["result": "failed"]
+        }
+    }
+}
+
+private extension RestoreOutcome {
+    var analyticsValue: String {
+        switch self {
+        case .restored: "restored"
+        case .nothingToRestore: "nothing_to_restore"
+        case .failed: "failed"
         }
     }
 }

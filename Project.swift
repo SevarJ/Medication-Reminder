@@ -34,6 +34,8 @@ let firebaseKit = Module.data(
     hasTests: false
 )
 
+let storeKitKit = Module.data("StoreKitKit", dependencies: [domain, dependencyInjection], testDependencies: [domain])
+
 let account = Feature.feature(
     "Account",
     dependencies: [domain, appLocalization, appFormatters, dependencyInjection, designSystem],
@@ -58,7 +60,7 @@ let settings = Feature.feature(
     testDependencies: [domain, domain.testing, appLocalization]
 )
 
-let modules = [appLocalization, appPreferences, dependencyInjection, designSystem, widgetSnapshot, domain, appFormatters, persistence, notificationsKit, firebaseKit, dataSync, widgetBridge]
+let modules = [appLocalization, appPreferences, dependencyInjection, designSystem, widgetSnapshot, domain, appFormatters, persistence, notificationsKit, firebaseKit, dataSync, widgetBridge, storeKitKit]
 let features = [account, onboarding, dashboard, settings]
 
 let project = Project(
