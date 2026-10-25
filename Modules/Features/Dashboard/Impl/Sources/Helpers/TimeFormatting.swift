@@ -24,6 +24,10 @@ extension Date {
         return String(format: "%02d:%02d", value.hour, value.minute)
     }
     
+    var dateText: String {
+        formatted(.dateTime.day().month(.abbreviated).year().locale(AppLanguage.current.locale))
+    }
+    
     var hourAndMinute: (hour: Int, minute: Int) {
         let components = Calendar.current.dateComponents([.hour, .minute], from: self)
         return (components.hour ?? 0, components.minute ?? 0)

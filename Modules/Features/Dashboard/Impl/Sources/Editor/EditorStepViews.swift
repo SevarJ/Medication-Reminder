@@ -362,16 +362,27 @@ private struct DurationStepView: View {
             
             Spacer(minLength: 0)
             
-            Group {
-                if let range {
-                    DatePicker("", selection: selection, in: range, displayedComponents: .date)
+            Text(selection.wrappedValue.dateText)
+                .accessibilityHidden(true)
+                .font(.body)
+                .foregroundStyle(Color.theme.textPrimary)
+                .padding(.horizontal, Spacing.md)
+                .padding(.vertical, Spacing.sm)
+                .background(Color.theme.fill, in: Capsule())
+                .overlay {
+                    Group {
+                        if let range {
+                            DatePicker(title, selection: selection, in: range, displayedComponents: .date)
+                        }
+                        else {
+                            DatePicker(title, selection: selection, displayedComponents: .date)
+                        }
+                    }
+                    .labelsHidden()
+                    .tint(Color.theme.accent)
+                    .blendMode(.destinationOver)
                 }
-                else {
-                    DatePicker("", selection: selection, displayedComponents: .date)
-                }
-            }
-            .labelsHidden()
-            .fixedSize()
+                .fixedSize()
         }
         .padding(Spacing.lg)
     }
