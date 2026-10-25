@@ -12,7 +12,7 @@ public protocol ReminderScheduling: Sendable {
     func cancel(for medicationId: UUID) async throws
     /// Removes every reminder, both the ones still to come and the ones already on screen.
     func cancelAll() async throws
-    func snooze(_ medication: Medication, until date: Date) async throws
+    func snooze(_ medication: Medication, scheduledDate: Date, until date: Date) async throws
     func scheduleLowStockAlert(for medication: Medication) async throws
     func scheduleFollowUps(for doses: [ScheduledDose]) async throws
 }

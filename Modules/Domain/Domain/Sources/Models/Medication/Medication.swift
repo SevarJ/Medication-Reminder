@@ -8,6 +8,7 @@
 import Foundation
 
 public struct Medication: Identifiable, Equatable, Hashable, Sendable {
+    public static let nameLimit = 100
     public static let notesLimit = 300
     
     public let id: UUID

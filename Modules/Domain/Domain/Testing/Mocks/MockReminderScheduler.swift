@@ -12,6 +12,7 @@ public actor MockReminderScheduler: ReminderScheduling {
     public private(set) var scheduledIds: [UUID] = []
     public private(set) var cancelledIds: [UUID] = []
     public private(set) var snoozedIds: [UUID] = []
+    public private(set) var snoozedDoseDates: [Date] = []
     public private(set) var cancelAllCount = 0
     public private(set) var lowStockAlerts: [Medication] = []
     public private(set) var followUps: [[ScheduledDose]] = []
@@ -38,8 +39,9 @@ public actor MockReminderScheduler: ReminderScheduling {
         cancelAllCount += 1
     }
 
-    public func snooze(_ medication: Medication, until date: Date) async throws {
+    public func snooze(_ medication: Medication, scheduledDate: Date, until date: Date) async throws {
         snoozedIds.append(medication.id)
+        snoozedDoseDates.append(scheduledDate)
     }
 
     public func scheduleLowStockAlert(for medication: Medication) async throws {

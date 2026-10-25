@@ -23,11 +23,12 @@ public struct SnoozeReminderUseCase: Sendable {
     
     public func execute(
         medicationId: UUID,
+        scheduledDate: Date,
         delay: TimeInterval = defaultDelay,
         now: Date = .now
     ) async throws {
         let medication = try await repository.fetch(id: medicationId)
         
-        try await scheduler.snooze(medication, until: now.addingTimeInterval(delay))
+        try await scheduler.snooze(medication, scheduledDate: scheduledDate, until: now.addingTimeInterval(delay))
     }
 }

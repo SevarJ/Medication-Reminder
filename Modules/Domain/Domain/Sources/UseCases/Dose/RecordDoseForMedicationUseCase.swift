@@ -32,6 +32,8 @@ public struct RecordDoseForMedicationUseCase: Sendable {
     ) async throws -> ScheduledDose {
         let dose = try await loadDose.execute(medicationId: medicationId, scheduledDate: scheduledDate)
         
+        guard dose.log?.status != status else { return dose }
+        
         return try await recordDose.execute(dose, status: status, now: now)
     }
 }

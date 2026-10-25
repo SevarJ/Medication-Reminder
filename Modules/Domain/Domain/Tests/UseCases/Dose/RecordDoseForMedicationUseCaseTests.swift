@@ -54,7 +54,7 @@ struct RecordDoseForMedicationUseCaseTests {
         #expect(await logRepository.logs.count == 1)
     }
     
-    @Test func togglesExistingLogInsteadOfAddingAnother() async throws {
+    @Test func keepsTheDoseWhenItWasAlreadyLoggedTheSameWay() async throws {
         let medication = try makeMedication()
         let scheduledDate = try date(day: 17, hour: 9)
         let logRepository = MockDoseLogRepository(
@@ -76,8 +76,34 @@ struct RecordDoseForMedicationUseCaseTests {
             now: try date(day: 17, hour: 10)
         )
         
-        #expect(dose.log == nil)
-        #expect(await logRepository.logs.isEmpty)
+        #expect(dose.log?.status == .taken)
+        #expect(await logRepository.logs.count == 1)
+    }
+    
+    @Test func replacesTheLogWhenTheAnswerChanges() async throws {
+        let medication = try makeMedication()
+        let scheduledDate = try date(day: 17, hour: 9)
+        let logRepository = MockDoseLogRepository(
+            logs: [
+                DoseLog(
+                    medicationId: medication.id,
+                    scheduledDate: scheduledDate,
+                    status: .skipped,
+                    recordedAt: scheduledDate
+                )
+            ]
+        )
+        let sut = makeSUT(medications: [medication], logRepository: logRepository)
+        
+        let dose = try await sut.execute(
+            medicationId: medication.id,
+            scheduledDate: scheduledDate,
+            status: .taken,
+            now: try date(day: 17, hour: 10)
+        )
+        
+        #expect(dose.log?.status == .taken)
+        #expect(await logRepository.logs.map(\.status) == [.taken])
     }
     
     @Test func failsForUnknownMedication() async throws {

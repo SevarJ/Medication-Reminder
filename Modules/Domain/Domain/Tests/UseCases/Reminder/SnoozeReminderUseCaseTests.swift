@@ -19,9 +19,12 @@ struct SnoozeReminderUseCaseTests {
             scheduler: scheduler
         )
         
-        try await sut.execute(medicationId: medication.id)
+        let scheduledDate = Date(timeIntervalSince1970: 1_790_000_000)
+        
+        try await sut.execute(medicationId: medication.id, scheduledDate: scheduledDate)
         
         #expect(await scheduler.snoozedIds == [medication.id])
+        #expect(await scheduler.snoozedDoseDates == [scheduledDate])
     }
     
     @Test func failsForUnknownMedication() async throws {
@@ -32,7 +35,7 @@ struct SnoozeReminderUseCaseTests {
         )
         
         await #expect(throws: DomainError.medicationNotFound) {
-            try await sut.execute(medicationId: UUID())
+            try await sut.execute(medicationId: UUID(), scheduledDate: .now)
         }
         
         #expect(await scheduler.snoozedIds.isEmpty)
