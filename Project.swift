@@ -51,6 +51,7 @@ let paywall = Feature.feature(
 let onboarding = Feature.feature(
     "Onboarding",
     dependencies: [domain, appLocalization, appPreferences, dependencyInjection, designSystem],
+    interfaces: [paywall],
     testDependencies: [domain, domain.testing, appPreferences]
 )
 

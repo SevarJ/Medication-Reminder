@@ -14,15 +14,17 @@ import Testing
 
 @MainActor
 struct OnboardingFlowTests {
+    private let defaults: UserDefaults
     private let preferences: AppPreferences
     private let analytics = MockAnalyticsTracker()
     
     init() throws {
         let suiteName = "OnboardingFlowTests.\(UUID().uuidString)"
-        preferences = AppPreferences(defaults: try #require(UserDefaults(suiteName: suiteName)))
+        defaults = try #require(UserDefaults(suiteName: suiteName))
+        preferences = AppPreferences(defaults: defaults)
     }
     
-    private func makeSUT(access: NotificationAccess = .notDetermined) -> OnboardingFlow {
+    private func makeSUT(access: NotificationAccess = .notDetermined, entitlement: Entitlement = .free) -> OnboardingFlow {
         OnboardingFlow(
             preferences: preferences,
             priming: NotificationPrimingModel(
@@ -31,6 +33,7 @@ struct OnboardingFlowTests {
                 analytics: analytics,
                 preferences: preferences
             ),
+            entitlements: MockEntitlementProvider(entitlement: entitlement),
             analytics: analytics
         )
     }
@@ -66,5 +69,43 @@ struct OnboardingFlowTests {
         preferences.markNotificationPrimingShown()
         
         #expect(await sut.pendingRoute(at: .afterSignIn) == nil)
+    }
+    
+    @Test func offersProAfterNotificationsWhenEnabled() async {
+        let sut = makeSUT()
+        
+        enablePaywall()
+        preferences.markNotificationPrimingShown()
+        
+        #expect(await sut.pendingRoute(at: .afterSignIn) == .paywall)
+    }
+    
+    @Test func asksForNotificationsBeforeOfferingPro() async {
+        enablePaywall()
+        
+        #expect(await makeSUT().pendingRoute(at: .afterSignIn) == .notificationPriming)
+    }
+    
+    @Test func offersProOnlyOnce() async {
+        let sut = makeSUT()
+        
+        enablePaywall()
+        preferences.markNotificationPrimingShown()
+        preferences.markPaywallShown()
+        
+        #expect(await sut.pendingRoute(at: .afterSignIn) == nil)
+    }
+    
+    @Test func skipsProOfferForSubscribers() async {
+        let sut = makeSUT(entitlement: .pro)
+        
+        enablePaywall()
+        preferences.markNotificationPrimingShown()
+        
+        #expect(await sut.pendingRoute(at: .afterSignIn) == nil)
+    }
+    
+    private func enablePaywall() {
+        defaults.set(true, forKey: PreferenceKey.paywallEnabled)
     }
 }

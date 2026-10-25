@@ -8,6 +8,7 @@
 public enum OnboardingRoute: Hashable, Identifiable, Sendable {
     case introduction
     case notificationPriming
+    case paywall
 
     public var id: Self { self }
 }

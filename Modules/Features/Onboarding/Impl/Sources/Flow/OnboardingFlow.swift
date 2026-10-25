@@ -13,11 +13,18 @@ import Onboarding
 struct OnboardingFlow {
     private let preferences: AppPreferences
     private let priming: NotificationPrimingModel
+    private let entitlements: any EntitlementProviding
     private let analytics: any AnalyticsTracking
 
-    init(preferences: AppPreferences, priming: NotificationPrimingModel, analytics: any AnalyticsTracking) {
+    init(
+        preferences: AppPreferences,
+        priming: NotificationPrimingModel,
+        entitlements: any EntitlementProviding,
+        analytics: any AnalyticsTracking
+    ) {
         self.preferences = preferences
         self.priming = priming
+        self.entitlements = entitlements
         self.analytics = analytics
     }
 
@@ -32,6 +39,10 @@ struct OnboardingFlow {
                 return .notificationPriming
             }
 
+            if await shouldOfferPro() {
+                return .paywall
+            }
+
             return nil
         }
     }
@@ -39,5 +50,11 @@ struct OnboardingFlow {
     func completeIntroduction() async {
         preferences.markIntroductionSeen()
         await analytics.track(.introductionCompleted)
+    }
+
+    private func shouldOfferPro() async -> Bool {
+        guard preferences.isPaywallEnabled, !preferences.hasShownPaywall else { return false }
+
+        return await entitlements.currentEntitlement() == .free
     }
 }

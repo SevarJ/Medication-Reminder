@@ -8,6 +8,7 @@ public struct Feature: Sendable {
     public static func feature(
         _ name: String,
         dependencies: [Module] = [],
+        interfaces: [Feature] = [],
         testDependencies: [Module] = []
     ) -> Feature {
         for module in dependencies where module.layer == .data {
@@ -16,7 +17,7 @@ public struct Feature: Sendable {
 
         return Feature(
             name: name,
-            dependencies: [.target(name: name)] + dependencies.map(\.dependency),
+            dependencies: [.target(name: name)] + dependencies.map(\.dependency) + interfaces.map(\.interface),
             testDependencies: testDependencies.map(\.dependency)
         )
     }
