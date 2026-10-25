@@ -49,7 +49,7 @@ let onboarding = Feature.feature(
 let dashboard = Feature.feature(
     "Dashboard",
     dependencies: [domain, appLocalization, appPreferences, appFormatters, dependencyInjection, designSystem],
-    testDependencies: [domain, domain.testing]
+    testDependencies: [domain, domain.testing, appFormatters]
 )
 
 let settings = Feature.feature(
