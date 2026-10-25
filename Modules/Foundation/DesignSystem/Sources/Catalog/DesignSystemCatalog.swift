@@ -19,6 +19,8 @@ struct DesignSystemCatalog: View {
         ("separator", Color.theme.separator),
         ("accentText", Color.theme.accentText),
         ("hero", Color.theme.hero),
+        ("success", Color.theme.success),
+        ("successTint", Color.theme.successTint),
         ("warning", Color.theme.warning),
         ("info", Color.theme.info)
     ]

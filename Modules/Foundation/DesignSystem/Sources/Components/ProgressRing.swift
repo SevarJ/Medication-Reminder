@@ -16,7 +16,7 @@ public struct ProgressRing: View {
     public init(
         progress: Double,
         lineWidth: CGFloat = 8,
-        tint: Color = Color.theme.accent,
+        tint: Color = Color.theme.success,
         track: Color = Color.theme.fill
     ) {
         self.progress = progress

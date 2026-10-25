@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-/// The one main action on a screen: a full-width solid capsule in the deep brand green.
+/// The one main action on a screen: a full-width solid capsule in brand violet.
 public struct PrimaryActionButtonStyle: ButtonStyle {
     public init() {}
 
@@ -20,7 +20,7 @@ public struct PrimaryActionButtonStyle: ButtonStyle {
     }
 }
 
-/// Same shape as the primary action, for a button that sits on a green hero card.
+/// Same shape as the primary action, for a button that sits on a hero card.
 public struct HeroActionButtonStyle: ButtonStyle {
     public init() {}
 

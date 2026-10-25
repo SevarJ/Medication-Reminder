@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-/// A large rounded-square symbol in the deep brand green, used on welcome and permission screens.
+/// A large rounded-square symbol in solid brand violet, used on welcome and permission screens.
 public struct HeroGlyph: View {
     private let systemName: String
 
@@ -23,11 +23,7 @@ public struct HeroGlyph: View {
             .foregroundStyle(Color.theme.onHero)
             .frame(width: size, height: size)
             .background(
-                LinearGradient(
-                    colors: [Color.theme.hero, Color.theme.heroDeep],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                ),
+                Color.theme.hero,
                 in: RoundedRectangle(cornerRadius: size * 0.28, style: .continuous)
             )
             .shadow(color: Color.theme.hero.opacity(0.28), radius: 24, y: 12)

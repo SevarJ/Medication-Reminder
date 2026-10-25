@@ -8,14 +8,30 @@
 import UIKit
 
 enum Palette {
-    // Brand green. `tealDeep` carries white text at AA contrast, `tealText` is the readable form on light surfaces.
-    static let teal = UIColor(hex: 0x12A594)
-    static let tealBright = UIColor(hex: 0x2ABFAD)
-    static let tealDeep = UIColor(hex: 0x0B6E63)
-    static let tealDeeper = UIColor(hex: 0x084D46)
-    static let tealText = UIColor(hex: 0x0B7F72)
-    static let tealTintLight = UIColor(hex: 0xE3F4F1)
-    static let tealTintDark = UIColor(hex: 0x103832)
+    // Brand violet, taken from the app icon. `violetDeep` carries white text at AA contrast.
+    static let violet = UIColor(hex: 0x7C3AED)
+    static let violetBright = UIColor(hex: 0xA78BFA)
+    static let violetDeep = UIColor(hex: 0x5B21B6)
+    static let violetTextDark = UIColor(hex: 0xC4B5FD)
+    static let violetTintLight = UIColor(hex: 0xF3EEFF)
+    static let violetTintDark = UIColor(hex: 0x2A1D4D)
+
+    // Medication colours, so each medication is easy to tell apart. `Deep` stops carry white text at AA contrast.
+    static let blue = UIColor(hex: 0x2563EB)
+    static let blueBright = UIColor(hex: 0x60A5FA)
+    static let blueDeep = UIColor(hex: 0x1D4ED8)
+    static let pink = UIColor(hex: 0xDB2777)
+    static let pinkBright = UIColor(hex: 0xF472B6)
+    static let pinkDeep = UIColor(hex: 0xBE185D)
+    static let cyan = UIColor(hex: 0x0891B2)
+    static let cyanBright = UIColor(hex: 0x22D3EE)
+    static let cyanDeep = UIColor(hex: 0x0E7490)
+    static let orange = UIColor(hex: 0xEA580C)
+    static let orangeBright = UIColor(hex: 0xFB923C)
+    static let orangeDeep = UIColor(hex: 0xC2410C)
+    static let indigo = UIColor(hex: 0x4F46E5)
+    static let indigoBright = UIColor(hex: 0x818CF8)
+    static let indigoDeep = UIColor(hex: 0x4338CA)
 
     // Neutrals
     static let canvasLight = UIColor(hex: 0xF4F6F5)
@@ -27,7 +43,12 @@ enum Palette {
     static let fillLight = UIColor(hex: 0x767680, alpha: 0.10)
     static let fillDark = UIColor(hex: 0x767680, alpha: 0.24)
 
-    // Supporting colours, each with a single meaning: amber needs attention, blue is calm information, red is destructive.
+    // Supporting colours, each with a single meaning: emerald from the app icon is taken, amber needs attention, blue is calm information, red is destructive.
+    static let green = UIColor(hex: 0x059669)
+    static let greenText = UIColor(hex: 0x047857)
+    static let greenTextDark = UIColor(hex: 0x34D399)
+    static let greenTintLight = UIColor(hex: 0xE3F8EF)
+    static let greenTintDark = UIColor(hex: 0x0F3326)
     static let amberText = UIColor(hex: 0x9A5B00)
     static let amberTextDark = UIColor(hex: 0xFFB84D)
     static let amberTintLight = UIColor(hex: 0xFFF1D6)
