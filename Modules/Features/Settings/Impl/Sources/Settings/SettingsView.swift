@@ -72,6 +72,7 @@ struct SettingsView: View {
                 pickerRow(
                     title: L10n.Settings.language,
                     systemName: "globe",
+                    tint: .blue,
                     selection: languageSelection,
                     options: AppLanguage.allCases,
                     label: \.displayName
@@ -82,6 +83,7 @@ struct SettingsView: View {
                 pickerRow(
                     title: L10n.Settings.appearance,
                     systemName: "circle.lefthalf.filled",
+                    tint: .gray,
                     selection: $appearance,
                     options: AppAppearance.allCases,
                     label: \.displayName
@@ -93,6 +95,7 @@ struct SettingsView: View {
     private func pickerRow<Option: Hashable & Identifiable>(
         title: String,
         systemName: String,
+        tint: Color,
         selection: Binding<Option>,
         options: [Option],
         label: KeyPath<Option, String>
@@ -100,8 +103,8 @@ struct SettingsView: View {
         AdaptiveStack {
             IconTile(
                 systemName: systemName,
-                foreground: Color.theme.accentText,
-                background: Color.theme.accentTint
+                foreground: .white,
+                background: tint
             )
             
             Text(title)
@@ -144,8 +147,8 @@ struct SettingsView: View {
                     AdaptiveStack {
                         IconTile(
                             systemName: "bell.fill",
-                            foreground: Color.theme.accentText,
-                            background: Color.theme.accentTint
+                            foreground: .white,
+                            background: .red
                         )
                         
                         Text(L10n.Settings.reminders)
@@ -174,6 +177,7 @@ struct SettingsView: View {
                 pickerRow(
                     title: L10n.Settings.snooze,
                     systemName: "clock.arrow.circlepath",
+                    tint: .orange,
                     selection: $snoozeDuration,
                     options: SnoozeDuration.allCases,
                     label: \.displayName
@@ -259,8 +263,8 @@ struct SettingsView: View {
                         AdaptiveStack {
                             IconTile(
                                 systemName: "hand.raised.fill",
-                                foreground: Color.theme.accentText,
-                                background: Color.theme.accentTint
+                                foreground: .white,
+                                background: .blue
                             )
                             
                             Text(L10n.Settings.privacyPolicy)
@@ -286,8 +290,8 @@ struct SettingsView: View {
                 AdaptiveStack {
                     IconTile(
                         systemName: "info.circle.fill",
-                        foreground: Color.theme.accentText,
-                        background: Color.theme.accentTint
+                        foreground: .white,
+                        background: .gray
                     )
                     
                     Text(L10n.Settings.version)
