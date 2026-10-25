@@ -52,7 +52,8 @@ struct TodayViewModelTests {
         let doseLogRepository = logRepository ?? MockDoseLogRepository(logs: logs)
         let saveMedication = SaveMedicationUseCase(
             repository: medicationRepository,
-            scheduler: MockReminderScheduler()
+            scheduler: MockReminderScheduler(),
+            analytics: MockAnalyticsTracker()
         )
         
         return TodayViewModel(
@@ -71,6 +72,7 @@ struct TodayViewModelTests {
                 doseLogRepository: doseLogRepository,
                 medicationRepository: medicationRepository,
                 scheduler: MockReminderScheduler(),
+                analytics: MockAnalyticsTracker(),
                 calendar: calendar
             ),
             saveMedication: saveMedication,
@@ -83,7 +85,8 @@ struct TodayViewModelTests {
                     deleteMedication: DeleteMedicationUseCase(
                         repository: medicationRepository,
                         scheduler: MockReminderScheduler(),
-                        doseLogRepository: doseLogRepository
+                        doseLogRepository: doseLogRepository,
+                        analytics: MockAnalyticsTracker()
                     ),
                     toggleMedicationActive: ToggleMedicationActiveUseCase(saveMedication: saveMedication)
                 )

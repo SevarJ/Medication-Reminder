@@ -103,7 +103,7 @@ struct MedicationDetailViewModelTests {
     ) -> MedicationDetailViewModel {
         let repository = repository ?? MockMedicationRepository(medications: [medication])
         let logRepository = MockDoseLogRepository(logs: logs)
-        let saveMedication = SaveMedicationUseCase(repository: repository, scheduler: scheduler)
+        let saveMedication = SaveMedicationUseCase(repository: repository, scheduler: scheduler, analytics: MockAnalyticsTracker())
         let now = now
         
         return MedicationDetailViewModel(
@@ -114,7 +114,8 @@ struct MedicationDetailViewModelTests {
             deleteMedication: DeleteMedicationUseCase(
                 repository: repository,
                 scheduler: scheduler,
-                doseLogRepository: logRepository
+                doseLogRepository: logRepository,
+                analytics: MockAnalyticsTracker()
             ),
             toggleMedicationActive: ToggleMedicationActiveUseCase(saveMedication: saveMedication),
             currentDate: { now }

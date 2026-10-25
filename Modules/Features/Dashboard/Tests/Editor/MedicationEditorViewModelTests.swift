@@ -477,7 +477,8 @@ struct MedicationEditorViewModelTests {
             medication: medication,
             saveMedication: SaveMedicationUseCase(
                 repository: repository,
-                scheduler: scheduler
+                scheduler: scheduler,
+                analytics: MockAnalyticsTracker()
             )
         )
     }

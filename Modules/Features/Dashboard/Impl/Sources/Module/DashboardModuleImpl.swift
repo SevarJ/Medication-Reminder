@@ -18,6 +18,7 @@ struct DashboardModuleImpl: DashboardModule {
     private let remoteDoseLogs: any DoseLogRemoteStore
     private let scheduler: any ReminderScheduling
     private let authorizer: any NotificationAuthorizing
+    private let analytics: any AnalyticsTracking
     private let preferences: AppPreferences
 
     init(
@@ -26,6 +27,7 @@ struct DashboardModuleImpl: DashboardModule {
         remoteDoseLogs: any DoseLogRemoteStore = resolve(),
         scheduler: any ReminderScheduling = resolve(),
         authorizer: any NotificationAuthorizing = resolve(),
+        analytics: any AnalyticsTracking = resolve(),
         preferences: AppPreferences = AppPreferences()
     ) {
         self.medications = medications
@@ -33,6 +35,7 @@ struct DashboardModuleImpl: DashboardModule {
         self.remoteDoseLogs = remoteDoseLogs
         self.scheduler = scheduler
         self.authorizer = authorizer
+        self.analytics = analytics
         self.preferences = preferences
     }
 
@@ -76,7 +79,8 @@ struct DashboardModuleImpl: DashboardModule {
                 deleteMedication: DeleteMedicationUseCase(
                     repository: medications,
                     scheduler: scheduler,
-                    doseLogRepository: doseLogs
+                    doseLogRepository: doseLogs,
+                    analytics: analytics
                 ),
                 toggleMedicationActive: ToggleMedicationActiveUseCase(saveMedication: saveMedication),
                 syncReminder: SyncReminderUseCase(repository: medications, scheduler: scheduler),
@@ -95,7 +99,7 @@ struct DashboardModuleImpl: DashboardModule {
                 scheduledDate: scheduledDate,
                 loadDose: LoadScheduledDoseUseCase(medicationRepository: medications, doseLogRepository: doseLogs),
                 recordDose: recordDose,
-                snoozeReminder: SnoozeReminderUseCase(repository: medications, scheduler: scheduler),
+                snoozeReminder: SnoozeReminderUseCase(repository: medications, scheduler: scheduler, analytics: analytics),
                 snoozeDelay: SnoozeDuration(minutes: preferences.snoozeMinutes).interval
             )
         )
@@ -111,17 +115,18 @@ struct DashboardModuleImpl: DashboardModule {
             deleteMedication: DeleteMedicationUseCase(
                 repository: medications,
                 scheduler: scheduler,
-                doseLogRepository: doseLogs
+                doseLogRepository: doseLogs,
+                analytics: analytics
             ),
             toggleMedicationActive: ToggleMedicationActiveUseCase(saveMedication: saveMedication)
         )
     }
 
     private var saveMedication: SaveMedicationUseCase {
-        SaveMedicationUseCase(repository: medications, scheduler: scheduler)
+        SaveMedicationUseCase(repository: medications, scheduler: scheduler, analytics: analytics)
     }
 
     private var recordDose: RecordDoseUseCase {
-        RecordDoseUseCase(doseLogRepository: doseLogs, medicationRepository: medications, scheduler: scheduler)
+        RecordDoseUseCase(doseLogRepository: doseLogs, medicationRepository: medications, scheduler: scheduler, analytics: analytics)
     }
 }

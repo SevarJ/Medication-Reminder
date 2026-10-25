@@ -242,7 +242,8 @@ struct MedicationListViewModelTests {
     ) -> MedicationListViewModel {
         let saveMedication = SaveMedicationUseCase(
             repository: repository,
-            scheduler: scheduler
+            scheduler: scheduler,
+            analytics: MockAnalyticsTracker()
         )
         
         return MedicationListViewModel(
@@ -251,7 +252,8 @@ struct MedicationListViewModelTests {
             deleteMedication: DeleteMedicationUseCase(
                 repository: repository,
                 scheduler: scheduler,
-                doseLogRepository: logRepository
+                doseLogRepository: logRepository,
+                analytics: MockAnalyticsTracker()
             ),
             toggleMedicationActive: ToggleMedicationActiveUseCase(saveMedication: saveMedication),
             syncReminder: SyncReminderUseCase(
