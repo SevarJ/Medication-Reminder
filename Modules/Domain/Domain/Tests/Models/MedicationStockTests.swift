@@ -47,6 +47,20 @@ struct MedicationStockTests {
         #expect(medication.daysOfStockLeft == 3)
     }
     
+    @Test func stockTooLargeToCountGivesNoEstimate() throws {
+        let medication = try makeMedication(dosage: Dosage(amount: 1, unit: .tablet), stock: 1e22)
+        
+        #expect(medication.daysOfStockLeft == nil)
+        #expect(medication.lowStockAlertDate() == nil)
+    }
+    
+    @Test func veryLargeStockNeverAlerts() throws {
+        let medication = try makeMedication(dosage: Dosage(amount: 1, unit: .tablet), stock: 1e15)
+        
+        #expect(medication.daysOfStockLeft == 1_000_000_000_000_000)
+        #expect(medication.lowStockAlertDate() == nil)
+    }
+    
     @Test func emptyStockLastsNoDays() throws {
         #expect(try makeMedication(stock: 0).daysOfStockLeft == 0)
     }

@@ -86,7 +86,7 @@ public struct Medication: Identifiable, Equatable, Hashable, Sendable {
         
         guard usedPerDay > 0 else { return nil }
         
-        return Int((stock / usedPerDay).rounded(.down))
+        return Int(exactly: (stock / usedPerDay).rounded(.down))
     }
 
     public static let lowStockDays = 3
