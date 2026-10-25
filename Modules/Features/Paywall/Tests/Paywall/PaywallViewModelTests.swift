@@ -14,14 +14,33 @@ import Testing
 struct PaywallViewModelTests {
     private let analytics = MockAnalyticsTracker()
 
-    private func makeSUT(entitlements: MockEntitlementProvider = MockEntitlementProvider()) -> PaywallViewModel {
-        PaywallViewModel(entitlements: entitlements, analytics: analytics)
+    private func makeSUT(
+        entitlements: MockEntitlementProvider = MockEntitlementProvider(),
+        account: UserAccount? = makeUserAccount()
+    ) -> PaywallViewModel {
+        PaywallViewModel(entitlements: entitlements, authenticator: MockAccountAuthenticator(account: account), analytics: analytics)
     }
 
     @Test func tracksBeingShown() async {
         await makeSUT().appear()
 
         #expect(await analytics.events == [.paywallShown])
+    }
+
+    @Test func tiesPurchasesToTheSignedInAccount() async {
+        let sut = makeSUT(account: makeUserAccount(id: "uid-42"))
+
+        await sut.appear()
+
+        #expect(sut.accountToken == PurchaseAccountToken.make(for: "uid-42"))
+    }
+
+    @Test func leavesPurchasesUntiedWithoutAnAccount() async {
+        let sut = makeSUT(account: nil)
+
+        await sut.appear()
+
+        #expect(sut.accountToken == nil)
     }
 
     @Test func finishesAfterPurchase() async {

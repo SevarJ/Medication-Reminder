@@ -6,6 +6,7 @@
 //
 
 import Domain
+import Foundation
 import Observation
 
 @MainActor
@@ -19,17 +20,21 @@ final class PaywallViewModel {
 
     private(set) var isRestoring = false
     private(set) var isFinished = false
+    private(set) var accountToken: UUID?
     var notice: Notice?
 
     private let entitlements: any EntitlementProviding
+    private let authenticator: any AccountAuthenticating
     private let analytics: any AnalyticsTracking
 
-    init(entitlements: any EntitlementProviding, analytics: any AnalyticsTracking) {
+    init(entitlements: any EntitlementProviding, authenticator: any AccountAuthenticating, analytics: any AnalyticsTracking) {
         self.entitlements = entitlements
+        self.authenticator = authenticator
         self.analytics = analytics
     }
 
     func appear() async {
+        accountToken = await authenticator.currentAccount().map { PurchaseAccountToken.make(for: $0.id) }
         await analytics.track(.paywallShown)
     }
 

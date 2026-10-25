@@ -31,10 +31,15 @@ struct PaywallView: View {
         .storeButton(.visible, for: .policies)
         .subscriptionStorePolicyDestination(url: LegalLinks.termsOfUse, for: .termsOfService)
         .subscriptionStorePolicyDestination(url: LegalLinks.privacyPolicy, for: .privacyPolicy)
+        .subscriptionStorePolicyForegroundStyle(Color.theme.accentText, Color.theme.textSecondary)
+        .inAppPurchaseOptions { [accountToken = viewModel.accountToken] _ in
+            accountToken.map { [.appAccountToken($0)] } ?? []
+        }
         .onInAppPurchaseCompletion { _, result in
             await viewModel.finishPurchase(await StorePurchase.outcome(of: result))
         }
         .containerBackground(Color.theme.background, for: .subscriptionStoreFullHeight)
+        .containerBackground(Color.theme.background, for: .subscriptionStore)
         .tint(Color.theme.hero)
         .safeAreaInset(edge: .top) {
             topBar

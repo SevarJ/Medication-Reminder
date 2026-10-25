@@ -7,6 +7,7 @@
 
 public enum PaywallRoute: Hashable, Identifiable, Sendable {
     case onboarding
+    case settings
 
     public var id: Self { self }
 }
