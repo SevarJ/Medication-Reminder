@@ -42,6 +42,12 @@ let account = Feature.feature(
     testDependencies: [domain, domain.testing]
 )
 
+let paywall = Feature.feature(
+    "Paywall",
+    dependencies: [domain, appLocalization, dependencyInjection, designSystem],
+    testDependencies: [domain, domain.testing]
+)
+
 let onboarding = Feature.feature(
     "Onboarding",
     dependencies: [domain, appLocalization, appPreferences, dependencyInjection, designSystem],
@@ -61,7 +67,7 @@ let settings = Feature.feature(
 )
 
 let modules = [appLocalization, appPreferences, dependencyInjection, designSystem, widgetSnapshot, domain, appFormatters, persistence, notificationsKit, firebaseKit, dataSync, widgetBridge, storeKitKit]
-let features = [account, onboarding, dashboard, settings]
+let features = [account, paywall, onboarding, dashboard, settings]
 
 let project = Project(
     name: AppConfig.name,
