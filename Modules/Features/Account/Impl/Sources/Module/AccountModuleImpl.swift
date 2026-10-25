@@ -12,16 +12,18 @@ import SwiftUI
 
 struct AccountModuleImpl: AccountModule {
     private let authenticator: any AccountAuthenticating
+    private let analytics: any AnalyticsTracking
 
-    init(authenticator: any AccountAuthenticating = resolve()) {
+    init(authenticator: any AccountAuthenticating = resolve(), analytics: any AnalyticsTracking = resolve()) {
         self.authenticator = authenticator
+        self.analytics = analytics
     }
 
     @MainActor
     func makeScreen(_ route: AccountRoute) -> some View {
         switch route {
         case .signIn:
-            SignInView(viewModel: SignInViewModel(authenticator: authenticator))
+            SignInView(viewModel: SignInViewModel(authenticator: authenticator, analytics: analytics))
         }
     }
 }

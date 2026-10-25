@@ -14,30 +14,36 @@ import Testing
 struct SignInViewModelTests {
     @Test func signingInAsksTheAuthenticator() async {
         let authenticator = MockAccountAuthenticator()
-        let sut = SignInViewModel(authenticator: authenticator)
+        let analytics = MockAnalyticsTracker()
+        let sut = SignInViewModel(authenticator: authenticator, analytics: analytics)
 
         await sut.signIn()
 
         #expect(await authenticator.signInCount == 1)
+        #expect(await analytics.events == [.signedIn])
         #expect(await authenticator.currentAccount() == makeUserAccount())
         #expect(sut.errorMessage == nil)
         #expect(sut.isSigningIn == false)
     }
 
     @Test func cancellingShowsNoError() async {
+        let analytics = MockAnalyticsTracker()
         let sut = SignInViewModel(
-            authenticator: MockAccountAuthenticator(signInResult: .failure(AccountError.signInCancelled))
+            authenticator: MockAccountAuthenticator(signInResult: .failure(AccountError.signInCancelled)),
+            analytics: analytics
         )
 
         await sut.signIn()
 
+        #expect(await analytics.events.isEmpty)
         #expect(sut.errorMessage == nil)
         #expect(sut.isSigningIn == false)
     }
 
     @Test func failingShowsAnError() async {
         let sut = SignInViewModel(
-            authenticator: MockAccountAuthenticator(signInResult: .failure(AccountError.signInFailed))
+            authenticator: MockAccountAuthenticator(signInResult: .failure(AccountError.signInFailed)),
+            analytics: MockAnalyticsTracker()
         )
 
         await sut.signIn()

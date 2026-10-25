@@ -16,9 +16,11 @@ final class SignInViewModel {
     var errorMessage: String?
 
     private let authenticator: any AccountAuthenticating
+    private let analytics: any AnalyticsTracking
 
-    init(authenticator: any AccountAuthenticating) {
+    init(authenticator: any AccountAuthenticating, analytics: any AnalyticsTracking) {
         self.authenticator = authenticator
+        self.analytics = analytics
     }
 
     func signIn() async {
@@ -29,6 +31,7 @@ final class SignInViewModel {
 
         do {
             _ = try await authenticator.signInWithGoogle()
+            await analytics.track(.signedIn)
         }
         catch AccountError.signInCancelled {
             return
