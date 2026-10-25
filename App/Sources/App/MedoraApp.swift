@@ -39,7 +39,8 @@ struct MedoraApp: App {
         let upcomingDoses = PublishUpcomingDosesUseCase(
             medicationRepository: medications,
             doseLogRepository: doseLogs,
-            publisher: resolve()
+            publisher: resolve(),
+            scheduler: scheduler
         )
         
         self.router = router
@@ -68,6 +69,7 @@ struct MedoraApp: App {
                 recordDose: RecordDoseUseCase(doseLogRepository: doseLogs, medicationRepository: medications, scheduler: scheduler)
             ),
             snoozeReminder: SnoozeReminderUseCase(repository: medications, scheduler: scheduler),
+            loadDose: LoadScheduledDoseUseCase(medicationRepository: medications, doseLogRepository: doseLogs),
             upcomingDoses: upcomingDoses,
             preferences: AppPreferences(),
             router: router

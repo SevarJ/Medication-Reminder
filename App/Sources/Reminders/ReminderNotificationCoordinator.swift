@@ -13,6 +13,7 @@ import UserNotifications
 final class ReminderNotificationCoordinator: NSObject, UNUserNotificationCenterDelegate {
     private let recordDose: RecordDoseForMedicationUseCase
     private let snoozeReminder: SnoozeReminderUseCase
+    private let loadDose: LoadScheduledDoseUseCase
     private let upcomingDoses: PublishUpcomingDosesUseCase
     private let preferences: AppPreferences
     private let router: ReminderRouter
@@ -20,12 +21,14 @@ final class ReminderNotificationCoordinator: NSObject, UNUserNotificationCenterD
     init(
         recordDose: RecordDoseForMedicationUseCase,
         snoozeReminder: SnoozeReminderUseCase,
+        loadDose: LoadScheduledDoseUseCase,
         upcomingDoses: PublishUpcomingDosesUseCase,
         preferences: AppPreferences,
         router: ReminderRouter
     ) {
         self.recordDose = recordDose
         self.snoozeReminder = snoozeReminder
+        self.loadDose = loadDose
         self.upcomingDoses = upcomingDoses
         self.preferences = preferences
         self.router = router
@@ -45,7 +48,13 @@ final class ReminderNotificationCoordinator: NSObject, UNUserNotificationCenterD
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification
     ) async -> UNNotificationPresentationOptions {
-        [.banner, .sound, .list]
+        if let followUp = ReminderResponseParser.followUpDose(of: notification),
+           let dose = try? await loadDose.execute(medicationId: followUp.medicationId, scheduledDate: followUp.scheduledDate),
+           dose.log != nil {
+            return []
+        }
+        
+        return [.banner, .sound, .list]
     }
     
     func userNotificationCenter(
