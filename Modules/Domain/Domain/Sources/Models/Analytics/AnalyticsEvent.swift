@@ -13,4 +13,7 @@ public enum AnalyticsEvent: Sendable, Equatable {
     case introductionCompleted
     case signedIn
     case notificationPromptAnswered(NotificationPromptAnswer)
+    case paywallShown
+    case purchaseFinished(PurchaseOutcome)
+    case purchasesRestored(RestoreOutcome)
 }
