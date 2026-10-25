@@ -89,11 +89,12 @@
     <li><strong>What you enter in the app.</strong> Medication names, dosage, schedules and reminder times, start and end dates, notes, remaining stock, an optional photo of the package, and a record of each dose you mark as taken or skipped.</li>
     <li><strong>Technical data.</strong> Google's Firebase services handle technical data such as your IP address and device information to sign you in and sync your data.</li>
     <li><strong>Crash reports and performance data.</strong> To find crashes and slow parts of the app, Firebase Crashlytics and Firebase Performance Monitoring send technical reports: device model, free memory and disk space, iOS and app version, where in the code a crash happened, how long app launch, screens and network requests take, the web addresses the app connects to, and a random installation identifier. Crash reports also carry your account identifier, so we can find the report if you contact us about a problem. They do not contain your name, email address or anything you enter in the app.</li>
+    <li><strong>Usage data.</strong> Firebase Analytics records how the app is used: when it is opened and for how long, country, language, device model, iOS and app version, a random app instance identifier, your account identifier, and a few in-app actions such as adding or deleting a medication, marking a dose as taken or skipped, and snoozing a reminder. These records never contain medication names, dosage, notes, photos or anything else you enter in the app.</li>
   </ul>
-  <p>Medora has no analytics, no advertising and no tracking, and it does not read your health data from other apps.</p>
+  <p>Medora has no advertising and no tracking: it does not collect the advertising identifier, does not link your data with data from other companies' apps or websites, and does not read your health data from other apps.</p>
 
   <h2>How we use it</h2>
-  <p>Only to run the app: to keep your medications and history in sync across your devices, to schedule your reminders, to show your progress and to find and fix crashes and slow screens. We do not sell your data, use it for advertising or share it with anyone except the service provider listed below.</p>
+  <p>Only to run the app: to keep your medications and history in sync across your devices, to schedule your reminders, to show your progress, to find and fix crashes and slow screens, and to understand which features people use so we can improve them. We do not sell your data, use it for advertising or share it with anyone except the service provider listed below.</p>
 
   <h2>Where it is stored</h2>
   <ul>
@@ -106,8 +107,11 @@
   <h2>Crash reports and performance</h2>
   <p>Medora uses Firebase Crashlytics and Firebase Performance Monitoring to find and fix crashes and slow screens. This data is used only to make the app more stable and faster, never for advertising or to build a profile of you. Google processes it on servers in the United States. Crash reports are kept for 90 days.</p>
 
+  <h2>Usage data</h2>
+  <p>Medora uses Firebase Analytics to count active users and see which features are used. The data is used only to improve the app, never for advertising, and it is not shared with Google's advertising services. Google processes it on servers in the United States. Detailed usage records are kept for 2 months; after that only aggregated statistics remain.</p>
+
   <h2>Service provider</h2>
-  <p>Google LLC provides sign-in, storage, crash reporting and performance monitoring through Firebase and Google Sign-In. See the <a href="https://firebase.google.com/support/privacy">Firebase privacy information</a> and the <a href="https://policies.google.com/privacy">Google Privacy Policy</a>.</p>
+  <p>Google LLC provides sign-in, storage, usage analytics, crash reporting and performance monitoring through Firebase and Google Sign-In. See the <a href="https://firebase.google.com/support/privacy">Firebase privacy information</a> and the <a href="https://policies.google.com/privacy">Google Privacy Policy</a>.</p>
 
   <h2>Security</h2>
   <p>Data is encrypted in transit. Database rules let only your signed-in account read or change your data.</p>
@@ -140,11 +144,12 @@
     <li><strong>Tətbiqə daxil etdikləriniz.</strong> Dərman adları, doza, cədvəl və xatırlatma vaxtları, başlama və bitmə tarixləri, qeydlər, qalan stok, istəyə görə qutunun şəkli və qəbul etdiyiniz və ya ötürdüyünüz hər dozanın qeydi.</li>
     <li><strong>Texniki məlumatlar.</strong> Google-un Firebase xidmətləri sizi daxil etmək və məlumatlarınızı sinxron saxlamaq üçün IP ünvanı və cihaz məlumatı kimi texniki məlumatları emal edir.</li>
     <li><strong>Çökmə hesabatları və performans məlumatları.</strong> Tətbiqdəki çökmələri və yavaş yerləri tapmaq üçün Firebase Crashlytics və Firebase Performance Monitoring texniki hesabatlar göndərir: cihaz modeli, boş yaddaş və disk sahəsi, iOS və tətbiq versiyası, çökmənin kodun harasında baş verdiyi, tətbiqin açılmasının, ekranların və şəbəkə sorğularının nə qədər çəkdiyi, tətbiqin qoşulduğu veb ünvanlar və təsadüfi quraşdırma identifikatoru. Çökmə hesabatlarına hesab identifikatorunuz da əlavə olunur ki, problemlə bağlı bizə yazsanız hesabatı tapa bilək. Onlarda adınız, e-poçt ünvanınız və tətbiqə daxil etdiyiniz heç nə olmur.</li>
+    <li><strong>İstifadə məlumatları.</strong> Firebase Analytics tətbiqin necə istifadə olunduğunu qeyd edir: nə vaxt və nə qədər açıldığı, ölkə, dil, cihaz modeli, iOS və tətbiq versiyası, təsadüfi tətbiq nüsxəsi identifikatoru, hesab identifikatorunuz və tətbiqdəki bir neçə hərəkət, məsələn dərman əlavə etmək və ya silmək, dozanı qəbul edilmiş və ya ötürülmüş kimi qeyd etmək və xatırlatmanı təxirə salmaq. Bu qeydlərdə heç vaxt dərman adları, doza, qeydlər, şəkillər və tətbiqə daxil etdiyiniz başqa heç nə olmur.</li>
   </ul>
-  <p>Medora-da analitika, reklam və izləmə yoxdur. Tətbiq digər tətbiqlərdən sağlamlıq məlumatlarınızı oxumur.</p>
+  <p>Medora-da reklam və izləmə yoxdur: tətbiq reklam identifikatorunu toplamır, məlumatlarınızı başqa şirkətlərin tətbiq və saytlarından olan məlumatlarla birləşdirmir və digər tətbiqlərdən sağlamlıq məlumatlarınızı oxumur.</p>
 
   <h2>Necə istifadə edirik</h2>
-  <p>Yalnız tətbiqin işləməsi üçün: dərmanlarınızı və tarixçənizi cihazlarınız arasında sinxron saxlamaq, xatırlatmaları planlaşdırmaq, irəliləyişinizi göstərmək və çökmələri və yavaş ekranları tapıb düzəltmək. Məlumatlarınızı satmırıq, reklam üçün istifadə etmirik və aşağıda göstərilən xidmət təminatçısından başqa heç kimlə paylaşmırıq.</p>
+  <p>Yalnız tətbiqin işləməsi üçün: dərmanlarınızı və tarixçənizi cihazlarınız arasında sinxron saxlamaq, xatırlatmaları planlaşdırmaq, irəliləyişinizi göstərmək, çökmələri və yavaş ekranları tapıb düzəltmək və hansı funksiyaların istifadə olunduğunu anlayıb onları yaxşılaşdırmaq. Məlumatlarınızı satmırıq, reklam üçün istifadə etmirik və aşağıda göstərilən xidmət təminatçısından başqa heç kimlə paylaşmırıq.</p>
 
   <h2>Harada saxlanılır</h2>
   <ul>
@@ -157,8 +162,11 @@
   <h2>Çökmə hesabatları və performans</h2>
   <p>Medora çökmələri və yavaş ekranları tapıb düzəltmək üçün Firebase Crashlytics və Firebase Performance Monitoring-dən istifadə edir. Bu məlumatlar yalnız tətbiqi daha sabit və sürətli etmək üçün istifadə olunur, heç vaxt reklam üçün və ya haqqınızda profil yaratmaq üçün yox. Onları Google ABŞ-dakı serverlərdə emal edir. Çökmə hesabatları 90 gün saxlanılır.</p>
 
+  <h2>İstifadə məlumatları</h2>
+  <p>Medora aktiv istifadəçiləri saymaq və hansı funksiyaların istifadə olunduğunu görmək üçün Firebase Analytics-dən istifadə edir. Bu məlumatlar yalnız tətbiqi yaxşılaşdırmaq üçün istifadə olunur, heç vaxt reklam üçün yox, və Google-un reklam xidmətləri ilə paylaşılmır. Onları Google ABŞ-dakı serverlərdə emal edir. Ətraflı istifadə qeydləri 2 ay saxlanılır, sonra yalnız ümumi statistika qalır.</p>
+
   <h2>Xidmət təminatçısı</h2>
-  <p>Google LLC giriş, saxlama, çökmə hesabatları və performans monitorinqi xidmətini Firebase və Google Sign-In vasitəsilə təmin edir. Ətraflı: <a href="https://firebase.google.com/support/privacy">Firebase məxfilik məlumatı</a> və <a href="https://policies.google.com/privacy">Google Məxfilik Siyasəti</a>.</p>
+  <p>Google LLC giriş, saxlama, istifadə analitikası, çökmə hesabatları və performans monitorinqi xidmətini Firebase və Google Sign-In vasitəsilə təmin edir. Ətraflı: <a href="https://firebase.google.com/support/privacy">Firebase məxfilik məlumatı</a> və <a href="https://policies.google.com/privacy">Google Məxfilik Siyasəti</a>.</p>
 
   <h2>Təhlükəsizlik</h2>
   <p>Məlumatlar ötürülərkən şifrələnir. Verilənlər bazasının qaydaları məlumatlarınızı yalnız sizin daxil olmuş hesabınızın oxumasına və dəyişməsinə icazə verir.</p>
@@ -191,11 +199,12 @@
     <li><strong>То, что вы вводите в приложении.</strong> Названия лекарств, дозировку, расписание и время напоминаний, даты начала и окончания, заметки, остаток, фото упаковки по желанию и отметку о каждом принятом или пропущенном приёме.</li>
     <li><strong>Технические данные.</strong> Сервисы Google Firebase обрабатывают технические данные, например IP-адрес и сведения об устройстве, чтобы выполнить вход и синхронизировать ваши данные.</li>
     <li><strong>Отчёты о сбоях и данные о производительности.</strong> Чтобы находить сбои и медленные места в приложении, Firebase Crashlytics и Firebase Performance Monitoring отправляют технические отчёты: модель устройства, свободную память и место на диске, версии iOS и приложения, место в коде, где произошёл сбой, время запуска приложения, открытия экранов и сетевых запросов, веб-адреса, к которым подключается приложение, и случайный идентификатор установки. К отчётам о сбоях также добавляется идентификатор вашего аккаунта, чтобы мы могли найти отчёт, если вы напишете нам о проблеме. В них нет вашего имени, адреса электронной почты и того, что вы вводите в приложении.</li>
+    <li><strong>Данные об использовании.</strong> Firebase Analytics записывает, как используется приложение: когда и как долго оно открыто, страну, язык, модель устройства, версии iOS и приложения, случайный идентификатор экземпляра приложения, идентификатор вашего аккаунта и несколько действий в приложении, например добавление или удаление лекарства, отметку приёма как принятого или пропущенного и откладывание напоминания. В этих записях никогда нет названий лекарств, дозировки, заметок, фото и ничего другого, что вы вводите в приложении.</li>
   </ul>
-  <p>В Medora нет аналитики, рекламы и отслеживания, и приложение не читает ваши медицинские данные из других приложений.</p>
+  <p>В Medora нет рекламы и отслеживания: приложение не собирает рекламный идентификатор, не объединяет ваши данные с данными из приложений и сайтов других компаний и не читает ваши медицинские данные из других приложений.</p>
 
   <h2>Как мы их используем</h2>
-  <p>Только для работы приложения: чтобы синхронизировать лекарства и историю между вашими устройствами, планировать напоминания, показывать ваш прогресс и находить и исправлять сбои и медленные экраны. Мы не продаём ваши данные, не используем их для рекламы и не передаём никому, кроме указанного ниже поставщика услуг.</p>
+  <p>Только для работы приложения: чтобы синхронизировать лекарства и историю между вашими устройствами, планировать напоминания, показывать ваш прогресс, находить и исправлять сбои и медленные экраны и понимать, какими функциями пользуются, чтобы их улучшать. Мы не продаём ваши данные, не используем их для рекламы и не передаём никому, кроме указанного ниже поставщика услуг.</p>
 
   <h2>Где хранятся данные</h2>
   <ul>
@@ -208,8 +217,11 @@
   <h2>Отчёты о сбоях и производительность</h2>
   <p>Medora использует Firebase Crashlytics и Firebase Performance Monitoring, чтобы находить и исправлять сбои и медленные экраны. Эти данные используются только для того, чтобы приложение работало стабильнее и быстрее, и никогда — для рекламы или составления вашего профиля. Их обрабатывает Google на серверах в США. Отчёты о сбоях хранятся 90 дней.</p>
 
+  <h2>Данные об использовании</h2>
+  <p>Medora использует Firebase Analytics, чтобы считать активных пользователей и видеть, какими функциями пользуются. Эти данные используются только для улучшения приложения, никогда — для рекламы, и не передаются рекламным сервисам Google. Их обрабатывает Google на серверах в США. Подробные записи об использовании хранятся 2 месяца, после этого остаётся только общая статистика.</p>
+
   <h2>Поставщик услуг</h2>
-  <p>Google LLC обеспечивает вход, хранение данных, отчёты о сбоях и мониторинг производительности через Firebase и Google Sign-In. Подробнее: <a href="https://firebase.google.com/support/privacy">информация о конфиденциальности Firebase</a> и <a href="https://policies.google.com/privacy">Политика конфиденциальности Google</a>.</p>
+  <p>Google LLC обеспечивает вход, хранение данных, аналитику использования, отчёты о сбоях и мониторинг производительности через Firebase и Google Sign-In. Подробнее: <a href="https://firebase.google.com/support/privacy">информация о конфиденциальности Firebase</a> и <a href="https://policies.google.com/privacy">Политика конфиденциальности Google</a>.</p>
 
   <h2>Безопасность</h2>
   <p>Данные шифруются при передаче. Правила базы данных разрешают читать и изменять ваши данные только вашему аккаунту после входа.</p>
