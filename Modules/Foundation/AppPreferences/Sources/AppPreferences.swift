@@ -33,4 +33,16 @@ public struct AppPreferences: @unchecked Sendable {
     public func markIntroductionSeen() {
         defaults.set(true, forKey: PreferenceKey.introductionSeen)
     }
+
+    public var isPaywallEnabled: Bool {
+        defaults.bool(forKey: PreferenceKey.paywallEnabled)
+    }
+
+    public var hasShownPaywall: Bool {
+        defaults.bool(forKey: PreferenceKey.paywallShown)
+    }
+
+    public func markPaywallShown() {
+        defaults.set(true, forKey: PreferenceKey.paywallShown)
+    }
 }

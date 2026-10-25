@@ -10,4 +10,6 @@ public enum PreferenceKey {
     public static let snoozeMinutes = "reminder.snoozeMinutes"
     public static let notificationPrimingShown = "notificationPriming.hasPrompted"
     public static let introductionSeen = "onboarding.introductionSeen"
+    public static let paywallShown = "onboarding.paywallShown"
+    public static let paywallEnabled = "feature.paywall"
 }

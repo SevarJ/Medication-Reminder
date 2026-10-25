@@ -43,4 +43,20 @@ struct AppPreferencesTests {
 
         #expect(sut.hasSeenIntroduction)
     }
+
+    @Test func paywallIsOffUntilEnabled() {
+        #expect(!sut.isPaywallEnabled)
+
+        defaults.set(true, forKey: PreferenceKey.paywallEnabled)
+
+        #expect(sut.isPaywallEnabled)
+    }
+
+    @Test func remembersThatPaywallWasShown() {
+        #expect(!sut.hasShownPaywall)
+
+        sut.markPaywallShown()
+
+        #expect(sut.hasShownPaywall)
+    }
 }
