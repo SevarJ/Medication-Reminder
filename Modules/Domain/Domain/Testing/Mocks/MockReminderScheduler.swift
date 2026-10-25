@@ -14,6 +14,7 @@ public actor MockReminderScheduler: ReminderScheduling {
     public private(set) var snoozedIds: [UUID] = []
     public private(set) var cancelAllCount = 0
     public private(set) var lowStockAlerts: [Medication] = []
+    public private(set) var followUps: [[ScheduledDose]] = []
 
     private let failsWithAuthorizationDenied: Bool
 
@@ -47,5 +48,13 @@ public actor MockReminderScheduler: ReminderScheduling {
         }
 
         lowStockAlerts.append(medication)
+    }
+
+    public func scheduleFollowUps(for doses: [ScheduledDose]) async throws {
+        if failsWithAuthorizationDenied {
+            throw ReminderError.authorizationDenied
+        }
+
+        followUps.append(doses)
     }
 }

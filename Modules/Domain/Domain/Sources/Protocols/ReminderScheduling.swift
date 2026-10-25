@@ -14,4 +14,5 @@ public protocol ReminderScheduling: Sendable {
     func cancelAll() async throws
     func snooze(_ medication: Medication, until date: Date) async throws
     func scheduleLowStockAlert(for medication: Medication) async throws
+    func scheduleFollowUps(for doses: [ScheduledDose]) async throws
 }

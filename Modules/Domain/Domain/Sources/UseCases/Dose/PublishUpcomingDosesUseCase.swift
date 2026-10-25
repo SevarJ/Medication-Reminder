@@ -15,17 +15,20 @@ public struct PublishUpcomingDosesUseCase: Sendable {
     private let medicationRepository: any MedicationRepository
     private let doseLogRepository: any DoseLogRepository
     private let publisher: any UpcomingDosePublishing
+    private let scheduler: any ReminderScheduling
     private let calendar: Calendar
 
     public init(
         medicationRepository: any MedicationRepository,
         doseLogRepository: any DoseLogRepository,
         publisher: any UpcomingDosePublishing,
+        scheduler: any ReminderScheduling,
         calendar: Calendar = .current
     ) {
         self.medicationRepository = medicationRepository
         self.doseLogRepository = doseLogRepository
         self.publisher = publisher
+        self.scheduler = scheduler
         self.calendar = calendar
     }
 
@@ -48,6 +51,7 @@ public struct PublishUpcomingDosesUseCase: Sendable {
             .filter { $0.log == nil && $0.scheduledDate > earliest }
 
         await publisher.publish(Array(doses.prefix(Self.doseLimit)))
+        try await scheduler.scheduleFollowUps(for: doses)
     }
 
     public func clear() async {

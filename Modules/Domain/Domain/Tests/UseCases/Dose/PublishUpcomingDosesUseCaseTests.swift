@@ -22,12 +22,14 @@ struct PublishUpcomingDosesUseCaseTests {
     private func makeSUT(
         medications: [Medication],
         logs: [DoseLog] = [],
-        publisher: MockUpcomingDosePublisher
+        publisher: MockUpcomingDosePublisher,
+        scheduler: MockReminderScheduler = MockReminderScheduler()
     ) -> PublishUpcomingDosesUseCase {
         PublishUpcomingDosesUseCase(
             medicationRepository: MockMedicationRepository(medications: medications),
             doseLogRepository: MockDoseLogRepository(logs: logs),
             publisher: publisher,
+            scheduler: scheduler,
             calendar: calendar
         )
     }
@@ -95,6 +97,41 @@ struct PublishUpcomingDosesUseCaseTests {
         try await sut.execute(now: try date(day: 25))
 
         #expect(try #require(await publisher.published.first).count == PublishUpcomingDosesUseCase.doseLimit)
+    }
+
+    @Test func schedulesFollowUpsForEveryDoseNotYetRecorded() async throws {
+        let publisher = MockUpcomingDosePublisher()
+        let scheduler = MockReminderScheduler()
+        let times = (0..<12).map { ($0 * 2, 0) }
+        let medication = try makeMedication(times: times, startDate: try date(day: 1))
+        let log = DoseLog(
+            medicationId: medication.id,
+            scheduledDate: try date(day: 25, hour: 14),
+            status: .skipped,
+            recordedAt: try date(day: 25, hour: 12)
+        )
+        let sut = makeSUT(medications: [medication], logs: [log], publisher: publisher, scheduler: scheduler)
+
+        try await sut.execute(now: try date(day: 25, hour: 12))
+
+        let followUps = try #require(await scheduler.followUps.first)
+
+        #expect(followUps.count > PublishUpcomingDosesUseCase.doseLimit)
+        #expect(followUps.first?.scheduledDate == (try date(day: 25, hour: 12)))
+        #expect(!followUps.contains { $0.scheduledDate == (try? date(day: 25, hour: 14)) })
+    }
+
+    @Test func publishesToTheWidgetEvenWhenFollowUpsCannotBeScheduled() async throws {
+        let publisher = MockUpcomingDosePublisher()
+        let scheduler = MockReminderScheduler(failsWithAuthorizationDenied: true)
+        let medication = try makeMedication(times: [(21, 0)], startDate: try date(day: 1))
+        let sut = makeSUT(medications: [medication], publisher: publisher, scheduler: scheduler)
+
+        await #expect(throws: ReminderError.authorizationDenied) {
+            try await sut.execute(now: try date(day: 25, hour: 12))
+        }
+
+        #expect(await publisher.published.count == 1)
     }
 
     @Test func clearRemovesThePublishedDoses() async throws {
