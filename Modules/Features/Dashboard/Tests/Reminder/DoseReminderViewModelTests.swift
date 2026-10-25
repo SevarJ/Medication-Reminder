@@ -24,6 +24,7 @@ struct DoseReminderViewModelTests {
     private func makeSUT(
         medicationId: UUID,
         medications: [Medication],
+        scheduledHour: Int = 9,
         logRepository: MockDoseLogRepository = MockDoseLogRepository(),
         scheduler: MockReminderScheduler = MockReminderScheduler()
     ) throws -> DoseReminderViewModel {
@@ -32,7 +33,7 @@ struct DoseReminderViewModelTests {
         
         return DoseReminderViewModel(
             medicationId: medicationId,
-            scheduledDate: try date(day: 17, hour: 9),
+            scheduledDate: try date(day: 17, hour: scheduledHour),
             loadDose: LoadScheduledDoseUseCase(medicationRepository: repository, doseLogRepository: logRepository),
             recordDose: RecordDoseUseCase(doseLogRepository: logRepository, medicationRepository: repository, scheduler: scheduler, calendar: calendar),
             snoozeReminder: SnoozeReminderUseCase(repository: repository, scheduler: scheduler),
@@ -42,7 +43,7 @@ struct DoseReminderViewModelTests {
     }
     
     @Test func loadsTheNotifiedDose() async throws {
-        let medication = try makeMedication()
+        let medication = try makeMedication(startDate: try date(day: 1, hour: 0))
         let sut = try makeSUT(medicationId: medication.id, medications: [medication])
         
         await sut.load()
@@ -57,6 +58,15 @@ struct DoseReminderViewModelTests {
         #expect(dose.log == nil)
     }
     
+    @Test func refusesATimeTheMedicationIsNotScheduledFor() async throws {
+        let medication = try makeMedication(startDate: try date(day: 1, hour: 0))
+        let sut = try makeSUT(medicationId: medication.id, medications: [medication], scheduledHour: 13)
+        
+        await sut.load()
+        
+        #expect(sut.state == .failure(message: L10n.Reminder.notScheduled))
+    }
+    
     @Test func reportsFailureForDeletedMedication() async throws {
         let sut = try makeSUT(medicationId: UUID(), medications: [])
         
@@ -66,7 +76,7 @@ struct DoseReminderViewModelTests {
     }
     
     @Test func takingRecordsDoseAndFinishes() async throws {
-        let medication = try makeMedication()
+        let medication = try makeMedication(startDate: try date(day: 1, hour: 0))
         let logRepository = MockDoseLogRepository()
         let sut = try makeSUT(medicationId: medication.id, medications: [medication], logRepository: logRepository)
         
@@ -84,7 +94,7 @@ struct DoseReminderViewModelTests {
     }
     
     @Test func takingAlreadyTakenDoseKeepsIt() async throws {
-        let medication = try makeMedication()
+        let medication = try makeMedication(startDate: try date(day: 1, hour: 0))
         let scheduledDate = try date(day: 17, hour: 9)
         let logRepository = MockDoseLogRepository(
             logs: [DoseLog(medicationId: medication.id, scheduledDate: scheduledDate, status: .taken, recordedAt: scheduledDate)]
@@ -98,7 +108,7 @@ struct DoseReminderViewModelTests {
     }
     
     @Test func takingReplacesSkippedDose() async throws {
-        let medication = try makeMedication()
+        let medication = try makeMedication(startDate: try date(day: 1, hour: 0))
         let scheduledDate = try date(day: 17, hour: 9)
         let logRepository = MockDoseLogRepository(
             logs: [DoseLog(medicationId: medication.id, scheduledDate: scheduledDate, status: .skipped, recordedAt: scheduledDate)]
@@ -112,7 +122,7 @@ struct DoseReminderViewModelTests {
     }
     
     @Test func snoozingSchedulesReminderWithoutRecording() async throws {
-        let medication = try makeMedication()
+        let medication = try makeMedication(startDate: try date(day: 1, hour: 0))
         let logRepository = MockDoseLogRepository()
         let scheduler = MockReminderScheduler()
         let sut = try makeSUT(
@@ -128,6 +138,7 @@ struct DoseReminderViewModelTests {
         #expect(sut.snoozeMinutes == 5)
         #expect(sut.isFinished)
         #expect(await scheduler.snoozedIds == [medication.id])
+        #expect(await scheduler.snoozedDoseDates == [try date(day: 17, hour: 9)])
         #expect(await logRepository.logs.isEmpty)
     }
 }

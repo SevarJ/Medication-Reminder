@@ -5,6 +5,7 @@
 //  Created by Sevar Jafarli on 12.09.26.
 //
 
+import AppFormatters
 import Domain
 import DomainTesting
 import Foundation
@@ -97,6 +98,17 @@ struct MedicationEditorViewModelTests {
         let saved = try #require(await repository.medications.first)
         
         #expect(saved.schedule.endDate != nil)
+    }
+
+    @Test func movingTheStartPastTheEndMovesTheEndAlong() async throws {
+        let sut = makeSUT()
+        let later = sut.startDate.addingTimeInterval(3 * 24 * 60 * 60)
+
+        sut.startDate = later
+        sut.hasEndDate = true
+
+        #expect(sut.endDate == later)
+        #expect(sut.validate(.duration))
     }
     
     @Test func rejectsInvalidAmount() async throws {
@@ -339,6 +351,16 @@ struct MedicationEditorViewModelTests {
         #expect(sut.isSelected(.afterMeal) == false)
     }
     
+    @Test func customTagNamedLikeAPresetSelectsThePreset() async throws {
+        let sut = makeSUT()
+        sut.customTagText = IntakeTag.afterMeal.displayText.uppercased()
+
+        sut.addCustomTag()
+
+        #expect(sut.intakeTags == [.afterMeal])
+        #expect(sut.customTagText.isEmpty)
+    }
+
     @Test func rejectsAStockThatIsNotANumber() async throws {
         let repository = MockMedicationRepository()
         let sut = makeSUT(repository: repository)
@@ -358,6 +380,86 @@ struct MedicationEditorViewModelTests {
         #expect(sut.stockText == "12")
     }
     
+    @Test func editingAStockTooLargeForAnIntDoesNotCrash() async throws {
+        let existing = try makeMedication(stock: 1e20)
+        let sut = makeSUT(medication: existing)
+
+        #expect(sut.stockText == "1e+20")
+        #expect(sut.validate(.extras) == false)
+    }
+
+    @Test func cutsTheNameToTheLimitTheServerKeeps() async throws {
+        let repository = MockMedicationRepository()
+        let sut = makeSUT(repository: repository)
+        sut.name = String(repeating: "a", count: Medication.nameLimit + 20)
+        
+        #expect(await sut.save())
+        
+        let saved = try #require(await repository.medications.first)
+        
+        #expect(saved.name.count == Medication.nameLimit)
+    }
+    
+    @Test func rejectsADosageThatIsNotFinite() async throws {
+        let sut = makeSUT()
+        sut.name = "Magnesium"
+        sut.amountText = "inf"
+
+        sut.next()
+
+        #expect(sut.step == .details)
+        #expect(sut.amount == nil)
+    }
+
+    @Test func rejectsADosageAboveTheLimit() async throws {
+        let repository = MockMedicationRepository()
+        let sut = makeSUT(repository: repository)
+        sut.name = "Magnesium"
+        sut.amountText = "99999999999999999999"
+
+        #expect(sut.validate(.details) == false)
+        #expect(await sut.save() == false)
+        #expect(sut.errorMessage != nil)
+        #expect(await repository.medications.isEmpty)
+    }
+
+    @Test func rejectsAStockAboveTheLimit() async throws {
+        let repository = MockMedicationRepository()
+        let sut = makeSUT(repository: repository)
+        sut.name = "Magnesium"
+        sut.stockText = "99999999999999999999"
+
+        #expect(await sut.save() == false)
+        #expect(sut.errorMessage != nil)
+        #expect(await repository.medications.isEmpty)
+    }
+
+    @Test func stockLimitFollowsTheUnit() async throws {
+        let sut = makeSUT()
+        sut.unit = .tablet
+        sut.stockText = "1000"
+
+        #expect(sut.validate(.extras))
+
+        sut.stockText = "1001"
+
+        #expect(sut.validate(.extras) == false)
+
+        sut.unit = .mg
+
+        #expect(sut.validate(.extras))
+    }
+
+    @Test func amountButtonsStopAtTheLimit() async throws {
+        let sut = makeSUT()
+        sut.unit = .mg
+        sut.amountText = "99999999999999999999"
+
+        sut.stepAmount(by: 1)
+
+        #expect(sut.amount == MedicationEditorViewModel.amountLimit)
+    }
+
     @Test func editingKeepsTheIntakeTagsTheMedicationHad() async throws {
         let existing = try makeMedication(intakeTags: [.afterMeal, .custom("With water")])
         let sut = makeSUT(medication: existing)

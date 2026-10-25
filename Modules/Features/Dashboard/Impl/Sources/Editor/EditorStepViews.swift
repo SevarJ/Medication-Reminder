@@ -49,6 +49,11 @@ private struct DetailsStepView: View {
                     .submitLabel(.done)
                     .padding(Spacing.lg)
                     .frame(minHeight: Size.primaryButton)
+                    .onChange(of: viewModel.name) { _, name in
+                        if name.count > Medication.nameLimit {
+                            viewModel.name = String(name.prefix(Medication.nameLimit))
+                        }
+                    }
             }
             
             doseSection
@@ -166,6 +171,7 @@ private struct DetailsStepView: View {
 
 private struct ScheduleStepView: View {
     @Bindable var viewModel: MedicationEditorViewModel
+    @Environment(\.locale) private var locale
     
     var body: some View {
         VStack(spacing: Spacing.xl) {
@@ -309,6 +315,7 @@ private struct ScheduleStepView: View {
                 )
                 .datePickerStyle(.wheel)
                 .labelsHidden()
+                .environment(\.locale, locale.twentyFourHourClock)
                 .frame(maxWidth: .infinity)
                 .padding(.bottom, Spacing.sm)
                 .transition(.opacity)

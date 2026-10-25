@@ -184,7 +184,7 @@ final class TodayViewModel {
     }
     
     var weekAdherence: Double {
-        let doses = week.flatMap(\.doses)
+        let doses = week.flatMap(\.doses).filter { state(of: $0) != .pending }
         
         guard !doses.isEmpty else { return 0 }
         

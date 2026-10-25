@@ -30,6 +30,15 @@ extension Date {
     }
 }
 
+extension Locale {
+    var twentyFourHourClock: Locale {
+        var components = Locale.Components(locale: self)
+        components.hourCycle = .zeroToTwentyThree
+        
+        return Locale(components: components)
+    }
+}
+
 extension Calendar {
     static var localized: Calendar {
         var calendar = Calendar.current

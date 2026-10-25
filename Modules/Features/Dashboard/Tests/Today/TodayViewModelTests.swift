@@ -180,6 +180,19 @@ struct TodayViewModelTests {
         #expect(abs(sut.weekAdherence - 1.0 / 7.0) < 0.0001)
     }
     
+    @Test func adherenceLeavesOutDosesStillAhead() async throws {
+        let medication = try makeMedication(times: [(9, 0), (20, 0)], startDay: 17)
+        let sut = makeSUT(
+            medications: [medication],
+            logs: [try takenLog(for: medication, day: 17, hour: 9)],
+            now: try date(day: 17, hour: 12)
+        )
+        
+        await sut.load()
+        
+        #expect(sut.weekAdherence == 1)
+    }
+    
     @Test func nextDoseIsEarliestPendingDoseToday() async throws {
         let sut = makeSUT(
             medications: [

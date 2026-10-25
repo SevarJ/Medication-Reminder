@@ -29,6 +29,7 @@ extension L10n {
         static var leftSuffix: String { string("form.left", "left") }
         static var notSet: String { string("form.notSet", "Not set") }
         static var invalidStock: String { string("form.error.stock", "Enter an amount of zero or more.") }
+        static func stockTooLarge(_ limit: String) -> String { string("form.error.stockTooLarge", "Enter \(limit) or less.") }
         
         static var next: String { string("form.next", "Next") }
         static var back: String { string("form.back", "Back") }

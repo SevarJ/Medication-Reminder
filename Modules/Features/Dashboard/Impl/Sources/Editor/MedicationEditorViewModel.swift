@@ -22,7 +22,13 @@ final class MedicationEditorViewModel: Identifiable {
     var times: [MedTime]
     var repeatMode: RepeatMode
     var weekdays: Set<Weekday>
-    var startDate: Date
+    var startDate: Date {
+        didSet {
+            if endDate < startDate {
+                endDate = startDate
+            }
+        }
+    }
     var hasEndDate: Bool
     var endDate: Date
     var isActive: Bool
@@ -87,7 +93,7 @@ final class MedicationEditorViewModel: Identifiable {
     }
     
     var amount: Double? {
-        Double(amountText.replacingOccurrences(of: ",", with: "."))
+        Self.number(from: amountText)
     }
     
     var dosage: Dosage? {
@@ -103,7 +109,7 @@ final class MedicationEditorViewModel: Identifiable {
     
     /// What is left, or nil when the field is empty or does not hold a number.
     var stock: Double? {
-        Double(stockText.replacingOccurrences(of: ",", with: "."))
+        Self.number(from: stockText)
     }
     
     // MARK: Steps
@@ -160,6 +166,9 @@ final class MedicationEditorViewModel: Identifiable {
             else if (amount ?? 0) <= 0 {
                 problem = L10n.Error.invalidAmount
             }
+            else if let amount, amount > Self.amountLimit {
+                problem = L10n.Error.amountTooLarge
+            }
             else {
                 problem = nil
             }
@@ -178,7 +187,15 @@ final class MedicationEditorViewModel: Identifiable {
                 ? ErrorFormatter.message(for: DomainError.invalidDateRange)
                 : nil
         case .extras:
-            problem = !stockText.isEmpty && (stock ?? -1) < 0 ? L10n.Form.invalidStock : nil
+            if !stockText.isEmpty && (stock ?? -1) < 0 {
+                problem = L10n.Form.invalidStock
+            }
+            else if let stock, stock > unit.stockLimit {
+                problem = L10n.Form.stockTooLarge(Dosage(amount: unit.stockLimit, unit: unit).displayText)
+            }
+            else {
+                problem = nil
+            }
         }
         
         errorMessage = problem
@@ -191,7 +208,7 @@ final class MedicationEditorViewModel: Identifiable {
     func stepAmount(by direction: Double) {
         let size = unit.stepSize
         let current = amount ?? 0
-        let next = max(size, current + direction * size)
+        let next = min(Self.amountLimit, max(size, current + direction * size))
         
         amountText = Self.text(for: next)
     }
@@ -260,8 +277,10 @@ final class MedicationEditorViewModel: Identifiable {
     }
     
     func addCustomTag() {
-        guard canAddCustomTag, let tag = IntakeTag.custom(named: customTagText) else { return }
-        
+        guard canAddCustomTag, let custom = IntakeTag.custom(named: customTagText) else { return }
+
+        let tag = tagChoices.first { $0.displayText.localizedCaseInsensitiveCompare(custom.displayText) == .orderedSame } ?? custom
+
         if !intakeTags.contains(tag) {
             intakeTags.append(tag)
         }
@@ -277,6 +296,11 @@ final class MedicationEditorViewModel: Identifiable {
             return false
         }
         
+        guard dosage.amount <= Self.amountLimit else {
+            errorMessage = L10n.Error.amountTooLarge
+            return false
+        }
+        
         guard validate(.extras) else { return false }
         
         isSaving = true
@@ -287,7 +311,7 @@ final class MedicationEditorViewModel: Identifiable {
         do {
             let updated = Medication(
                 id: medication?.id ?? UUID(),
-                name: name.trimmingCharacters(in: .whitespacesAndNewlines),
+                name: String(name.trimmingCharacters(in: .whitespacesAndNewlines).prefix(Medication.nameLimit)),
                 dosage: dosage,
                 schedule: MedicationSchedule(
                     times: times.sorted(),
@@ -325,9 +349,13 @@ final class MedicationEditorViewModel: Identifiable {
         return [time]
     }
     
+    static let amountLimit: Double = 10_000
+    
+    private static func number(from text: String) -> Double? {
+        Double(text.replacingOccurrences(of: ",", with: ".")).flatMap { $0.isFinite ? $0 : nil }
+    }
+    
     private static func text(for amount: Double) -> String {
-        amount.rounded() == amount
-            ? String(Int(amount))
-            : String(amount)
+        Int(exactly: amount).map(String.init) ?? String(amount)
     }
 }

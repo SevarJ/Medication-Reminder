@@ -51,7 +51,11 @@ final class DoseReminderViewModel: Identifiable {
     
     func load() async {
         do {
-            state = .loaded(try await loadDose.execute(medicationId: medicationId, scheduledDate: scheduledDate))
+            let dose = try await loadDose.execute(medicationId: medicationId, scheduledDate: scheduledDate)
+            
+            state = dose.medication.schedule.doses(on: scheduledDate).contains(scheduledDate)
+                ? .loaded(dose)
+                : .failure(message: L10n.Reminder.notScheduled)
         }
         catch {
             state = .failure(message: ErrorFormatter.message(for: error))
@@ -72,7 +76,7 @@ final class DoseReminderViewModel: Identifiable {
     
     func snooze() async {
         do {
-            try await snoozeReminder.execute(medicationId: medicationId, delay: snoozeDelay, now: currentDate())
+            try await snoozeReminder.execute(medicationId: medicationId, scheduledDate: scheduledDate, delay: snoozeDelay, now: currentDate())
             isFinished = true
         }
         catch {

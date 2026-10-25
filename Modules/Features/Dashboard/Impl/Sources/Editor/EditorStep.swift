@@ -55,4 +55,13 @@ extension DosageUnit {
         case .drop: 1
         }
     }
+    
+    var stockLimit: Double {
+        switch self {
+        case .mg: 100_000
+        case .ml: 5_000
+        case .tablet: 1_000
+        case .drop: 10_000
+        }
+    }
 }

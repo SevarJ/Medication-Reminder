@@ -277,6 +277,29 @@
         }
       }
     },
+    "form.error.stockTooLarge": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter %@ or less."
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ən çox %@ daxil edin."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Введите не больше %@."
+          }
+        }
+      }
+    },
     "form.next": {
       "extractionState": "manual",
       "localizations": {

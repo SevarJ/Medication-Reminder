@@ -356,11 +356,19 @@ enum L10n {
         static var loadFailedTitle: String {
             String(localized: "reminder.failure.title", defaultValue: "Could Not Load This Dose", bundle: .module.localized())
         }
+        
+        static var notScheduled: String {
+            String(localized: "reminder.failure.notScheduled", defaultValue: "This dose is not in the medication's schedule.", bundle: .module.localized())
+        }
     }
     
     enum Error {
         static var invalidAmount: String {
             String(localized: "error.invalidAmount", defaultValue: "Enter a dosage amount greater than zero.", bundle: .module.localized())
+        }
+        
+        static var amountTooLarge: String {
+            String(localized: "error.amountTooLarge", defaultValue: "Enter a dosage of 10,000 or less.", bundle: .module.localized())
         }
     }
 }
