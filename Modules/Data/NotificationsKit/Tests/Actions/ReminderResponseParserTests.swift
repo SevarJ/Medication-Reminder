@@ -101,4 +101,38 @@ struct ReminderResponseParserTests {
         
         #expect(response.scheduledDate == delivered)
     }
+    
+    @Test func followUpUsesTheDoseItRemindsOfEvenOnTheNextDay() async throws {
+        let dose = try deliveredAt(hour: 23, minute: 50)
+        var info = userInfo(medicationId: UUID(), hour: 0, minute: 20)
+        
+        info[ReminderUserInfoKey.scheduledDate] = dose.timeIntervalSince1970
+        
+        let response = try #require(
+            ReminderResponseParser.parse(
+                userInfo: info,
+                actionIdentifier: ReminderCategory.takenActionIdentifier,
+                deliveredAt: dose.addingTimeInterval(30 * 60),
+                calendar: calendar
+            )
+        )
+        
+        #expect(response.scheduledDate == dose)
+    }
+    
+    @Test func readsTheDoseOfAFollowUp() async throws {
+        let medicationId = UUID()
+        let dose = try deliveredAt(hour: 9, minute: 0)
+        var info = userInfo(medicationId: medicationId)
+        
+        info[ReminderUserInfoKey.scheduledDate] = dose.timeIntervalSince1970
+        
+        let followUp = ReminderResponseParser.followUpDose(userInfo: info)
+        
+        #expect(followUp == FollowUpDose(medicationId: medicationId, scheduledDate: dose))
+    }
+    
+    @Test func plainReminderIsNoFollowUp() async throws {
+        #expect(ReminderResponseParser.followUpDose(userInfo: userInfo(medicationId: UUID())) == nil)
+    }
 }

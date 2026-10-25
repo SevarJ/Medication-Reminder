@@ -14,7 +14,8 @@ struct ReminderRequest: Sendable, Equatable {
     let body: String
     let components: DateComponents
     let repeats: Bool
-    
+    var scheduledDate: Date? = nil
+
     var hour: Int? { components.hour }
     var minute: Int? { components.minute }
     var weekday: Int? { components.weekday }

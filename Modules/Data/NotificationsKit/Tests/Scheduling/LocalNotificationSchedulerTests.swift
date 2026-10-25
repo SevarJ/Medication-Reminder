@@ -279,4 +279,108 @@ struct LocalNotificationSchedulerTests {
         
         #expect(alertLog.dates.isEmpty)
     }
+    
+    @Test func followUpComesHalfAnHourAfterTheDose() async throws {
+        let center = MockUserNotificationCenter()
+        let sut = LocalNotificationScheduler(center: center, alertLog: MockLowStockAlertLog())
+        let medication = try makeMedication(intakeTags: [.custom("With water")])
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let dose = ScheduledDose(medication: medication, scheduledDate: now.addingTimeInterval(-10 * 60))
+        
+        try await sut.scheduleFollowUps(for: [dose], now: now)
+        
+        let added = try #require(await center.added.first)
+        let fireDate = try #require(Calendar.current.date(from: added.components))
+        
+        #expect(await center.added.count == 1)
+        #expect(added.repeats == false)
+        #expect(fireDate == dose.scheduledDate.addingTimeInterval(LocalNotificationScheduler.followUpDelay))
+        #expect(added.scheduledDate == dose.scheduledDate)
+        #expect(added.title == medication.name)
+        #expect(added.body.hasSuffix(" · With water"))
+        #expect(added.identifier.hasPrefix(LocalNotificationScheduler.identifierPrefix(medicationId: medication.id)))
+    }
+    
+    @Test func followUpsLeaveOutRecordedAndPastDoses() async throws {
+        let center = MockUserNotificationCenter()
+        let sut = LocalNotificationScheduler(center: center, alertLog: MockLowStockAlertLog())
+        let medication = try makeMedication()
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let recorded = now.addingTimeInterval(60 * 60)
+        let doses = [
+            ScheduledDose(medication: medication, scheduledDate: now.addingTimeInterval(-40 * 60)),
+            ScheduledDose(
+                medication: medication,
+                scheduledDate: recorded,
+                log: DoseLog(medicationId: medication.id, scheduledDate: recorded, status: .taken, recordedAt: now)
+            ),
+            ScheduledDose(medication: try makeMedication(isActive: false), scheduledDate: recorded)
+        ]
+        
+        try await sut.scheduleFollowUps(for: doses, now: now)
+        
+        #expect(await center.added.isEmpty)
+    }
+    
+    @Test func schedulingFollowUpsReplacesTheEarlierOnes() async throws {
+        let center = MockUserNotificationCenter()
+        let sut = LocalNotificationScheduler(center: center, alertLog: MockLowStockAlertLog())
+        let medication = try makeMedication()
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let first = ScheduledDose(medication: medication, scheduledDate: now)
+        let second = ScheduledDose(medication: medication, scheduledDate: now.addingTimeInterval(60 * 60))
+        
+        try await sut.schedule(for: medication)
+        try await sut.scheduleFollowUps(for: [first, second], now: now)
+        try await sut.scheduleFollowUps(for: [second], now: now)
+        
+        let followUps = await center.added.filter { LocalNotificationScheduler.isFollowUpIdentifier($0.identifier) }
+        
+        #expect(followUps.map(\.scheduledDate) == [second.scheduledDate])
+        #expect(await center.added.count == 2)
+    }
+    
+    @Test func followUpsKeepRoomForTheRegularReminders() async throws {
+        let center = MockUserNotificationCenter()
+        let sut = LocalNotificationScheduler(center: center, alertLog: MockLowStockAlertLog())
+        let medication = try makeMedication(times: [(8, 0), (20, 0)])
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let doses = (1...100).map {
+            ScheduledDose(medication: medication, scheduledDate: now.addingTimeInterval(Double($0) * 60 * 60))
+        }
+        
+        try await sut.schedule(for: medication)
+        try await sut.scheduleFollowUps(for: doses, now: now)
+        
+        let followUps = await center.added.filter { LocalNotificationScheduler.isFollowUpIdentifier($0.identifier) }
+        
+        #expect(followUps.count == LocalNotificationScheduler.pendingLimit - 2)
+        #expect(followUps.first?.scheduledDate == doses.first?.scheduledDate)
+    }
+    
+    @Test func followUpsNeedAuthorization() async throws {
+        let center = MockUserNotificationCenter(status: .denied)
+        let sut = LocalNotificationScheduler(center: center, alertLog: MockLowStockAlertLog())
+        let dose = ScheduledDose(medication: try makeMedication(), scheduledDate: .now)
+        
+        await #expect(throws: ReminderError.authorizationDenied) {
+            try await sut.scheduleFollowUps(for: [dose], now: .now)
+        }
+        
+        #expect(await center.added.isEmpty)
+    }
+    
+    @Test func followUpIdentifierIsNotARegularReminder() async throws {
+        let medicationId = UUID()
+        
+        #expect(LocalNotificationScheduler.isFollowUpIdentifier(
+            LocalNotificationScheduler.followUpIdentifier(medicationId: medicationId, scheduledDate: .now)
+        ))
+        #expect(!LocalNotificationScheduler.isFollowUpIdentifier(
+            LocalNotificationScheduler.identifier(medicationId: medicationId, timeId: UUID())
+        ))
+        #expect(!LocalNotificationScheduler.isFollowUpIdentifier(
+            LocalNotificationScheduler.lowStockIdentifier(medicationId: medicationId)
+        ))
+    }
 }

@@ -124,6 +124,60 @@ struct LocalNotificationScheduler: ReminderScheduling {
         )
     }
     
+    func scheduleFollowUps(for doses: [ScheduledDose]) async throws {
+        try await scheduleFollowUps(for: doses, now: .now)
+    }
+
+    func scheduleFollowUps(for doses: [ScheduledDose], now: Date) async throws {
+        let pending = await center.pendingIdentifiers()
+        let stale = pending.filter(Self.isFollowUpIdentifier)
+
+        if !stale.isEmpty {
+            await center.removePending(identifiers: stale)
+        }
+
+        try await requireAuthorization()
+
+        let room = max(0, Self.pendingLimit - (pending.count - stale.count))
+        let followUps = doses
+            .filter { $0.log == nil && $0.medication.isActive }
+            .map { (dose: $0, fireDate: $0.scheduledDate.addingTimeInterval(Self.followUpDelay)) }
+            .filter { $0.fireDate > now }
+            .prefix(room)
+
+        for followUp in followUps {
+            let medication = followUp.dose.medication
+
+            try await center.add(
+                ReminderRequest(
+                    identifier: Self.followUpIdentifier(medicationId: medication.id, scheduledDate: followUp.dose.scheduledDate),
+                    medicationId: medication.id,
+                    title: medication.name,
+                    body: L10n.FollowUp.body(medication.doseText),
+                    components: Calendar.current.dateComponents(
+                        [.year, .month, .day, .hour, .minute],
+                        from: followUp.fireDate
+                    ),
+                    repeats: false,
+                    scheduledDate: followUp.dose.scheduledDate
+                )
+            )
+        }
+    }
+
+    static let followUpDelay: TimeInterval = 30 * 60
+    static let pendingLimit = 60
+
+    static func followUpIdentifier(medicationId: UUID, scheduledDate: Date) -> String {
+        identifierPrefix(medicationId: medicationId) + followUpMarker + "\(Int(scheduledDate.timeIntervalSince1970))"
+    }
+
+    static func isFollowUpIdentifier(_ identifier: String) -> Bool {
+        identifier.hasPrefix(reminderPrefix) && identifier.contains("." + followUpMarker)
+    }
+
+    private static let followUpMarker = "followUp."
+
     static func snoozeIdentifier(medicationId: UUID) -> String {
         identifierPrefix(medicationId: medicationId) + "snooze." + UUID().uuidString
     }

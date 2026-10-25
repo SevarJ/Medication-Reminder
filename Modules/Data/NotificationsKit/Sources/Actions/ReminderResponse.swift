@@ -21,6 +21,11 @@ public struct ReminderResponse: Sendable, Equatable {
     public let action: Action
 }
 
+public struct FollowUpDose: Sendable, Equatable {
+    public let medicationId: UUID
+    public let scheduledDate: Date
+}
+
 public enum ReminderResponseParser {
     public static func parse(
         _ response: UNNotificationResponse,
@@ -64,11 +69,32 @@ public enum ReminderResponseParser {
         }
     }
     
+    public static func followUpDose(of notification: UNNotification) -> FollowUpDose? {
+        guard LocalNotificationScheduler.isFollowUpIdentifier(notification.request.identifier) else { return nil }
+        
+        return followUpDose(userInfo: notification.request.content.userInfo)
+    }
+    
+    static func followUpDose(userInfo: [AnyHashable: Any]) -> FollowUpDose? {
+        guard let rawId = userInfo[ReminderUserInfoKey.medicationId] as? String,
+              let medicationId = UUID(uuidString: rawId),
+              let timestamp = userInfo[ReminderUserInfoKey.scheduledDate] as? TimeInterval
+        else {
+            return nil
+        }
+        
+        return FollowUpDose(medicationId: medicationId, scheduledDate: Date(timeIntervalSince1970: timestamp))
+    }
+    
     private static func scheduledDate(
         from userInfo: [AnyHashable: Any],
         deliveredAt: Date,
         calendar: Calendar
     ) -> Date {
+        if let timestamp = userInfo[ReminderUserInfoKey.scheduledDate] as? TimeInterval {
+            return Date(timeIntervalSince1970: timestamp)
+        }
+        
         guard let hour = userInfo[ReminderUserInfoKey.hour] as? Int,
               let minute = userInfo[ReminderUserInfoKey.minute] as? Int,
               let scheduledDate = calendar.date(

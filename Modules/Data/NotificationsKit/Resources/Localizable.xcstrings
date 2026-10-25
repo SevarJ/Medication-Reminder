@@ -70,6 +70,29 @@
         }
       }
     },
+    "followUp.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not logged yet · %@"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hələ qeyd olunmayıb · %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ещё не отмечено · %@"
+          }
+        }
+      }
+    },
     "lowStock.daysLeft": {
       "extractionState": "manual",
       "localizations": {

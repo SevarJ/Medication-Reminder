@@ -51,7 +51,11 @@ final class SystemNotificationCenter: UserNotificationCenter, @unchecked Sendabl
             ReminderUserInfoKey.hour: reminder.hour as Any,
             ReminderUserInfoKey.minute: reminder.minute as Any
         ]
-        
+
+        if let scheduledDate = reminder.scheduledDate {
+            content.userInfo[ReminderUserInfoKey.scheduledDate] = scheduledDate.timeIntervalSince1970
+        }
+
         let request = UNNotificationRequest(
             identifier: reminder.identifier,
             content: content,
@@ -98,4 +102,5 @@ enum ReminderUserInfoKey {
     static let medicationId = "medicationId"
     static let hour = "hour"
     static let minute = "minute"
+    static let scheduledDate = "scheduledDate"
 }

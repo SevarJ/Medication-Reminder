@@ -33,4 +33,10 @@ enum L10n {
             String(localized: "lowStock.out", defaultValue: "Out of stock. Time to refill.", bundle: .module.localized())
         }
     }
+
+    enum FollowUp {
+        static func body(_ doseText: String) -> String {
+            String(localized: "followUp.body", defaultValue: "Not logged yet · \(doseText)", bundle: .module.localized())
+        }
+    }
 }
