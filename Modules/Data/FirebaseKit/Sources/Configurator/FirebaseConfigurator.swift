@@ -18,6 +18,7 @@ public enum FirebaseConfigurator {
             FirebaseApp.configure()
         }
 
+        FirebaseDiagnostics.start()
         register(in: container)
     }
 
