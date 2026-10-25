@@ -26,8 +26,10 @@ struct NotificationPrimingScreen: View {
                 }
             },
             onNotNow: {
-                model.dismiss()
-                onFinish()
+                Task {
+                    await model.dismiss()
+                    onFinish()
+                }
             }
         )
     }

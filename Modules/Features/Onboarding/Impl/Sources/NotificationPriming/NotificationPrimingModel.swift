@@ -12,15 +12,18 @@ import Domain
 final class NotificationPrimingModel {
     private let authorizer: any NotificationAuthorizing
     private let syncReminder: SyncReminderUseCase
+    private let analytics: any AnalyticsTracking
     private let preferences: AppPreferences
     
     init(
         authorizer: any NotificationAuthorizing,
         syncReminder: SyncReminderUseCase,
+        analytics: any AnalyticsTracking,
         preferences: AppPreferences = AppPreferences()
     ) {
         self.authorizer = authorizer
         self.syncReminder = syncReminder
+        self.analytics = analytics
         self.preferences = preferences
     }
     
@@ -35,12 +38,15 @@ final class NotificationPrimingModel {
         
         let isGranted = (try? await authorizer.requestAuthorization()) ?? false
         
+        await analytics.track(.notificationPromptAnswered(isGranted ? .allowed : .denied))
+        
         guard isGranted else { return }
         
         try? await syncReminder.execute()
     }
     
-    func dismiss() {
+    func dismiss() async {
         preferences.markNotificationPrimingShown()
+        await analytics.track(.notificationPromptAnswered(.postponed))
     }
 }

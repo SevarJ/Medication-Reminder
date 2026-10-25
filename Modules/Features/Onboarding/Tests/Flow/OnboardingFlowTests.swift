@@ -15,6 +15,7 @@ import Testing
 @MainActor
 struct OnboardingFlowTests {
     private let preferences: AppPreferences
+    private let analytics = MockAnalyticsTracker()
     
     init() throws {
         let suiteName = "OnboardingFlowTests.\(UUID().uuidString)"
@@ -27,8 +28,10 @@ struct OnboardingFlowTests {
             priming: NotificationPrimingModel(
                 authorizer: MockNotificationAuthorizer(access: access),
                 syncReminder: SyncReminderUseCase(repository: MockMedicationRepository(), scheduler: MockReminderScheduler()),
+                analytics: analytics,
                 preferences: preferences
-            )
+            ),
+            analytics: analytics
         )
     }
     
@@ -36,10 +39,13 @@ struct OnboardingFlowTests {
         #expect(await makeSUT().pendingRoute(at: .beforeSignIn) == .introduction)
     }
     
-    @Test func skipsIntroductionOnceSeen() async {
-        preferences.markIntroductionSeen()
+    @Test func completingIntroductionHidesItAndTracksIt() async {
+        let sut = makeSUT()
         
-        #expect(await makeSUT().pendingRoute(at: .beforeSignIn) == nil)
+        await sut.completeIntroduction()
+        
+        #expect(await sut.pendingRoute(at: .beforeSignIn) == nil)
+        #expect(await analytics.events == [.introductionCompleted])
     }
     
     @Test func signingInCountsAsHavingSeenIntroduction() async {

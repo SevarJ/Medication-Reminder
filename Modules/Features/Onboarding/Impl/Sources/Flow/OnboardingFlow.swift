@@ -6,16 +6,19 @@
 //
 
 import AppPreferences
+import Domain
 import Onboarding
 
 @MainActor
 struct OnboardingFlow {
     private let preferences: AppPreferences
     private let priming: NotificationPrimingModel
+    private let analytics: any AnalyticsTracking
 
-    init(preferences: AppPreferences, priming: NotificationPrimingModel) {
+    init(preferences: AppPreferences, priming: NotificationPrimingModel, analytics: any AnalyticsTracking) {
         self.preferences = preferences
         self.priming = priming
+        self.analytics = analytics
     }
 
     func pendingRoute(at stage: OnboardingStage) async -> OnboardingRoute? {
@@ -31,5 +34,10 @@ struct OnboardingFlow {
 
             return nil
         }
+    }
+
+    func completeIntroduction() async {
+        preferences.markIntroductionSeen()
+        await analytics.track(.introductionCompleted)
     }
 }

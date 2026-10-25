@@ -15,6 +15,7 @@ import Testing
 @MainActor
 struct NotificationPrimingModelTests {
     private let defaults: UserDefaults
+    private let analytics = MockAnalyticsTracker()
     
     init() throws {
         let suiteName = "NotificationPrimingModelTests.\(UUID().uuidString)"
@@ -32,6 +33,7 @@ struct NotificationPrimingModelTests {
                 repository: MockMedicationRepository(medications: medications),
                 scheduler: scheduler
             ),
+            analytics: analytics,
             preferences: AppPreferences(defaults: defaults)
         )
     }
@@ -54,12 +56,13 @@ struct NotificationPrimingModelTests {
         let authorizer = MockNotificationAuthorizer(access: .notDetermined)
         let first = makeSUT(authorizer: authorizer)
         
-        first.dismiss()
+        await first.dismiss()
         
         let second = makeSUT(authorizer: authorizer)
         
         #expect(await second.shouldPresent() == false)
         #expect(await authorizer.requestCount == 0)
+        #expect(await analytics.events == [.notificationPromptAnswered(.postponed)])
     }
     
     @Test func allowingRequestsAccessAndSchedulesReminders() async throws {
@@ -73,6 +76,7 @@ struct NotificationPrimingModelTests {
         #expect(await sut.shouldPresent() == false)
         #expect(await authorizer.requestCount == 1)
         #expect(await scheduler.scheduledIds == [medication.id])
+        #expect(await analytics.events == [.notificationPromptAnswered(.allowed)])
     }
     
     @Test func refusingSkipsReminderSync() async throws {
@@ -88,5 +92,6 @@ struct NotificationPrimingModelTests {
         
         #expect(await sut.shouldPresent() == false)
         #expect(await scheduler.scheduledIds.isEmpty)
+        #expect(await analytics.events == [.notificationPromptAnswered(.denied)])
     }
 }
