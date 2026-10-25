@@ -8,7 +8,7 @@ public extension Target {
             product: .app,
             bundleId: AppConfig.bundleId,
             deploymentTargets: AppConfig.deploymentTargets,
-            infoPlist: .dictionary(urlTypes),
+            infoPlist: .dictionary(urlTypes.merging(analyticsPrivacy) { $1 }),
             buildableFolders: [
                 .folder(.relativeToRoot("App/Sources")),
                 .folder(.relativeToRoot("App/Resources")),
@@ -33,6 +33,12 @@ private let urlTypes: [String: Plist.Value] = [
                 ]
             }
     ),
+]
+
+private let analyticsPrivacy: [String: Plist.Value] = [
+    "GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS": false,
+    "GOOGLE_ANALYTICS_REGISTRATION_WITH_AD_NETWORK_ENABLED": false,
+    "GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED": false,
 ]
 
 private let crashlyticsPath = "Tuist/.build/checkouts/firebase-ios-sdk/Crashlytics"

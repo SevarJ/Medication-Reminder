@@ -36,6 +36,7 @@ struct MedoraApp: App {
         let medications: any MedicationRepository = resolve()
         let doseLogs: any DoseLogRepository = resolve()
         let scheduler: any ReminderScheduling = resolve()
+        let analytics: any AnalyticsTracking = resolve()
         let upcomingDoses = PublishUpcomingDosesUseCase(
             medicationRepository: medications,
             doseLogRepository: doseLogs,
@@ -66,9 +67,9 @@ struct MedoraApp: App {
             recordDose: RecordDoseForMedicationUseCase(
                 medicationRepository: medications,
                 doseLogRepository: doseLogs,
-                recordDose: RecordDoseUseCase(doseLogRepository: doseLogs, medicationRepository: medications, scheduler: scheduler)
+                recordDose: RecordDoseUseCase(doseLogRepository: doseLogs, medicationRepository: medications, scheduler: scheduler, analytics: analytics)
             ),
-            snoozeReminder: SnoozeReminderUseCase(repository: medications, scheduler: scheduler),
+            snoozeReminder: SnoozeReminderUseCase(repository: medications, scheduler: scheduler, analytics: analytics),
             loadDose: LoadScheduledDoseUseCase(medicationRepository: medications, doseLogRepository: doseLogs),
             upcomingDoses: upcomingDoses,
             preferences: AppPreferences(),
