@@ -12,13 +12,16 @@ public struct SnoozeReminderUseCase: Sendable {
     
     private let repository: any MedicationRepository
     private let scheduler: any ReminderScheduling
+    private let analytics: any AnalyticsTracking
     
     public init(
         repository: any MedicationRepository,
-        scheduler: any ReminderScheduling
+        scheduler: any ReminderScheduling,
+        analytics: any AnalyticsTracking
     ) {
         self.repository = repository
         self.scheduler = scheduler
+        self.analytics = analytics
     }
     
     public func execute(
@@ -30,5 +33,6 @@ public struct SnoozeReminderUseCase: Sendable {
         let medication = try await repository.fetch(id: medicationId)
         
         try await scheduler.snooze(medication, scheduledDate: scheduledDate, until: now.addingTimeInterval(delay))
+        await analytics.track(.reminderSnoozed)
     }
 }

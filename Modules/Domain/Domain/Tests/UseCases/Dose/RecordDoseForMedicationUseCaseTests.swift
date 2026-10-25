@@ -32,6 +32,7 @@ struct RecordDoseForMedicationUseCaseTests {
                 doseLogRepository: logRepository,
                 medicationRepository: medicationRepository,
                 scheduler: MockReminderScheduler(),
+                analytics: MockAnalyticsTracker(),
                 calendar: calendar
             )
         )

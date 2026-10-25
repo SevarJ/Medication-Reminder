@@ -10,13 +10,16 @@ import Foundation
 public struct SaveMedicationUseCase: Sendable {
     private let repository: any MedicationRepository
     private let scheduler: any ReminderScheduling
+    private let analytics: any AnalyticsTracking
     
     public init(
         repository: any MedicationRepository,
-        scheduler: any ReminderScheduling
+        scheduler: any ReminderScheduling,
+        analytics: any AnalyticsTracking
     ) {
         self.repository = repository
         self.scheduler = scheduler
+        self.analytics = analytics
     }
     
     public func execute(_ medication: Medication) async throws {
@@ -42,7 +45,13 @@ public struct SaveMedicationUseCase: Sendable {
             throw DomainError.invalidDateRange
         }
         
+        let isNew = (try? await repository.fetch(id: medication.id)) == nil
+        
         try await repository.save(medication)
+        
+        if isNew {
+            await analytics.track(.medicationAdded)
+        }
         
         if medication.isActive {
             try await scheduler.schedule(for: medication)

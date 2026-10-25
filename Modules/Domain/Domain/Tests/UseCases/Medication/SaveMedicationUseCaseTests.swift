@@ -15,10 +15,13 @@ struct SaveMedicationUseCaseTests {
     
     private let scheduler = MockReminderScheduler()
     
+    private let analytics = MockAnalyticsTracker()
+    
     private var sut: SaveMedicationUseCase {
         SaveMedicationUseCase(
             repository: repository,
-            scheduler: scheduler
+            scheduler: scheduler,
+            analytics: analytics
         )
     }
     
@@ -83,5 +86,29 @@ struct SaveMedicationUseCaseTests {
         #expect(await repository.savedMedications.count == 1)
         #expect(await scheduler.scheduledIds.isEmpty)
         #expect(await scheduler.cancelledIds == [medication.id])
+    }
+    
+    @Test func tracksNewMedication() async throws {
+        try await sut.execute(makeMedication())
+        
+        #expect(await analytics.events == [.medicationAdded])
+    }
+    
+    @Test func doesNotTrackEditedMedication() async throws {
+        let medication = try makeMedication()
+        let repository = MockMedicationRepository(medications: [medication])
+        let sut = SaveMedicationUseCase(repository: repository, scheduler: scheduler, analytics: analytics)
+        
+        try await sut.execute(medication.updating(isActive: false))
+        
+        #expect(await analytics.events.isEmpty)
+    }
+    
+    @Test func doesNotTrackInvalidMedication() async throws {
+        await #expect(throws: DomainError.nameEmpty) {
+            try await sut.execute(makeMedication(name: ""))
+        }
+        
+        #expect(await analytics.events.isEmpty)
     }
 }

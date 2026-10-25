@@ -19,7 +19,8 @@ struct ToggleMedicationActiveUseCaseTests {
         ToggleMedicationActiveUseCase(
             saveMedication: SaveMedicationUseCase(
                 repository: repository,
-                scheduler: scheduler
+                scheduler: scheduler,
+                analytics: MockAnalyticsTracker()
             )
         )
     }

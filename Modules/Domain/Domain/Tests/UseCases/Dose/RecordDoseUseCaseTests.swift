@@ -22,12 +22,14 @@ struct RecordDoseUseCaseTests {
     private func makeSUT(
         repository: MockDoseLogRepository,
         medications: MockMedicationRepository = MockMedicationRepository(),
-        scheduler: MockReminderScheduler = MockReminderScheduler()
+        scheduler: MockReminderScheduler = MockReminderScheduler(),
+        analytics: MockAnalyticsTracker = MockAnalyticsTracker()
     ) -> RecordDoseUseCase {
         RecordDoseUseCase(
             doseLogRepository: repository,
             medicationRepository: medications,
             scheduler: scheduler,
+            analytics: analytics,
             calendar: calendar
         )
     }
@@ -67,6 +69,34 @@ struct RecordDoseUseCaseTests {
         #expect(logs.first?.status == .taken)
         #expect(logs.first?.recordedAt == now)
         #expect(result.state(at: now) == .taken)
+    }
+    
+    @Test func tracksRecordedStatus() async throws {
+        let now = try date(day: 17, hour: 14, minute: 30)
+        let analytics = MockAnalyticsTracker()
+        let dose = makeDose(
+            medication: try makeMedication(),
+            scheduledDate: try date(day: 17, hour: 9, minute: 0)
+        )
+        
+        _ = try await makeSUT(repository: MockDoseLogRepository(), analytics: analytics).execute(dose, status: .skipped, now: now)
+        
+        #expect(await analytics.events == [.doseLogged(.skipped)])
+    }
+    
+    @Test func doesNotTrackRemovedLog() async throws {
+        let now = try date(day: 17, hour: 14, minute: 30)
+        let analytics = MockAnalyticsTracker()
+        let dose = makeDose(
+            medication: try makeMedication(),
+            scheduledDate: try date(day: 17, hour: 9, minute: 0),
+            status: .taken
+        )
+        let repository = MockDoseLogRepository(logs: [try #require(dose.log)])
+        
+        _ = try await makeSUT(repository: repository, analytics: analytics).execute(dose, status: .taken, now: now)
+        
+        #expect(await analytics.events.isEmpty)
     }
     
     @Test func removesLogWhenSameStatusTappedAgain() async throws {

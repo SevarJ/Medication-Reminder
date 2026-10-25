@@ -11,17 +11,20 @@ public struct RecordDoseUseCase: Sendable {
     private let doseLogRepository: any DoseLogRepository
     private let medicationRepository: any MedicationRepository
     private let scheduler: any ReminderScheduling
+    private let analytics: any AnalyticsTracking
     private let calendar: Calendar
     
     public init(
         doseLogRepository: any DoseLogRepository,
         medicationRepository: any MedicationRepository,
         scheduler: any ReminderScheduling,
+        analytics: any AnalyticsTracking,
         calendar: Calendar = .current
     ) {
         self.doseLogRepository = doseLogRepository
         self.medicationRepository = medicationRepository
         self.scheduler = scheduler
+        self.analytics = analytics
         self.calendar = calendar
     }
     
@@ -55,6 +58,7 @@ public struct RecordDoseUseCase: Sendable {
         
         if let newLog {
             try await doseLogRepository.save(newLog)
+            await analytics.track(.doseLogged(newLog.status))
         }
         
         let medication = try await adjustStock(of: dose.medication, from: dose.log, to: newLog)

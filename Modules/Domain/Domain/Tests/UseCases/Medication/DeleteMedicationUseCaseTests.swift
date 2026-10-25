@@ -17,11 +17,14 @@ struct DeleteMedicationUseCaseTests {
     
     private let logRepository = MockDoseLogRepository()
     
+    private let analytics = MockAnalyticsTracker()
+    
     private var sut: DeleteMedicationUseCase {
         DeleteMedicationUseCase(
             repository: repository,
             scheduler: scheduler,
-            doseLogRepository: logRepository
+            doseLogRepository: logRepository,
+            analytics: analytics
         )
     }
     
@@ -31,6 +34,7 @@ struct DeleteMedicationUseCaseTests {
         try await sut.execute(id: medication.id)
         #expect(await repository.deletedIds == [medication.id])
         #expect(await scheduler.cancelledIds == [medication.id])
+        #expect(await analytics.events == [.medicationDeleted])
     }
     
     @Test func deletesLogsOfDeletedMedicationOnly() async throws {
@@ -46,7 +50,8 @@ struct DeleteMedicationUseCaseTests {
         let sut = DeleteMedicationUseCase(
             repository: repository,
             scheduler: scheduler,
-            doseLogRepository: logRepository
+            doseLogRepository: logRepository,
+            analytics: MockAnalyticsTracker()
         )
         
         try await sut.execute(id: first.id)
