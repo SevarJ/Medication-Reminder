@@ -51,6 +51,21 @@ struct LocalNotificationSchedulerTests {
         #expect(await center.added.count == 1)
     }
     
+    @Test func reschedulingKeepsASnoozedReminder() async throws {
+        let center = MockUserNotificationCenter()
+        let sut = LocalNotificationScheduler(center: center, alertLog: MockLowStockAlertLog())
+        let medication = try makeMedication(times: [(9, 0)])
+        
+        try await sut.schedule(for: medication)
+        try await sut.snooze(medication, scheduledDate: .now, until: .now.addingTimeInterval(600))
+        try await sut.schedule(for: medication)
+        
+        let added = await center.added
+        
+        #expect(added.count == 2)
+        #expect(added.filter { $0.repeats == false }.count == 1)
+    }
+    
     @Test func cancelRemovesOnlyMatchingMedication() async throws {
         let center = MockUserNotificationCenter()
         let sut = LocalNotificationScheduler(center: center, alertLog: MockLowStockAlertLog())
@@ -75,7 +90,7 @@ struct LocalNotificationSchedulerTests {
         
         try await sut.schedule(for: first)
         try await sut.schedule(for: second)
-        try await sut.snooze(first, until: .now.addingTimeInterval(600))
+        try await sut.snooze(first, scheduledDate: .now, until: .now.addingTimeInterval(600))
         try await sut.cancelAll()
         
         #expect(await center.added.isEmpty)
@@ -89,7 +104,18 @@ struct LocalNotificationSchedulerTests {
         await #expect(throws: ReminderError.authorizationDenied) {
             try await sut.schedule(for: try makeMedication())
         }
-        
+
+        #expect(await center.added.isEmpty)
+    }
+
+    @Test func snoozingThrowsWhenAuthorizationDenied() async throws {
+        let center = MockUserNotificationCenter(status: .denied)
+        let sut = LocalNotificationScheduler(center: center, alertLog: MockLowStockAlertLog())
+
+        await #expect(throws: ReminderError.authorizationDenied) {
+            try await sut.snooze(try makeMedication(), scheduledDate: .now, until: .now.addingTimeInterval(600))
+        }
+
         #expect(await center.added.isEmpty)
     }
     
@@ -159,10 +185,15 @@ struct LocalNotificationSchedulerTests {
             Calendar.current.date(bySettingHour: 9, minute: 10, second: 0, of: .now)
         )
         
-        try await sut.snooze(medication, until: until)
+        let dose = try #require(
+            Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: .now)
+        )
+        
+        try await sut.snooze(medication, scheduledDate: dose, until: until)
         
         let added = try #require(await center.added.first)
         
+        #expect(added.scheduledDate == dose)
         #expect(await center.added.count == 1)
         #expect(added.repeats == false)
         #expect(added.hour == 9)

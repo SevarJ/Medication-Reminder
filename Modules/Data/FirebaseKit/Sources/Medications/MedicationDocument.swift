@@ -14,7 +14,7 @@ import Foundation
 struct MedicationDocument: Codable {
     static let collection = "medications"
     /// The rules allow three times as much, which covers characters that take several bytes.
-    static let nameLimit = 100
+    static let nameLimit = Medication.nameLimit
     static let notesLimit = Medication.notesLimit
     /// The rules refuse a larger photo, and the app shrinks photos far below this.
     static let photoLimit = 100_000

@@ -20,7 +20,13 @@ struct LocalNotificationScheduler: ReminderScheduling {
     }
     
     func schedule(for medication: Medication) async throws {
-        try await cancel(for: medication.id)
+        let prefix = Self.identifierPrefix(medicationId: medication.id)
+        let previous = await center.pendingIdentifiers().filter { $0.hasPrefix(prefix) && !Self.isOneOffIdentifier($0) }
+        
+        if !previous.isEmpty {
+            await center.removePending(identifiers: previous)
+        }
+        
         try await requireAuthorization()
         
         for reminder in Self.reminders(for: medication) {
@@ -106,7 +112,9 @@ struct LocalNotificationScheduler: ReminderScheduling {
         }
     }
     
-    func snooze(_ medication: Medication, until date: Date) async throws {
+    func snooze(_ medication: Medication, scheduledDate: Date, until date: Date) async throws {
+        try await requireAuthorization()
+
         let components = Calendar.current.dateComponents(
             [.year, .month, .day, .hour, .minute],
             from: date
@@ -119,7 +127,8 @@ struct LocalNotificationScheduler: ReminderScheduling {
                 title: medication.name,
                 body: medication.doseText,
                 components: components,
-                repeats: false
+                repeats: false,
+                scheduledDate: scheduledDate
             )
         )
     }
@@ -177,9 +186,14 @@ struct LocalNotificationScheduler: ReminderScheduling {
     }
 
     private static let followUpMarker = "followUp."
+    private static let snoozeMarker = "snooze."
 
     static func snoozeIdentifier(medicationId: UUID) -> String {
-        identifierPrefix(medicationId: medicationId) + "snooze." + UUID().uuidString
+        identifierPrefix(medicationId: medicationId) + snoozeMarker + UUID().uuidString
+    }
+    
+    static func isOneOffIdentifier(_ identifier: String) -> Bool {
+        isFollowUpIdentifier(identifier) || identifier.contains("." + snoozeMarker)
     }
     
     func cancel(for medicationId: UUID) async throws {
