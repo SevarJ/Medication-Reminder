@@ -10,10 +10,11 @@ import SwiftUI
 struct NotificationPrimingScreen: View {
     @State private var model: NotificationPrimingModel
 
-    @Environment(\.dismiss) private var dismiss
+    private let onFinish: () -> Void
 
-    init(model: NotificationPrimingModel) {
+    init(model: NotificationPrimingModel, onFinish: @escaping () -> Void) {
         _model = State(initialValue: model)
+        self.onFinish = onFinish
     }
 
     var body: some View {
@@ -21,16 +22,13 @@ struct NotificationPrimingScreen: View {
             onAllow: {
                 Task {
                     await model.allow()
-                    dismiss()
+                    onFinish()
                 }
             },
             onNotNow: {
                 model.dismiss()
-                dismiss()
+                onFinish()
             }
         )
-        .onDisappear {
-            model.dismiss()
-        }
     }
 }

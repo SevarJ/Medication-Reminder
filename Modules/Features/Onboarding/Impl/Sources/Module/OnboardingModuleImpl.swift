@@ -30,15 +30,21 @@ struct OnboardingModuleImpl: OnboardingModule {
     }
 
     @MainActor
-    func pendingRoute() async -> OnboardingRoute? {
-        await makePrimingModel().shouldPresent() ? .notificationPriming : nil
+    func pendingRoute(at stage: OnboardingStage) async -> OnboardingRoute? {
+        await OnboardingFlow(preferences: preferences, priming: makePrimingModel()).pendingRoute(at: stage)
     }
 
     @MainActor
-    func makeScreen(_ route: OnboardingRoute) -> some View {
+    @ViewBuilder
+    func makeScreen(_ route: OnboardingRoute, onFinish: @escaping () -> Void) -> some View {
         switch route {
+        case .introduction:
+            IntroductionView {
+                preferences.markIntroductionSeen()
+                onFinish()
+            }
         case .notificationPriming:
-            NotificationPrimingScreen(model: makePrimingModel())
+            NotificationPrimingScreen(model: makePrimingModel(), onFinish: onFinish)
         }
     }
 

@@ -1,6 +1,190 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "introduction.action.next": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Davam et"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Далее"
+          }
+        }
+      }
+    },
+    "introduction.action.start": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Get Started"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başla"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Начать"
+          }
+        }
+      }
+    },
+    "introduction.reminders.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You get a notification when it's time for a dose."
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doza vaxtı çatanda bildiriş alırsınız."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Когда придёт время приёма, вы получите уведомление."
+          }
+        }
+      }
+    },
+    "introduction.reminders.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On-Time Reminders"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vaxtında xatırlatma"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Напоминания вовремя"
+          }
+        }
+      }
+    },
+    "introduction.stock.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We'll tell you 3 days before a box runs out."
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qutu bitməzdən 3 gün əvvəl xəbər veririk."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Предупредим за 3 дня до конца упаковки."
+          }
+        }
+      }
+    },
+    "introduction.stock.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Never Run Out"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dərmanınız bitməsin"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Лекарство не закончится"
+          }
+        }
+      }
+    },
+    "introduction.today.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See what you've taken today and what's left."
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu gün nəyi qəbul etdiyinizi və nəyin qaldığını görün."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Смотрите, что уже принято сегодня и что осталось."
+          }
+        }
+      }
+    },
+    "introduction.today.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your Day at a Glance"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gününüz bir baxışda"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваш день на одном экране"
+          }
+        }
+      }
+    },
     "priming.action.allow": {
       "extractionState": "manual",
       "localizations": {
@@ -53,19 +237,88 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Medora uses notifications to remind you when it's time to take your medication. You can mark doses as taken or snooze them right from the notification."
+            "value": "We'll let you know when it's time."
           }
         },
         "az": {
           "stringUnit": {
             "state": "translated",
-            "value": "Medora dərman vaxtı çatanda xatırlatmaq üçün bildirişlərdən istifadə edir. Dozanı birbaşa bildirişdən qəbul edildi kimi qeyd edə və ya təxirə sala bilərsiniz."
+            "value": "Vaxtı çatanda xəbər verəcəyik."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Medora присылает уведомления, когда пора принять лекарство. Отмечайте приём или откладывайте напоминание прямо из уведомления."
+            "value": "Мы напомним, когда придёт время."
+          }
+        }
+      }
+    },
+    "priming.sample.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 tablet · After meals"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 tablet · Yeməkdən sonra"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 таблетка · После еды"
+          }
+        }
+      }
+    },
+    "priming.sample.time": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "now"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "indi"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "сейчас"
+          }
+        }
+      }
+    },
+    "priming.sample.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vitamin D"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "D vitamini"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Витамин D"
           }
         }
       }
