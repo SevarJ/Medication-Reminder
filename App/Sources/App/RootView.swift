@@ -30,7 +30,7 @@ struct RootView<Account: AccountModule, Dashboard: DashboardModule, Settings: Se
     @AppStorage(PreferenceKey.appearance) private var appearance: AppAppearance = .system
     @AppStorage(PreferenceKey.snoozeMinutes) private var snoozeDuration: SnoozeDuration = .default
     @State private var selectedTab: AppTab = .today
-    @State private var onboardingRoute: OnboardingRoute?
+    @State private var onboardingProgress: OnboardingProgress?
     @State private var wasInBackground = false
     
     @Environment(\.scenePhase) private var scenePhase
@@ -77,25 +77,57 @@ struct RootView<Account: AccountModule, Dashboard: DashboardModule, Settings: Se
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color.theme.background)
         case .signedOut:
-            account.makeScreen(.signIn)
-                .id(language)
+            afterOnboarding(at: .beforeSignIn) {
+                account.makeScreen(.signIn)
+                    .id(language)
+            }
         case .signedIn:
-            MainTabView(
-                dashboard: dashboard,
-                settings: settings,
-                selection: $selectedTab,
-                revision: router.revision + session.revision
-            )
-                .id(language)
-                .sheet(item: $onboardingRoute) { route in
-                    onboarding.makeScreen(route)
+            afterOnboarding(at: .afterSignIn) {
+                MainTabView(
+                    dashboard: dashboard,
+                    settings: settings,
+                    selection: $selectedTab,
+                    revision: router.revision + session.revision
+                )
+                    .id(language)
+                    .fullScreenCover(item: $router.doseReminder, onDismiss: router.didClose) { route in
+                        dashboard.makeScreen(route)
+                    }
+            }
+        }
+    }
+    
+    /// Shows the onboarding steps still pending at this stage one after another, then the content.
+    private func afterOnboarding(at stage: OnboardingStage, @ViewBuilder content: () -> some View) -> some View {
+        ZStack {
+            if let progress = onboardingProgress, progress.stage == stage {
+                if let route = progress.route {
+                    onboarding.makeScreen(route) {
+                        Task { await showNextOnboardingStep(at: stage) }
+                    }
+                    .id(route)
+                    .transition(.opacity)
                 }
-                .fullScreenCover(item: $router.doseReminder, onDismiss: router.didClose) { route in
-                    dashboard.makeScreen(route)
+                else {
+                    content()
+                        .transition(.opacity)
                 }
-                .task {
-                    onboardingRoute = await onboarding.pendingRoute()
-                }
+            }
+            else {
+                Color.theme.background
+                    .ignoresSafeArea()
+            }
+        }
+        .task {
+            await showNextOnboardingStep(at: stage)
+        }
+    }
+    
+    private func showNextOnboardingStep(at stage: OnboardingStage) async {
+        let route = await onboarding.pendingRoute(at: stage)
+        
+        withAnimation {
+            onboardingProgress = OnboardingProgress(stage: stage, route: route)
         }
     }
     
@@ -114,6 +146,11 @@ struct RootView<Account: AccountModule, Dashboard: DashboardModule, Settings: Se
             break
         }
     }
+}
+
+private struct OnboardingProgress: Equatable {
+    let stage: OnboardingStage
+    let route: OnboardingRoute?
 }
 
 private enum AppTab: Hashable {
