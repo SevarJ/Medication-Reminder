@@ -35,4 +35,12 @@ struct AppPreferencesTests {
 
         #expect(sut.hasShownNotificationPriming)
     }
+
+    @Test func remembersThatIntroductionWasSeen() {
+        #expect(!sut.hasSeenIntroduction)
+
+        sut.markIntroductionSeen()
+
+        #expect(sut.hasSeenIntroduction)
+    }
 }

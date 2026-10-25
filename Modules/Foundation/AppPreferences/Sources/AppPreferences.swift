@@ -25,4 +25,12 @@ public struct AppPreferences: @unchecked Sendable {
     public func markNotificationPrimingShown() {
         defaults.set(true, forKey: PreferenceKey.notificationPrimingShown)
     }
+
+    public var hasSeenIntroduction: Bool {
+        defaults.bool(forKey: PreferenceKey.introductionSeen)
+    }
+
+    public func markIntroductionSeen() {
+        defaults.set(true, forKey: PreferenceKey.introductionSeen)
+    }
 }
