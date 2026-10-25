@@ -14,8 +14,10 @@ import Domain
 import FirebaseKit
 import NotificationsKit
 import OnboardingImpl
+import PaywallImpl
 import Persistence
 import SettingsImpl
+import StoreKitKit
 import SwiftUI
 import WidgetBridge
 
@@ -31,6 +33,7 @@ struct MedoraApp: App {
         NotificationsConfigurator.setup()
         DataSyncConfigurator.setup()
         WidgetBridgeConfigurator.setup()
+        StoreKitConfigurator.setup()
         
         let router = ReminderRouter()
         let medications: any MedicationRepository = resolve()
@@ -86,7 +89,7 @@ struct MedoraApp: App {
                 account: AccountModuleConfigurator.makeModule(),
                 dashboard: DashboardModuleConfigurator.makeModule(),
                 settings: SettingsModuleConfigurator.makeModule(),
-                onboarding: OnboardingModuleConfigurator.makeModule()
+                onboarding: OnboardingModuleConfigurator.makeModule(paywall: PaywallModuleConfigurator.makeModule())
             )
         }
     }

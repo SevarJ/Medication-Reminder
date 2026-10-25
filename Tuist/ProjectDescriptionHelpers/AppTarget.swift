@@ -62,7 +62,10 @@ public extension Scheme {
             name: AppConfig.name,
             buildAction: .buildAction(targets: [.target(AppConfig.name)]),
             testAction: .targets(testTargets.map { .testableTarget(target: .target($0)) }),
-            runAction: .runAction(executable: .target(AppConfig.name))
+            runAction: .runAction(
+                executable: .target(AppConfig.name),
+                options: .options(storeKitConfigurationPath: .relativeToRoot("App/Medora.storekit"))
+            )
         )
     }
 }

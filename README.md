@@ -6,7 +6,7 @@ A medication reminder and adherence tracker for iOS. Schedule medications, get a
   <a href="https://github.com/SevarJ/Medication-Reminder/actions/workflows/ci.yml"><img src="https://github.com/SevarJ/Medication-Reminder/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/iOS-17%2B-blue" alt="iOS 17+">
   <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
-  <img src="https://img.shields.io/badge/tests-378-brightgreen" alt="378 tests">
+  <img src="https://img.shields.io/badge/tests-401-brightgreen" alt="401 tests">
 </p>
 
 ## Features
@@ -26,25 +26,26 @@ A medication reminder and adherence tracker for iOS. Schedule medications, get a
 Modular clean architecture generated with [Tuist](https://tuist.dev). Every layer is a group of small framework modules, and a module may only depend on the layers below it. The Tuist helpers reject any other dependency when the project is generated, and CI runs `tuist inspect dependencies` to catch implicit or redundant imports.
 
 ```
-                               ┌──────────────┐
-                               │    Medora    │  app target, composition root, embeds MedoraWidget
-                               └──────┬───────┘
-      ┌──────────────────┬────────────┴─────┬──────────────────┐
-┌─────┴───────┐  ┌───────┴────────┐  ┌──────┴────────┐  ┌──────┴───────┐
-│ AccountImpl │  │ OnboardingImpl │  │ DashboardImpl │  │ SettingsImpl │   Features
-│   Account   │  │   Onboarding   │  │   Dashboard   │  │   Settings   │   impl + interface
-└─────┬───────┘  └───────┬────────┘  └──────┬────────┘  └──────┬───────┘
-      └──────────────────┴────────────┬─────┴──────────────────┘
-                              ┌───────┴───────┐
-                              │ AppFormatters │                            Shared
-                              └───────┬───────┘
-┌─────────────┐  ┌──────────────────┐ │  ┌─────────────┐  ┌──────────┐  ┌──────────────┐
-│ Persistence │  │ NotificationsKit │ │  │ FirebaseKit │  │ DataSync │  │ WidgetBridge │   Data
-└──────┬──────┘  └─────────┬────────┘ │  └──────┬──────┘  └─────┬────┘  └──────┬───────┘
-       └───────────────────┴──────────┼─────────┴───────────────┴──────────────┘
-                                ┌─────┴─────┐
-                                │  Domain   │  entities, use cases, ports    Domain
-                                └───────────┘
+                                           ┌──────────────┐
+                                           │    Medora    │  app target, composition root, embeds MedoraWidget
+                                           └──────┬───────┘
+       ┌────────────────┬──────────────────┬──────┴───────────┬──────────────────┐
+┌──────┴──────┐  ┌──────┴──────┐  ┌────────┴───────┐  ┌───────┴───────┐  ┌───────┴──────┐
+│ AccountImpl │  │ PaywallImpl │  │ OnboardingImpl │  │ DashboardImpl │  │ SettingsImpl │                 Features
+│   Account   │  │   Paywall   │  │   Onboarding   │  │   Dashboard   │  │   Settings   │                 impl + interface
+└──────┬──────┘  └──────┬──────┘  └────────┬───────┘  └───────┬───────┘  └───────┬──────┘
+       └────────────────┴──────────────────┴──────┬───────────┴──────────────────┘
+                                          ┌───────┴───────┐
+                                          │ AppFormatters │                                               Shared
+                                          └───────┬───────┘
+       ┌───────────────────┬──────────────────┬───┴───────────┬───────────────┬────────────────┐
+┌──────┴──────┐  ┌─────────┴────────┐  ┌──────┴──────┐  ┌─────┴────┐  ┌───────┴──────┐  ┌──────┴──────┐
+│ Persistence │  │ NotificationsKit │  │ FirebaseKit │  │ DataSync │  │ WidgetBridge │  │ StoreKitKit │   Data
+└──────┬──────┘  └─────────┬────────┘  └──────┬──────┘  └─────┬────┘  └───────┬──────┘  └──────┬──────┘
+       └───────────────────┴──────────────────┴───┬───────────┴───────────────┴────────────────┘
+                                            ┌─────┴─────┐
+                                            │  Domain   │  entities, use cases, ports                     Domain
+                                            └───────────┘
 
   AppLocalization · AppPreferences · DependencyInjection · DesignSystem · WidgetSnapshot   Foundation, usable by every layer
 ```
@@ -63,6 +64,7 @@ PersistenceConfigurator.setup()
 NotificationsConfigurator.setup()
 DataSyncConfigurator.setup()
 WidgetBridgeConfigurator.setup()
+StoreKitConfigurator.setup()
 ```
 
 Third-party SDKs are linked only by data modules, which list them as `packages` in `Project.swift`. `FirebaseKit` is the only module that imports Firebase or Google Sign-In.
@@ -87,6 +89,14 @@ Documents live under the account: `users/{uid}/medications/{medicationId}` and `
 - The widget links only `WidgetSnapshot`, `AppLocalization` and `DesignSystem`, which have no dependencies, and merges them into its own binary. The app merges its frameworks into its binary, so the extension cannot load them from the app bundle.
 - Tapping the widget opens the dose screen from 30 minutes before a dose until 30 minutes after it, and the Today tab at any other time.
 
+### Pro subscription
+
+- `Domain` knows only `Entitlement` (`free` or `pro`), the product identifiers in `ProSubscription` and the `EntitlementProviding` port. No Pro feature is gated yet.
+- `StoreKitKit` implements the port with StoreKit 2: it reads `Transaction.currentEntitlements`, restores with `AppStore.sync()` and finishes every verified transaction from `Transaction.updates` from launch on. Another data module, such as one built on RevenueCat, can replace it behind the same port.
+- `Paywall` shows a `SubscriptionStoreView` with a monthly and a yearly plan, the yearly one with a free week. The screen has a close button, Restore, and links to the terms of use and the privacy policy, and it tracks `paywall_shown`, `purchase_result` and `restore_result`.
+- Onboarding offers it once after the notification step to anyone without Pro. It stays off until the `feature.paywall` preference is set, for example by launching with `-feature.paywall YES`.
+- `App/Medora.storekit` is the scheme's StoreKit configuration, so purchases work in the simulator without App Store Connect when the app is run from Xcode.
+
 ## Design
 
 `DesignSystem` holds the tokens and shared components. Screens use them instead of raw colors or sizes.
@@ -98,7 +108,7 @@ Documents live under the account: `users/{uid}/medications/{medicationId}` and `
 
 ## Tech stack
 
-Swift 6 with strict concurrency · SwiftUI · SwiftData · UserNotifications · WidgetKit · Firebase Authentication · Cloud Firestore · Google Sign-In · Swift Testing · Tuist
+Swift 6 with strict concurrency · SwiftUI · SwiftData · UserNotifications · WidgetKit · StoreKit 2 · Firebase Authentication · Cloud Firestore · Google Sign-In · Swift Testing · Tuist
 
 ## Getting started
 
