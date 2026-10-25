@@ -10,4 +10,7 @@ public enum AnalyticsEvent: Sendable, Equatable {
     case medicationDeleted
     case doseLogged(DoseStatus)
     case reminderSnoozed
+    case introductionCompleted
+    case signedIn
+    case notificationPromptAnswered(NotificationPromptAnswer)
 }
