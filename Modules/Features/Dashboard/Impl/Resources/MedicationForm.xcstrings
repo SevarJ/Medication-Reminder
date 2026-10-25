@@ -461,6 +461,98 @@
         }
       }
     },
+    "form.photo.camera": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take photo"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şəkil çək"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сделать фото"
+          }
+        }
+      }
+    },
+    "form.photo.library": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose from library"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qalereyadan seç"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбрать из галереи"
+          }
+        }
+      }
+    },
+    "form.photo.cameraDenied.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Camera access is off"
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kameraya icazə yoxdur"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет доступа к камере"
+          }
+        }
+      }
+    },
+    "form.photo.cameraDenied.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To take a photo of the box, allow Medora to use the camera in Settings."
+          }
+        },
+        "az": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qutunun şəklini çəkmək üçün Ayarlarda Medora-ya kameradan istifadə etməyə icazə verin."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Чтобы сфотографировать упаковку, разрешите Medora доступ к камере в Настройках."
+          }
+        }
+      }
+    },
     "form.time.remove": {
       "extractionState": "manual",
       "localizations": {

@@ -6,6 +6,7 @@
 //
 
 import AppFormatters
+import AppLocalization
 import DesignSystem
 import Domain
 import PhotosUI
@@ -35,7 +36,12 @@ private struct DetailsStepView: View {
     @Bindable var viewModel: MedicationEditorViewModel
     
     @State private var pickerItem: PhotosPickerItem?
+    @State private var isLibraryPresented = false
+    @State private var isCameraPresented = false
+    @State private var isCameraDenied = false
     @FocusState private var isNameFocused: Bool
+    
+    @Environment(\.openURL) private var openURL
     
     var body: some View {
         VStack(spacing: Spacing.xl) {
@@ -62,7 +68,9 @@ private struct DetailsStepView: View {
     
     private var photoSection: some View {
         VStack(spacing: Spacing.md) {
-            PhotosPicker(selection: $pickerItem, matching: .images) {
+            Menu {
+                photoSourceButtons
+            } label: {
                 if viewModel.photo != nil {
                     MedicationAvatar(photo: viewModel.photo, size: 104)
                 }
@@ -78,11 +86,9 @@ private struct DetailsStepView: View {
             .accessibilityLabel(viewModel.photo == nil ? L10n.Form.addPhoto : L10n.Form.changePhoto)
             
             HStack(spacing: Spacing.lg) {
-                PhotosPicker(
-                    viewModel.photo == nil ? L10n.Form.addPhoto : L10n.Form.changePhoto,
-                    selection: $pickerItem,
-                    matching: .images
-                )
+                Menu(viewModel.photo == nil ? L10n.Form.addPhoto : L10n.Form.changePhoto) {
+                    photoSourceButtons
+                }
                 .font(.system(.subheadline, weight: .semibold))
                 .tint(Color.theme.accentText)
                 
@@ -102,6 +108,24 @@ private struct DetailsStepView: View {
                 .padding(.horizontal, Spacing.xl)
         }
         .frame(maxWidth: .infinity)
+        .photosPicker(isPresented: $isLibraryPresented, selection: $pickerItem, matching: .images)
+        .fullScreenCover(isPresented: $isCameraPresented) {
+            CameraPicker { image in
+                if let photo = MedicationPhoto.compressed(image) {
+                    viewModel.photo = photo
+                }
+            }
+            .ignoresSafeArea()
+        }
+        .alert(L10n.Form.cameraDeniedTitle, isPresented: $isCameraDenied) {
+            Button(L10n.Banner.openSettings) {
+                openSettings()
+            }
+            
+            Button(CommonText.cancel, role: .cancel) {}
+        } message: {
+            Text(L10n.Form.cameraDeniedMessage)
+        }
         .onChange(of: pickerItem) { _, item in
             guard let item else { return }
             
@@ -114,6 +138,36 @@ private struct DetailsStepView: View {
                 pickerItem = nil
             }
         }
+    }
+    
+    @ViewBuilder
+    private var photoSourceButtons: some View {
+        if CameraAccess.isAvailable {
+            Button(L10n.Form.takePhoto, systemImage: "camera") {
+                openCamera()
+            }
+        }
+        
+        Button(L10n.Form.chooseFromLibrary, systemImage: "photo.on.rectangle") {
+            isLibraryPresented = true
+        }
+    }
+    
+    private func openCamera() {
+        Task {
+            if await CameraAccess.request() {
+                isCameraPresented = true
+            }
+            else {
+                isCameraDenied = true
+            }
+        }
+    }
+    
+    private func openSettings() {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        
+        openURL(url)
     }
     
     private var doseSection: some View {

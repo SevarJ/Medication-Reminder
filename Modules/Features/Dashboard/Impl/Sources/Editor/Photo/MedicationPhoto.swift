@@ -16,6 +16,10 @@ enum MedicationPhoto {
     static func compressed(_ data: Data) -> Data? {
         guard let image = UIImage(data: data) else { return nil }
         
+        return compressed(image)
+    }
+    
+    static func compressed(_ image: UIImage) -> Data? {
         let longestSide = max(image.size.width, image.size.height)
         let scale = longestSide > maxDimension ? maxDimension / longestSide : 1
         let size = CGSize(width: image.size.width * scale, height: image.size.height * scale)

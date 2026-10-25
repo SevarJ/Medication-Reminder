@@ -39,6 +39,10 @@ extension L10n {
         static var changePhoto: String { string("form.photo.change", "Change photo") }
         static var removePhoto: String { string("form.photo.remove", "Remove photo") }
         static var photoHint: String { string("form.photo.hint", "Optional. A picture of the box helps you recognise it.") }
+        static var takePhoto: String { string("form.photo.camera", "Take photo") }
+        static var chooseFromLibrary: String { string("form.photo.library", "Choose from library") }
+        static var cameraDeniedTitle: String { string("form.photo.cameraDenied.title", "Camera access is off") }
+        static var cameraDeniedMessage: String { string("form.photo.cameraDenied.message", "To take a photo of the box, allow Medora to use the camera in Settings.") }
         
         static var decreaseDose: String { string("form.dose.decrease", "Decrease dose") }
         static var increaseDose: String { string("form.dose.increase", "Increase dose") }
